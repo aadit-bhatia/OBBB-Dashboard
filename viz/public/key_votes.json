@@ -2,20 +2,61 @@
   "_meta": {
     "description": "CBO-scored legislation used for fiscal accountability tracking. All deficit impacts are 10-year estimates relative to the CBO baseline at time of scoring. Positive = adds to deficit. Negative = reduces deficit.",
     "scoring_convention": "cbo_10yr_b: positive = adds to deficit (costs), negative = reduces deficit (saves). Figures are billions of dollars.",
-    "last_updated": "2026-05-03",
-    "methodology": "Each member's fiscal record is computed by summing CBO-scored impact of bills they voted Yea on. Voting Nay on a deficit-reducing bill is shown separately. No editorial weighting is applied — this is arithmetic on official government scores.",
+    "last_updated": "2026-05-15",
+    "methodology": "Each member's fiscal record is computed by summing CBO-scored impact of bills they voted Yea on. Voting Nay on a deficit-reducing bill is shown separately. No editorial weighting is applied \u2014 this is arithmetic on official government scores.",
     "sources": [
-      { "id": "cbo_53415", "label": "CBO/JCT: TCJA conference agreement (Dec 2017)", "url": "https://www.cbo.gov/publication/53415" },
-      { "id": "cbo_53556", "label": "CBO: Bipartisan Budget Act of 2018 (Feb 2018)", "url": "https://www.cbo.gov/publication/53556" },
-      { "id": "cbo_56334", "label": "CBO: CARES Act (Apr 2020)", "url": "https://www.cbo.gov/publication/56334" },
-      { "id": "cbo_57056", "label": "CBO: American Rescue Plan Act (Mar 2021)", "url": "https://www.cbo.gov/publication/57056" },
-      { "id": "cbo_57406", "label": "CBO: Infrastructure Investment and Jobs Act (Aug 2021)", "url": "https://www.cbo.gov/publication/57406" },
-      { "id": "cbo_58366", "label": "CBO/JCT: Inflation Reduction Act (Aug 2022)", "url": "https://www.cbo.gov/publication/58366" },
-      { "id": "cbo_59225", "label": "CBO: Fiscal Responsibility Act of 2023 (Jun 2023)", "url": "https://www.cbo.gov/publication/59225" },
-      { "id": "cbo_61570", "label": "CBO: One Big Beautiful Bill Act (Jul 2025)", "url": "https://www.cbo.gov/publication/61570" }
+      {
+        "id": "cbo_53415",
+        "label": "CBO/JCT: TCJA conference agreement (Dec 2017)",
+        "url": "https://www.cbo.gov/publication/53415"
+      },
+      {
+        "id": "cbo_53556",
+        "label": "CBO: Bipartisan Budget Act of 2018 (Feb 2018)",
+        "url": "https://www.cbo.gov/publication/53556"
+      },
+      {
+        "id": "cbo_56334",
+        "label": "CBO: CARES Act (Apr 2020)",
+        "url": "https://www.cbo.gov/publication/56334"
+      },
+      {
+        "id": "cbo_57056",
+        "label": "CBO: American Rescue Plan Act (Mar 2021)",
+        "url": "https://www.cbo.gov/publication/57056"
+      },
+      {
+        "id": "cbo_57406",
+        "label": "CBO: Infrastructure Investment and Jobs Act (Aug 2021)",
+        "url": "https://www.cbo.gov/publication/57406"
+      },
+      {
+        "id": "cbo_58366",
+        "label": "CBO/JCT: Inflation Reduction Act (Aug 2022)",
+        "url": "https://www.cbo.gov/publication/58366"
+      },
+      {
+        "id": "cbo_59225",
+        "label": "CBO: Fiscal Responsibility Act of 2023 (Jun 2023)",
+        "url": "https://www.cbo.gov/publication/59225"
+      },
+      {
+        "id": "cbo_61570",
+        "label": "CBO: One Big Beautiful Bill Act (Jul 2025)",
+        "url": "https://www.cbo.gov/publication/61570"
+      },
+      {
+        "id": "cbo_56891",
+        "label": "CBO: Consolidated Appropriations Act 2021 \u2014 Division M (COVID Relief) Cost Estimate (Jan 2021)",
+        "url": "https://www.cbo.gov/publication/56891"
+      },
+      {
+        "id": "cbo_58392",
+        "label": "CBO: Honoring our PACT Act of 2022 (S. 3373) Cost Estimate (Aug 2022)",
+        "url": "https://www.cbo.gov/publication/58392"
+      }
     ]
   },
-
   "votes": [
     {
       "id": "tcja_2017",
@@ -26,12 +67,29 @@
       "year": 2017,
       "date_enacted": "2017-12-22",
       "cbo_10yr_b": 1456,
-      "cbo_note": "CBO/JCT scored the conference agreement at +$1,455B over 2018–2027. Including debt-service costs: ~$1,800B total impact.",
+      "cbo_note": "CBO/JCT scored the conference agreement at +$1,455B over 2018\u20132027. Including debt-service costs: ~$1,800B total impact.",
       "cbo_source": "cbo_53415",
       "description": "Permanently cut the corporate tax rate from 35% to 21%; temporarily reduced individual income tax rates (expiring 2025); doubled the standard deduction.",
-      "senate_roll_call": { "number": 323, "year": 2017, "congress": 115, "yea": 51, "nay": 48, "result": "Passed", "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1151/vote_115_1_00323.htm" },
-      "house_roll_call": { "number": 699, "year": 2017, "congress": 115, "yea": 224, "nay": 201, "result": "Passed", "url": "https://clerk.house.gov/Votes/2017699" },
+      "senate_roll_call": {
+        "number": 323,
+        "year": 2017,
+        "congress": 115,
+        "yea": 51,
+        "nay": 48,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1151/vote_115_1_00323.htm"
+      },
+      "house_roll_call": {
+        "number": 699,
+        "year": 2017,
+        "congress": 115,
+        "yea": 224,
+        "nay": 201,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2017699"
+      },
       "partisan_pattern": "Near party-line: 51R yea / 48D-I nay in Senate; 224R yea / 201D nay in House",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Tax_Cuts_and_Jobs_Act_of_2017",
       "include_in_score": true,
       "emergency": false
     },
@@ -44,12 +102,29 @@
       "year": 2018,
       "date_enacted": "2018-02-09",
       "cbo_10yr_b": 320,
-      "cbo_note": "CBO scored +$320B over 10 years. Lifted Budget Control Act discretionary spending caps by $296B over FY2018–2019.",
+      "cbo_note": "CBO scored +$320B over 10 years. Lifted Budget Control Act discretionary spending caps by $296B over FY2018\u20132019.",
       "cbo_source": "cbo_53556",
       "description": "Suspended the debt ceiling through March 2019 and raised discretionary spending caps by $296 billion over two years for both defense and non-defense programs.",
-      "senate_roll_call": { "number": 31, "year": 2018, "congress": 115, "yea": 71, "nay": 28, "result": "Passed", "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1152/vote_115_2_00031.htm" },
-      "house_roll_call": { "number": 69, "year": 2018, "congress": 115, "yea": 240, "nay": 186, "result": "Passed", "url": "https://clerk.house.gov/Votes/201869" },
+      "senate_roll_call": {
+        "number": 31,
+        "year": 2018,
+        "congress": 115,
+        "yea": 71,
+        "nay": 28,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1152/vote_115_2_00031.htm"
+      },
+      "house_roll_call": {
+        "number": 69,
+        "year": 2018,
+        "congress": 115,
+        "yea": 240,
+        "nay": 186,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/201869"
+      },
       "partisan_pattern": "Bipartisan in Senate (71-28); mixed in House (167R+73D yea vs 67R+119D nay)",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Bipartisan_Budget_Act_of_2018",
       "include_in_score": true,
       "emergency": false
     },
@@ -62,13 +137,57 @@
       "year": 2020,
       "date_enacted": "2020-03-27",
       "cbo_10yr_b": 1700,
-      "cbo_note": "CBO/JCT estimated +~$1.7T over 2020–2030. Emergency COVID-19 response.",
+      "cbo_note": "CBO/JCT estimated +~$1.7T over 2020\u20132030. Emergency COVID-19 response.",
       "cbo_source": "cbo_56334",
       "description": "Emergency pandemic relief: $1,200 direct payments, $600B+ in small business loans (PPP), expanded unemployment insurance, and $175B for hospitals and healthcare.",
-      "senate_roll_call": { "number": 80, "year": 2020, "congress": 116, "yea": 96, "nay": 0, "result": "Passed", "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1162/vote_116_2_00080.htm" },
+      "senate_roll_call": {
+        "number": 80,
+        "year": 2020,
+        "congress": 116,
+        "yea": 96,
+        "nay": 0,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1162/vote_116_2_00080.htm"
+      },
       "house_roll_call": null,
-      "house_vote_note": "House passed by voice vote on March 27, 2020 — no recorded roll call exists.",
+      "house_vote_note": "House passed by voice vote on March 27, 2020 \u2014 no recorded roll call exists.",
       "partisan_pattern": "Unanimous in Senate (96-0). House: voice vote, no roll call.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/CARES_Act",
+      "include_in_score": true,
+      "emergency": true
+    },
+    {
+      "id": "caa_dec2020",
+      "name": "Consolidated Appropriations Act, 2021 \u2014 COVID Relief",
+      "short_name": "Dec-2020 COVID",
+      "public_law": "P.L. 116-260",
+      "congress": 116,
+      "year": 2020,
+      "date_enacted": "2020-12-27",
+      "cbo_10yr_b": 868,
+      "cbo_note": "CBO scored the COVID-relief divisions (M & N) at ~$868B over 2021-2030: $184B in Div M + $682B in Div N. The full omnibus also contained FY2021 appropriations; only the COVID portion is attributed here, since trackers including CRFB treat the December 2020 package as the second major pandemic response after CARES.",
+      "cbo_source": "cbo_56891",
+      "description": "Second major pandemic relief package, attached to the FY2021 omnibus: $600 direct payments, $300/wk expanded unemployment, $325B small-business aid (incl. second-round PPP), $69B vaccine/testing, plus rental assistance and education aid. The bill also funded the federal government through FY2021.",
+      "senate_roll_call": {
+        "number": 289,
+        "year": 2020,
+        "congress": 116,
+        "yea": 92,
+        "nay": 6,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1162/vote_116_2_00289.htm"
+      },
+      "house_roll_call": {
+        "number": 251,
+        "year": 2020,
+        "congress": 116,
+        "yea": 359,
+        "nay": 53,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2020251"
+      },
+      "partisan_pattern": "Strong bipartisan: 92-6 Senate; 359-53 House on the COVID-relief portion (Roll 251). A separate House vote (Roll 250, 327-85) covered the FY2021 funding portion.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Consolidated_Appropriations_Act,_2021",
       "include_in_score": true,
       "emergency": true
     },
@@ -81,12 +200,29 @@
       "year": 2021,
       "date_enacted": "2021-03-11",
       "cbo_10yr_b": 1900,
-      "cbo_note": "CBO scored +$1.9T over 2021–2031. Nearly all costs front-loaded in FY2021–2022.",
+      "cbo_note": "CBO scored +$1.9T over 2021\u20132031. Nearly all costs front-loaded in FY2021\u20132022.",
       "cbo_source": "cbo_57056",
       "description": "Pandemic relief: $1,400 direct payments, expanded child tax credit, $350B in state/local aid, vaccine distribution, and extended supplemental unemployment benefits.",
-      "senate_roll_call": { "number": 110, "year": 2021, "congress": 117, "yea": 50, "nay": 49, "result": "Passed", "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1171/vote_117_1_00110.htm" },
-      "house_roll_call": { "number": 72, "year": 2021, "congress": 117, "yea": 220, "nay": 211, "result": "Passed", "url": "https://clerk.house.gov/Votes/202172" },
+      "senate_roll_call": {
+        "number": 110,
+        "year": 2021,
+        "congress": 117,
+        "yea": 50,
+        "nay": 49,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1171/vote_117_1_00110.htm"
+      },
+      "house_roll_call": {
+        "number": 72,
+        "year": 2021,
+        "congress": 117,
+        "yea": 220,
+        "nay": 211,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/202172"
+      },
       "partisan_pattern": "Near party-line: 50D-I yea / 49R nay in Senate; 220D yea / 211R+1D nay in House",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/American_Rescue_Plan_Act_of_2021",
       "include_in_score": true,
       "emergency": true
     },
@@ -99,12 +235,64 @@
       "year": 2021,
       "date_enacted": "2021-11-15",
       "cbo_10yr_b": 256,
-      "cbo_note": "CBO scored +$256B net over 2021–2031. Includes $415B in new discretionary spending offset by $110B in mandatory savings and $50B in new revenues.",
+      "cbo_note": "CBO scored +$256B net over 2021\u20132031. Includes $415B in new discretionary spending offset by $110B in mandatory savings and $50B in new revenues.",
       "cbo_source": "cbo_57406",
       "description": "Authorized $1.2 trillion for roads, bridges, broadband, rail, water systems, and electric vehicle infrastructure. Net deficit impact $256B after mandatory offsets.",
-      "senate_roll_call": { "number": 314, "year": 2021, "congress": 117, "yea": 69, "nay": 30, "result": "Passed", "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1171/vote_117_1_00314.htm" },
-      "house_roll_call": { "number": 369, "year": 2021, "congress": 117, "yea": 228, "nay": 206, "result": "Passed", "url": "https://clerk.house.gov/Votes/2021369" },
+      "senate_roll_call": {
+        "number": 314,
+        "year": 2021,
+        "congress": 117,
+        "yea": 69,
+        "nay": 30,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1171/vote_117_1_00314.htm"
+      },
+      "house_roll_call": {
+        "number": 369,
+        "year": 2021,
+        "congress": 117,
+        "yea": 228,
+        "nay": 206,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2021369"
+      },
       "partisan_pattern": "Bipartisan in Senate (50D+19R yea); mostly D in House (215D+13R yea vs 200R+6D nay)",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Infrastructure_Investment_and_Jobs_Act",
+      "include_in_score": true,
+      "emergency": false
+    },
+    {
+      "id": "pact_2022",
+      "name": "Honoring our PACT Act of 2022",
+      "short_name": "PACT Act",
+      "public_law": "P.L. 117-168",
+      "congress": 117,
+      "year": 2022,
+      "date_enacted": "2022-08-10",
+      "cbo_10yr_b": 277,
+      "cbo_note": "CBO scored the conference text at +$277B over 2022-2031: ~$278B in mandatory veterans-healthcare spending offset by ~$1B in revenues. Among the largest non-emergency mandatory expansions of the period.",
+      "cbo_source": "cbo_58392",
+      "description": "Expanded VA healthcare and disability benefits for ~3.5 million veterans exposed to toxic substances (burn pits, Agent Orange, radiation). Created a presumption-of-service-connection framework. Final law was enacted as S. 3373 after the House passed the Senate-amended bill on July 13, 2022 and the Senate concurred Aug 2, 2022.",
+      "senate_roll_call": {
+        "number": 280,
+        "year": 2022,
+        "congress": 117,
+        "yea": 86,
+        "nay": 11,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1172/vote_117_2_00280.htm"
+      },
+      "house_roll_call": {
+        "number": 309,
+        "year": 2022,
+        "congress": 117,
+        "yea": 342,
+        "nay": 88,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2022309"
+      },
+      "partisan_pattern": "Bipartisan in both chambers: 86-11 Senate (Aug 2, 2022, after a procedural fight over a tax provision); 342-88 House (July 13, 2022).",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Honoring_our_PACT_Act_of_2022",
       "include_in_score": true,
       "emergency": false
     },
@@ -117,12 +305,29 @@
       "year": 2022,
       "date_enacted": "2022-08-16",
       "cbo_10yr_b": -305,
-      "cbo_note": "CBO/JCT scored approximately -$305B net deficit reduction over 2022–2031. Revenue: +$739B (drug pricing, minimum corporate tax, IRS enforcement). Spending: +$433B (climate credits, ACA extensions). Net: ~-$305B.",
+      "cbo_note": "CBO/JCT scored approximately -$305B net deficit reduction over 2022\u20132031. Revenue: +$739B (drug pricing, minimum corporate tax, IRS enforcement). Spending: +$433B (climate credits, ACA extensions). Net: ~-$305B.",
       "cbo_source": "cbo_58366",
       "description": "Largest U.S. climate investment in history ($369B in clean energy credits) plus Medicare drug pricing reform; financed by a 15% minimum corporate tax, IRS enforcement funding, and other revenue measures.",
-      "senate_roll_call": { "number": 325, "year": 2022, "congress": 117, "yea": 51, "nay": 50, "result": "Passed", "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1172/vote_117_2_00325.htm" },
-      "house_roll_call": { "number": 420, "year": 2022, "congress": 117, "yea": 220, "nay": 207, "result": "Passed", "url": "https://clerk.house.gov/Votes/2022420" },
+      "senate_roll_call": {
+        "number": 325,
+        "year": 2022,
+        "congress": 117,
+        "yea": 51,
+        "nay": 50,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1172/vote_117_2_00325.htm"
+      },
+      "house_roll_call": {
+        "number": 420,
+        "year": 2022,
+        "congress": 117,
+        "yea": 220,
+        "nay": 207,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2022420"
+      },
       "partisan_pattern": "Party-line: 51D yea (inc. VP Harris tiebreak) / 50R nay in Senate; 220D yea / 207R nay in House",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Inflation_Reduction_Act",
       "include_in_score": true,
       "emergency": false
     },
@@ -135,12 +340,29 @@
       "year": 2023,
       "date_enacted": "2023-06-03",
       "cbo_10yr_b": -1500,
-      "cbo_note": "CBO projected -$1.5T over 2023–2033. IMPORTANT: ~$1.49T of savings are from discretionary spending caps that future Congresses must honor in annual appropriations. Hard mandatory/revenue savings: ~$10B. The cap savings are projections, not guaranteed.",
+      "cbo_note": "CBO projected -$1.5T over 2023\u20132033. IMPORTANT: ~$1.49T of savings are from discretionary spending caps that future Congresses must honor in annual appropriations. Hard mandatory/revenue savings: ~$10B. The cap savings are projections, not guaranteed.",
       "cbo_source": "cbo_59225",
-      "description": "Debt ceiling suspension through January 2025 paired with discretionary spending caps for FY2024–2025, limits on unspent COVID funds, and mandatory program savings. CBO projected $1.5T in deficit reduction, primarily from the spending caps.",
-      "senate_roll_call": { "number": 146, "year": 2023, "congress": 118, "yea": 63, "nay": 36, "result": "Passed", "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1181/vote_118_1_00146.htm" },
-      "house_roll_call": { "number": 243, "year": 2023, "congress": 118, "yea": 314, "nay": 117, "result": "Passed", "url": "https://clerk.house.gov/Votes/2023243" },
+      "description": "Debt ceiling suspension through January 2025 paired with discretionary spending caps for FY2024\u20132025, limits on unspent COVID funds, and mandatory program savings. CBO projected $1.5T in deficit reduction, primarily from the spending caps.",
+      "senate_roll_call": {
+        "number": 146,
+        "year": 2023,
+        "congress": 118,
+        "yea": 63,
+        "nay": 36,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1181/vote_118_1_00146.htm"
+      },
+      "house_roll_call": {
+        "number": 243,
+        "year": 2023,
+        "congress": 118,
+        "yea": 314,
+        "nay": 117,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2023243"
+      },
       "partisan_pattern": "Bipartisan: 149R+165D yea vs 71R+46D nay in House; 17R+46D-I yea in Senate",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Fiscal_Responsibility_Act_of_2023",
       "include_in_score": true,
       "emergency": false
     },
@@ -153,12 +375,29 @@
       "year": 2025,
       "date_enacted": "2025-07-04",
       "cbo_10yr_b": 3400,
-      "cbo_note": "CBO scored +$3.4T over 2025–2034 (vs. CBO Jan 2025 baseline). Breakdown: -$1.1T mandatory cuts (Medicaid, SNAP, student loans) offset by -$4.5T in revenue reductions (TCJA permanence + new cuts). Including debt service: ~$4.1T total impact.",
+      "cbo_note": "CBO scored +$3.4T over 2025\u20132034 (vs. CBO Jan 2025 baseline). Breakdown: -$1.1T mandatory cuts (Medicaid, SNAP, student loans) offset by -$4.5T in revenue reductions (TCJA permanence + new cuts). Including debt service: ~$4.1T total impact.",
       "cbo_source": "cbo_61570",
       "description": "Made 2017 TCJA tax cuts permanent and added new reductions (no tax on tips/overtime, expanded deductions) while cutting Medicaid, SNAP, and student loan programs. CBO's largest single-bill deficit score in recent history.",
-      "senate_roll_call": { "number": 372, "year": 2025, "congress": 119, "yea": 51, "nay": 50, "result": "Passed", "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00372.htm" },
-      "house_roll_call": { "number": 190, "year": 2025, "congress": 119, "yea": 218, "nay": 214, "result": "Passed", "url": "https://clerk.house.gov/Votes/2025190" },
+      "senate_roll_call": {
+        "number": 372,
+        "year": 2025,
+        "congress": 119,
+        "yea": 51,
+        "nay": 50,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00372.htm"
+      },
+      "house_roll_call": {
+        "number": 190,
+        "year": 2025,
+        "congress": 119,
+        "yea": 218,
+        "nay": 214,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2025190"
+      },
       "partisan_pattern": "Near party-line: 50R yea + VP Vance / 50D-I nay in Senate; ~216R+2D yea vs all D + ~2R nay in House",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/One_Big_Beautiful_Bill_Act",
       "include_in_score": true,
       "emergency": false
     }
