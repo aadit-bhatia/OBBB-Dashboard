@@ -445,9 +445,9 @@ var TOUR_CONFIGS = {
   // Page 7 — OBBBA (includes debt pile)
   7: [
     { title: "Increases in the annual deficit", body: "Over the next 10 years, tax cuts under the OBBBA will grow the amount of money the government borrows by hundreds of billions. Each year's bar shows three scenarios: what would have happened if the OBBBA wasn't passed, what will happen if President Trump is able to cover some of his tax cuts with import tariffs, and what will happen if the tariffs are struck down and that money must be borrowed.", targetId: "obbba-deficit-card" },
-    { title: "Why might the tariffs be struck down?", body: "President Trump has touted his import tariffs as a way to make up the deficit spending from the OBBBA. The tariffs he announced in April 2025 were estimated by the CBO to raise $3.4 trillion over the next 10 years. However, the Supreme Court ruled he did not have the authority to apply taxes, and they were replaced by temporary duties.", targetId: "obbba-deficit-card" },
+    { title: "Will tariffs offset any of the cost of the OBBBA?", body: "President Trump has claimed that his import tariffs are a way to make up the deficit spending from the OBBBA. The tariffs he announced in April 2025 were estimated by the CBO to raise $3.4 trillion over the next 10 years. However, the Supreme Court ruled he did not have the authority to apply taxes and that the money collected had to be refunded. Those refunds have started going out. Since then the original tariffs were replaced by temporary duties.", targetId: "obbba-deficit-card" },
     { title: "Will the government still tax imports?", body: "Right now, it's unclear. There are ongoing lawsuits on which tariffs are legal, how high each tax will be, and whether the government has to pay back tariffs already collected. We believe that the revenue from tariffs from now till 2034 will fall somewhere between the no tariff revenue case and the CBO's projections assuming the July 2025 tariffs remain in place.", targetId: "obbba-deficit-card" },
-    { title: "Scrub through the next decade", body: "Use the slider to see how each year's deficit adds to the national debt pile. The pile shows cumulative debt held by the public — gray is what we already owed at the end of 2024." },
+    { title: "Move the slider through the next decade", body: "Use the slider to see how each year's deficit adds to the national debt pile. The pile shows cumulative debt held by the public — gray is what we already owed at the end of 2024." },
   ],
   // Page 8 — Consoles (no tour)
   // Page 9 — What Does This Mean for Future Generations? / consequences overview (no tour)
@@ -459,7 +459,7 @@ var TOUR_CONFIGS = {
   // Page 11 — Net Interest
   11: [
     { title: "Compare any program", body: "Use the dropdown to select any government program. The block grids below will update to show net interest payments alongside your chosen program for that year." },
-    { title: "Scrub through time", body: "Use the slider to move from 1970 to 2024 and see how both figures have changed over time. Compare how fast spending on interest has grown versus other categories." },
+    { title: "Move the slider through time", body: "Use the slider to move from 1970 to 2024 and see how both figures have changed over time. Compare how fast spending on interest has grown versus other categories." },
   ],
   // Page 12 — Budget Dilemma
   12: [
@@ -2059,7 +2059,7 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
         );
       })()}
       <div style={{ margin: "0 0 16px", display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 12, color: MUTED, whiteSpace: "nowrap" }}>Scrub year:</span>
+        <span style={{ fontSize: 12, color: MUTED, whiteSpace: "nowrap" }}>Slide to change year:</span>
         <input type="range" min={0} max={PILE_YEARS.length - 1}
           value={PILE_YEARS.indexOf(scrubYear) === -1 ? PILE_YEARS.length - 1 : PILE_YEARS.indexOf(scrubYear)}
           onChange={function (e) { setScrubYear(PILE_YEARS[Number(e.target.value)]); }}
