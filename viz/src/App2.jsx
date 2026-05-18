@@ -2241,39 +2241,6 @@ function CrowdingOutPage({ spendingData, summaryData, niProj, projSummary }) {
         </div>
       )}
 
-      <h3 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: "8px 0 6px" }}>What's coming next: CBO projections through 2036</h3>
-      <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 6px" }}>
-        Under current law, the share of every tax dollar going to interest is projected to keep climbing. By 2036, the CBO projects <strong style={{ color: "#f59e0b" }}>{projDisplay ? projDisplay.pct.toFixed(1) : "—"}¢</strong> of every dollar in federal revenue will go to interest — even more than today.
-      </p>
-      <p style={{ fontSize: 13, color: MUTED, margin: "0 0 16px" }}>
-        {hovProjRow ? hovProjRow.year + " — " + hovProjRow.pct.toFixed(1) + "¢ per tax dollar (projected)" : "Hover any column to see that year."}
-      </p>
-
-      {/* Stat callout — projection */}
-      {projDisplay && (
-        <div style={{ display: "flex", gap: 16, margin: "0 0 20px", flexWrap: "wrap" }}>
-          <div style={{ background: "#fffbeb", borderRadius: 8, padding: "14px 20px", flexShrink: 0 }}>
-            <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-              {hovProjRow ? hovProjRow.year : "FY" + projLast.year} — per tax dollar
-            </div>
-            <div style={{ fontSize: 48, fontWeight: 800, color: "#f59e0b", lineHeight: 1 }}>
-              {projDisplay.pct.toFixed(1)}¢
-            </div>
-            <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>projected interest share</div>
-          </div>
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 8, minWidth: 180 }}>
-            <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 14px" }}>
-              <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected net interest</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: TEXT }}>${Math.round(projDisplay.ni / 1000)}B</div>
-            </div>
-            <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 14px" }}>
-              <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected total revenue</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: TEXT }}>${Math.round(projDisplay.receipts / 1000)}B</div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Block bar chart — historical + projections */}
       <Card style={{ borderLeft: "4px solid " + RED, marginBottom: 20 }}>
         <p style={{ fontSize: 12, color: MUTED, margin: "0 0 12px" }}>
@@ -2353,6 +2320,39 @@ function CrowdingOutPage({ spendingData, summaryData, niProj, projSummary }) {
           </div>
         </div>
       </Card>
+
+      <h3 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: "8px 0 6px" }}>What's coming next: CBO projections through 2036</h3>
+      <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 6px" }}>
+        Under current law, the share of every tax dollar going to interest is projected to keep climbing. By 2036, the CBO projects <strong style={{ color: "#f59e0b" }}>{projDisplay ? projDisplay.pct.toFixed(1) : "—"}¢</strong> of every dollar in federal revenue will go to interest — even more than today.
+      </p>
+      <p style={{ fontSize: 13, color: MUTED, margin: "0 0 16px" }}>
+        {hovProjRow ? hovProjRow.year + " — " + hovProjRow.pct.toFixed(1) + "¢ per tax dollar (projected)" : "Hover any column to see that year."}
+      </p>
+
+      {/* Stat callout — projection */}
+      {projDisplay && (
+        <div style={{ display: "flex", gap: 16, margin: "0 0 20px", flexWrap: "wrap" }}>
+          <div style={{ background: "#fffbeb", borderRadius: 8, padding: "14px 20px", flexShrink: 0 }}>
+            <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+              {hovProjRow ? hovProjRow.year : "FY" + projLast.year} — per tax dollar
+            </div>
+            <div style={{ fontSize: 48, fontWeight: 800, color: "#f59e0b", lineHeight: 1 }}>
+              {projDisplay.pct.toFixed(1)}¢
+            </div>
+            <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>projected interest share</div>
+          </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 8, minWidth: 180 }}>
+            <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 14px" }}>
+              <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected net interest</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: TEXT }}>${Math.round(projDisplay.ni / 1000)}B</div>
+            </div>
+            <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 14px" }}>
+              <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected total revenue</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: TEXT }}>${Math.round(projDisplay.receipts / 1000)}B</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 16px" }}>
         When the government borrows, it also competes with every other borrower in the economy, which pushes up interest rates. Higher rates mean more expensive mortgages, costlier business loans, and less private investment. The CBO estimates that for every dollar of deficit spending, private investment falls by about 33 cents.
