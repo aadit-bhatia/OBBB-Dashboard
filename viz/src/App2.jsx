@@ -1844,6 +1844,13 @@ function ProjectionPanel({ years, baselineSeries, obbbaWithTariffSeries, obbbaNo
 
   function fmtSum(val) { return val ? "$" + (val / 1000).toFixed(2) + "T" : "—"; }
 
+  // Average % of GDP across the projection window: sum(deficit) / sum(GDP) × 100
+  var tenYrGdp = years.reduce(function (a, yr) { return a + (gdpByYear[yr] || 0); }, 0);
+  function fmtSumPct(val) {
+    if (!val || !tenYrGdp) return "";
+    return (val / tenYrGdp * 100).toFixed(1) + "% avg GDP";
+  }
+
   var maxRows = useMemo(function () {
     var m = 1;
     years.forEach(function (yr) {
@@ -1882,7 +1889,7 @@ function ProjectionPanel({ years, baselineSeries, obbbaWithTariffSeries, obbbaNo
           );
         })}
       </div>
-      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 2, overflowX: "auto" }}>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 2, paddingTop: 80, overflow: "visible" }}>
         {years.map(function (yr) {
           var baseline   = base[yr]    || 0;
           var withTariff = withTar[yr] || 0;
@@ -1912,10 +1919,17 @@ function ProjectionPanel({ years, baselineSeries, obbbaWithTariffSeries, obbbaNo
       </div>
       <div style={{ marginTop: 20, display: "flex", gap: 10, flexWrap: "wrap" }}>
         {summaryItems.map(function (s) {
+          var dol = fmtSum(s.val);
+          var pct = fmtSumPct(s.val);
+          var primary   = mode === "pct" ? pct : dol;
+          var secondary = mode === "pct" ? dol : pct;
           return (
             <div key={s.label} style={{ flex: 1, minWidth: 120, background: s.bg, borderRadius: 6, padding: "8px 12px" }}>
               <div style={{ fontSize: 10, color: MUTED, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 2 }}>{s.label}</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: s.color }}>{fmtSum(s.val)}</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: s.color }}>
+                {primary}
+                {secondary && <span style={{ fontSize: 12, fontWeight: 500, color: MUTED, marginLeft: 6 }}>({secondary})</span>}
+              </div>
             </div>
           );
         })}
@@ -2016,20 +2030,34 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 16px" }}>
         These deficits accumulate into a growing pile of public debt. Drag the slider to see how the debt grows year by year through 2035.
       </p>
-      <div style={{ display: "flex", gap: 24, marginBottom: 12, flexWrap: "wrap" }}>
-        <div style={{ background: "#fef2f2", borderRadius: 8, padding: "10px 16px", flex: "1 1 140px" }}>
-          <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Annual deficit</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: RED }}>${((pileActiveSeries[scrubYear] || 0) / 1000).toFixed(2)}T</div>
-        </div>
-        <div style={{ background: "#fef2f2", borderRadius: 8, padding: "10px 16px", flex: "1 1 140px" }}>
-          <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Cumulative debt</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: RED }}>${((cumulativeByYear[scrubYear] || 0) / 1000).toFixed(1)}T</div>
-        </div>
-        <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 16px", flex: "1 1 140px" }}>
-          <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Added since 2024</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: RED }}>${(((cumulativeByYear[scrubYear] || 0) - ANCHOR_DEBT_B) / 1000).toFixed(1)}T</div>
-        </div>
-      </div>
+      {(function () {
+        var gdpY  = gdpByYear[scrubYear] || 0;
+        var defB  = pileActiveSeries[scrubYear] || 0;
+        var cumB  = cumulativeByYear[scrubYear] || 0;
+        var addedB = cumB - ANCHOR_DEBT_B;
+        var dolStr = function (b, d) { return "$" + (b / 1000).toFixed(d) + "T"; };
+        var pctStr = function (b) { return gdpY ? (b / gdpY * 100).toFixed(1) + "% GDP" : ""; };
+        var cell = function (label, b, d, bg) {
+          var primary   = mode === "pct" ? pctStr(b) : dolStr(b, d);
+          var secondary = mode === "pct" ? dolStr(b, d) : pctStr(b);
+          return (
+            <div style={{ background: bg, borderRadius: 8, padding: "10px 16px", flex: "1 1 140px" }}>
+              <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: RED }}>
+                {primary || dolStr(b, d)}
+                {gdpY > 0 && <span style={{ fontSize: 12, fontWeight: 500, color: MUTED, marginLeft: 6 }}>({secondary})</span>}
+              </div>
+            </div>
+          );
+        };
+        return (
+          <div style={{ display: "flex", gap: 24, marginBottom: 12, flexWrap: "wrap" }}>
+            {cell("Annual deficit",   defB,  2, "#fef2f2")}
+            {cell("Cumulative debt",  cumB,  1, "#fef2f2")}
+            {cell("Added since 2024", addedB, 1, "#f9fafb")}
+          </div>
+        );
+      })()}
       <div style={{ margin: "0 0 16px", display: "flex", alignItems: "center", gap: 12 }}>
         <span style={{ fontSize: 12, color: MUTED, whiteSpace: "nowrap" }}>Scrub year:</span>
         <input type="range" min={0} max={PILE_YEARS.length - 1}
@@ -2067,9 +2095,20 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
             });
           })()}
         </div>
-        <div style={{ marginTop: 12, fontSize: 13, color: MUTED }}>
-          Total projected debt by 2035: <strong style={{ color: RED }}>${((cumulativeByYear[2035] || 0) / 1000).toFixed(1)}T</strong>
-        </div>
+        {(function () {
+          var cum2035 = cumulativeByYear[2035] || 0;
+          var gdp2035 = gdpByYear[2035] || 0;
+          var dol = "$" + (cum2035 / 1000).toFixed(1) + "T";
+          var pct = gdp2035 ? (cum2035 / gdp2035 * 100).toFixed(1) + "% GDP" : "";
+          var primary   = mode === "pct" ? pct : dol;
+          var secondary = mode === "pct" ? dol : pct;
+          return (
+            <div style={{ marginTop: 12, fontSize: 13, color: MUTED }}>
+              Total projected debt by 2035: <strong style={{ color: RED }}>{primary || dol}</strong>
+              {secondary && <span style={{ marginLeft: 6 }}>({secondary})</span>}
+            </div>
+          );
+        })()}
       </Card>
       <p style={{ fontSize: 12, color: MUTED, marginTop: 16 }}>Sources: <a href="https://www.cbo.gov/publication/62105" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO February 2026 Budget Projections (pub. 62105)</a>; <a href="https://www.cbo.gov/publication/61570" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO OBBBA cost estimate (pub. 61570)</a>.</p>
     </div>
@@ -2095,9 +2134,10 @@ function ConsolesPage() {
 }
 
 /* ── III.a  Crowding Out ─────────────────── */
-function CrowdingOutPage({ spendingData, summaryData }) {
+function CrowdingOutPage({ spendingData, summaryData, niProj, projSummary }) {
   var tour = useTour(10);
   var _hov = useState(null); var hovYear = _hov[0]; var setHovYear = _hov[1];
+  var _hovProj = useState(null); var hovProjYear = _hovProj[0]; var setHovProjYear = _hovProj[1];
 
   var series = useMemo(function () {
     if (!spendingData || !summaryData) return [];
@@ -2121,15 +2161,44 @@ function CrowdingOutPage({ spendingData, summaryData }) {
     return result;
   }, [spendingData, summaryData]);
 
+  // CBO Feb 2026 baseline projections — net interest and total revenue (billions)
+  var projSeries = useMemo(function () {
+    if (!niProj || !projSummary) return [];
+    var revenue = {};
+    projSummary.filter(function (r) {
+      return String(r.category).trim() === "Total Revenues";
+    }).forEach(function (r) { revenue[Number(r.year)] = Number(r.amount_billions); });
+
+    var interest = {};
+    niProj.filter(function (r) {
+      return r.scenario === "feb_2026_current_law";
+    }).forEach(function (r) { interest[Number(r.year)] = Number(r.net_interest_billions); });
+
+    var result = [];
+    for (var y = 2025; y <= 2036; y++) {
+      var ni = interest[y]; var rec = revenue[y];
+      if (ni != null && rec != null && rec > 0) {
+        // Convert billions → millions to match historical units in the callout
+        result.push({ year: y, pct: (ni / rec) * 100, ni: ni * 1000, receipts: rec * 1000 });
+      }
+    }
+    return result;
+  }, [niProj, projSummary]);
+
+  var hovProjRow = hovProjYear != null ? projSeries.find(function (r) { return r.year === hovProjYear; }) : null;
+  var projLast   = projSeries.length ? projSeries[projSeries.length - 1] : null;
+  var projDisplay = hovProjRow || projLast;
+
   var latest  = series.length ? series[series.length - 1] : null;
   var hovRow  = hovYear != null ? series.find(function (r) { return r.year === hovYear; }) : null;
   var display = hovRow || latest;
 
-  // 55 years, target ~900px wide → col = 900/55 ≈ 16px, gap 2px
-  var BLK_SZ   = 14;
-  var BLK_GAP  = 2;
+  // 67 columns total (1970–2024 + 2025–2036). Card inner width ≈ 988px →
+  // 67 × 13 blocks + 66 × 1 gap = 937px → fills the Card almost edge-to-edge.
+  var BLK_SZ   = 13;
+  var BLK_GAP  = 1;
   var BLK_CELL = BLK_SZ + BLK_GAP;
-  var COL_GAP  = 2;
+  var COL_GAP  = 1;
   var XAXIS_H  = 20;
   var MAX_CENTS = 22;
 
@@ -2173,9 +2242,13 @@ function CrowdingOutPage({ spendingData, summaryData }) {
         </div>
       )}
 
-      {/* Block bar chart */}
+      {/* Block bar chart — historical + projections */}
       <Card style={{ borderLeft: "4px solid " + RED, marginBottom: 20 }}>
-        <p style={{ fontSize: 12, color: MUTED, margin: "0 0 12px" }}>Each block = 1¢ of every tax dollar going to interest. Hover a column for detail.</p>
+        <p style={{ fontSize: 12, color: MUTED, margin: "0 0 12px" }}>
+          Each block = 1¢ of every tax dollar going to interest.{" "}
+          <span style={{ color: RED, fontWeight: 600 }}>Red</span> = historical and FY2025 actual (1970–2025);{" "}
+          <span style={{ color: "#f59e0b", fontWeight: 600 }}>Amber</span> = CBO Feb 2026 projections (2026–2036). Hover a column for detail.
+        </p>
         <div style={{ overflowX: "auto" }}>
           <div style={{ display: "flex", alignItems: "flex-end", gap: COL_GAP + "px", paddingBottom: XAXIS_H + "px", position: "relative" }}>
             {series.map(function (r) {
@@ -2211,15 +2284,82 @@ function CrowdingOutPage({ spendingData, summaryData }) {
                 </div>
               );
             })}
+            {projSeries.map(function (r) {
+              var blocks   = Math.round(r.pct);
+              var isHov    = hovProjYear === r.year;
+              var showLabel = r.year % 5 === 0;
+              var isActual = r.year === 2025;
+              return (
+                <div key={r.year}
+                  onMouseEnter={function () { setHovProjYear(r.year); }}
+                  onMouseLeave={function () { setHovProjYear(null); }}
+                  style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "default", position: "relative", flexShrink: 0 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: BLK_GAP + "px" }}>
+                    {Array.from({ length: blocks }).map(function (_, b) {
+                      return (
+                        <div key={b} style={{
+                          width: BLK_SZ, height: BLK_SZ, borderRadius: 2,
+                          backgroundColor: isActual ? RED : "#f59e0b",
+                          opacity: isHov ? 1 : 0.75,
+                          transition: "opacity 0.1s",
+                        }} />
+                      );
+                    })}
+                  </div>
+                  <div style={{
+                    position: "absolute", bottom: -XAXIS_H,
+                    fontSize: 9, color: isHov ? TEXT : MUTED,
+                    fontWeight: isHov ? 700 : 400,
+                    whiteSpace: "nowrap",
+                    visibility: showLabel || isHov ? "visible" : "hidden",
+                  }}>
+                    {r.year}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </Card>
+
+      <h3 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: "8px 0 6px" }}>What's coming next: CBO projections through 2036</h3>
+      <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 6px" }}>
+        Under current law, the share of every tax dollar going to interest is projected to keep climbing. By 2036, the CBO projects <strong style={{ color: "#f59e0b" }}>{projDisplay ? projDisplay.pct.toFixed(1) : "—"}¢</strong> of every dollar in federal revenue will go to interest — even more than today.
+      </p>
+      <p style={{ fontSize: 13, color: MUTED, margin: "0 0 16px" }}>
+        {hovProjRow ? hovProjRow.year + " — " + hovProjRow.pct.toFixed(1) + "¢ per tax dollar (projected)" : "Hover any column to see that year."}
+      </p>
+
+      {/* Stat callout — projection */}
+      {projDisplay && (
+        <div style={{ display: "flex", gap: 16, margin: "0 0 20px", flexWrap: "wrap" }}>
+          <div style={{ background: "#fffbeb", borderRadius: 8, padding: "14px 20px", flexShrink: 0 }}>
+            <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+              {hovProjRow ? hovProjRow.year : "FY" + projLast.year} — per tax dollar
+            </div>
+            <div style={{ fontSize: 48, fontWeight: 800, color: "#f59e0b", lineHeight: 1 }}>
+              {projDisplay.pct.toFixed(1)}¢
+            </div>
+            <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>projected interest share</div>
+          </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 8, minWidth: 180 }}>
+            <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 14px" }}>
+              <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected net interest</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: TEXT }}>${Math.round(projDisplay.ni / 1000)}B</div>
+            </div>
+            <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 14px" }}>
+              <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected total revenue</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: TEXT }}>${Math.round(projDisplay.receipts / 1000)}B</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 16px" }}>
         When the government borrows, it also competes with every other borrower in the economy, which pushes up interest rates. Higher rates mean more expensive mortgages, costlier business loans, and less private investment. The CBO estimates that for every dollar of deficit spending, private investment falls by about 33 cents.
       </p>
 
-      <p style={{ fontSize: 12, color: MUTED }}>Sources: <a href="https://www.whitehouse.gov/omb/information-resources/budget/historical-tables/" target="_blank" rel="noreferrer" style={{ color: BLUE }}>OMB Historical Tables</a> (net interest, total receipts). CBO crowding-out estimate via <a href="https://www.pgpf.org/article/the-national-debt-can-crowd-out-investments-in-the-economy-heres-how/" target="_blank" rel="noreferrer" style={{ color: BLUE }}>Peter G. Peterson Foundation</a>.</p>
+      <p style={{ fontSize: 12, color: MUTED }}>Sources: <a href="https://www.whitehouse.gov/omb/information-resources/budget/historical-tables/" target="_blank" rel="noreferrer" style={{ color: BLUE }}>OMB Historical Tables</a> (historical net interest, total receipts). <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO, The Budget and Economic Outlook: 2026 to 2036</a> (projected net interest, total revenues, Table 1-1). CBO crowding-out estimate via <a href="https://www.pgpf.org/article/the-national-debt-can-crowd-out-investments-in-the-economy-heres-how/" target="_blank" rel="noreferrer" style={{ color: BLUE }}>Peter G. Peterson Foundation</a>.</p>
     </div>
   );
 }
@@ -5952,7 +6092,7 @@ export default function App() {
     /* 7  */ <OBBBAPage         deficitProj={deficitProj} niProj={niProj} projSummary={projSummary} />,
     /* 8  */ <ConsolesPage />,
     /* 9  */ <CrowdingOutTextPage />,
-    /* 10 */ <CrowdingOutPage   spendingData={spendingData} summaryData={summaryData} />,
+    /* 10 */ <CrowdingOutPage   spendingData={spendingData} summaryData={summaryData} niProj={niProj} projSummary={projSummary} />,
     /* 11 */ <NetInterestPage   spendingData={spendingData} />,
     /* 12 */ <BudgetDilemmaPage spendingData={spendingData} summaryData={summaryData} />,
     /* 13 */ <TaxPage taxData={taxData} spendingData={spendingData} summaryData={summaryData}
