@@ -46,14 +46,34 @@
         "url": "https://www.cbo.gov/publication/61570"
       },
       {
-        "id": "cbo_56891",
-        "label": "CBO: Consolidated Appropriations Act 2021 \u2014 Division M (COVID Relief) Cost Estimate (Jan 2021)",
-        "url": "https://www.cbo.gov/publication/56891"
+        "id": "cbo_56963",
+        "label": "CBO: Consolidated Appropriations Act 2021 \u2014 Summary Estimate for Divisions M through FF (Jan 2021)",
+        "url": "https://www.cbo.gov/publication/56963"
       },
       {
         "id": "cbo_58392",
         "label": "CBO: Honoring our PACT Act of 2022 (S. 3373) Cost Estimate (Aug 2022)",
         "url": "https://www.cbo.gov/publication/58392"
+      },
+      {
+        "id": "cbo_56316",
+        "label": "CBO: H.R. 6201, Families First Coronavirus Response Act, Preliminary Estimate (Apr 2020)",
+        "url": "https://www.cbo.gov/publication/56316"
+      },
+      {
+        "id": "cbo_56338",
+        "label": "CBO: H.R. 266, Paycheck Protection Program and Health Care Enhancement Act (Apr 2020)",
+        "url": "https://www.cbo.gov/publication/56338"
+      },
+      {
+        "id": "cbo_bba2019",
+        "label": "CBO: Bipartisan Budget Act of 2019, Cost Estimate (Jul 2019)",
+        "url": "https://www.cbo.gov/system/files/2019-07/BipartisanBudgetActof2019.pdf"
+      },
+      {
+        "id": "cbo_58319",
+        "label": "CBO: H.R. 4346, CHIPS Act of 2022 \u2014 Estimated Budgetary Effects (Jul 2022)",
+        "url": "https://www.cbo.gov/publication/58319"
       }
     ]
   },
@@ -166,7 +186,7 @@
       "date_enacted": "2020-12-27",
       "cbo_10yr_b": 868,
       "cbo_note": "CBO scored the COVID-relief divisions (M & N) at ~$868B over 2021-2030: $184B in Div M + $682B in Div N. The full omnibus also contained FY2021 appropriations; only the COVID portion is attributed here, since trackers including CRFB treat the December 2020 package as the second major pandemic response after CARES.",
-      "cbo_source": "cbo_56891",
+      "cbo_source": "cbo_56963",
       "description": "Second major pandemic relief package, attached to the FY2021 omnibus: $600 direct payments, $300/wk expanded unemployment, $325B small-business aid (incl. second-round PPP), $69B vaccine/testing, plus rental assistance and education aid. The bill also funded the federal government through FY2021.",
       "senate_roll_call": {
         "number": 289,
@@ -304,8 +324,8 @@
       "congress": 117,
       "year": 2022,
       "date_enacted": "2022-08-16",
-      "cbo_10yr_b": -305,
-      "cbo_note": "CBO/JCT scored approximately -$305B net deficit reduction over 2022\u20132031. Revenue: +$739B (drug pricing, minimum corporate tax, IRS enforcement). Spending: +$433B (climate credits, ACA extensions). Net: ~-$305B.",
+      "cbo_10yr_b": -238,
+      "cbo_note": "CBO/JCT's final post-enactment score: -$238B net deficit reduction over 2022\u20132031. (Initial Aug 3, 2022 estimate was -$305B; the final score reflects revisions to drug-pricing and energy-credit lines as enacted.) Revenue raisers: drug pricing reform, 15% minimum corporate tax, IRS enforcement funding. Offsetting outlays: clean-energy tax credits and extended ACA subsidies.",
       "cbo_source": "cbo_58366",
       "description": "Largest U.S. climate investment in history ($369B in clean energy credits) plus Medicare drug pricing reform; financed by a 15% minimum corporate tax, IRS enforcement funding, and other revenue measures.",
       "senate_roll_call": {
@@ -398,6 +418,139 @@
       },
       "partisan_pattern": "Near party-line: 50R yea + VP Vance / 50D-I nay in Senate; ~216R+2D yea vs all D + ~2R nay in House",
       "wikipedia_url": "https://en.wikipedia.org/wiki/One_Big_Beautiful_Bill_Act",
+      "include_in_score": true,
+      "emergency": false
+    },
+    {
+      "id": "ffcra_2020",
+      "name": "Families First Coronavirus Response Act",
+      "short_name": "FFCRA",
+      "public_law": "P.L. 116-127",
+      "congress": 116,
+      "year": 2020,
+      "date_enacted": "2020-03-18",
+      "cbo_10yr_b": 192,
+      "cbo_note": "CBO/JCT preliminary estimate (Apr 2, 2020): +$192B over the 2020-2030 period, mostly in FY2020-21. Emergency COVID-19 response.",
+      "cbo_source": "cbo_56316",
+      "description": "First major emergency pandemic package: free COVID-19 testing, paid sick and family leave for some workers, expanded unemployment benefits, and an increased federal Medicaid match (FMAP) for states.",
+      "senate_roll_call": {
+        "number": 76,
+        "year": 2020,
+        "congress": 116,
+        "yea": 90,
+        "nay": 8,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1162/vote_116_2_00076.htm"
+      },
+      "house_roll_call": {
+        "number": 102,
+        "year": 2020,
+        "congress": 116,
+        "yea": 363,
+        "nay": 40,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2020102"
+      },
+      "partisan_pattern": "Strong bipartisan: 90-8 Senate; 363-40 House (all 40 nays were Republicans).",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Families_First_Coronavirus_Response_Act",
+      "include_in_score": true,
+      "emergency": true
+    },
+    {
+      "id": "pppchea_2020",
+      "name": "Paycheck Protection Program and Health Care Enhancement Act",
+      "short_name": "PPPHCEA",
+      "public_law": "P.L. 116-139",
+      "congress": 116,
+      "year": 2020,
+      "date_enacted": "2020-04-24",
+      "cbo_10yr_b": 483,
+      "cbo_note": "CBO estimated +$483B over 10 years (per CRFB summary of the CBO score for H.R. 266). Gross spending: $484B in additional appropriations \u2014 PPP +$321B, hospitals +$75B, testing +$25B, plus administrative and EIDL components. Emergency COVID-19 response.",
+      "cbo_source": "cbo_56338",
+      "description": "Fourth COVID-19 emergency package (\"COVID 3.5\"): replenished the Paycheck Protection Program with $310B in additional small-business loans, added $75B for hospitals and healthcare providers, and $25B for testing.",
+      "senate_roll_call": null,
+      "senate_vote_note": "Senate passed by voice vote on April 21, 2020 \u2014 no recorded roll call exists.",
+      "house_roll_call": {
+        "number": 104,
+        "year": 2020,
+        "congress": 116,
+        "yea": 388,
+        "nay": 5,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2020104"
+      },
+      "partisan_pattern": "Senate: voice vote, no recorded roll call. House: 388-5 (the 5 nays were 4 Republicans \u2014 Massie, Biggs, Buck, Hice \u2014 and 1 Democrat, Ocasio-Cortez).",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Paycheck_Protection_Program_and_Health_Care_Enhancement_Act",
+      "include_in_score": true,
+      "emergency": true
+    },
+    {
+      "id": "bba_2019",
+      "name": "Bipartisan Budget Act of 2019",
+      "short_name": "BBA 2019",
+      "public_law": "P.L. 116-37",
+      "congress": 116,
+      "year": 2019,
+      "date_enacted": "2019-08-02",
+      "cbo_10yr_b": 245,
+      "cbo_note": "CBO scored a cap-driven net increase of ~$245B over 10 years: discretionary cap raises of $322B over FY2020-21 ($171B + $153B) partially offset by $77B in offsets ($16B from customs/passenger fee extensions and $62B from extending the mandatory sequester to 2029). The widely-cited '$1.7T addition to debt' figure includes cap extrapolation and interest; this entry uses the clean CBO net figure to match BBA 2018 methodology.",
+      "cbo_source": "cbo_bba2019",
+      "description": "Two-year debt ceiling suspension (through July 31, 2021) paired with discretionary spending cap increases for FY2020-21 ($322B above current law) and partial offsets.",
+      "senate_roll_call": {
+        "number": 262,
+        "year": 2019,
+        "congress": 116,
+        "yea": 67,
+        "nay": 28,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1161/vote_116_1_00262.htm"
+      },
+      "house_roll_call": {
+        "number": 511,
+        "year": 2019,
+        "congress": 116,
+        "yea": 284,
+        "nay": 149,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2019511"
+      },
+      "partisan_pattern": "Bipartisan in both chambers: 67-28 Senate; 284-149 House.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Bipartisan_Budget_Act_of_2019",
+      "include_in_score": true,
+      "emergency": false
+    },
+    {
+      "id": "chips_2022",
+      "name": "CHIPS and Science Act",
+      "short_name": "CHIPS",
+      "public_law": "P.L. 117-167",
+      "congress": 117,
+      "year": 2022,
+      "date_enacted": "2022-08-09",
+      "cbo_10yr_b": 79,
+      "cbo_note": "CBO scored mandatory + revenue effects at +$79B over 2022-2031 (+$48B over the first 5 years). Authorizations of an additional ~$200B in discretionary R&D and science funding are not counted in this score, since they require future appropriations. This entry uses the mandatory+revenue net figure to match the convention used for IIJA and IRA.",
+      "cbo_source": "cbo_58319",
+      "description": "Industrial policy package: ~$52B in semiconductor manufacturing subsidies and a 25% investment tax credit for chip fabs, plus ~$200B in authorized (not appropriated) R&D, STEM, and science programs over 10 years.",
+      "senate_roll_call": {
+        "number": 271,
+        "year": 2022,
+        "congress": 117,
+        "yea": 64,
+        "nay": 33,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1172/vote_117_2_00271.htm"
+      },
+      "house_roll_call": {
+        "number": 404,
+        "year": 2022,
+        "congress": 117,
+        "yea": 243,
+        "nay": 187,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2022404"
+      },
+      "partisan_pattern": "Bipartisan: 64-33 Senate (47D-I + 17R yea); 243-187 House (24 R crossed over to support).",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/CHIPS_and_Science_Act",
       "include_in_score": true,
       "emergency": false
     }

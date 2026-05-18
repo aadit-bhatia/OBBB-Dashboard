@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import Papa from "papaparse";
 
 // ─────────────────────────────────────────────
@@ -4893,10 +4894,724 @@ function RepresentativesPageC({ legislators, keyVotesData, rollCalls, zipDistric
   );
 }
 
+// ─────────────────────────────────────────────
+// Variant D — "normalized fiscal index" framing
+// Score = (max − actual) / (max − min) × 100, range [0, 100].
+//   0   = most deficit-INCREASING record this rep's vote set could produce
+//   100 = most deficit-REDUCING record this rep's vote set could produce
+//   actual = Σ(impact of YES votes) − Σ(impact of NO votes), over bills
+//   the rep actually voted on (so absences / not-yet-in-office drop out).
+//   max / min = the most deficit-increasing / -reducing record the same
+//   set of votes could have produced (flip each vote to its extreme).
+// Self-normalizes for tenure & absences. Headline pairs with a chamber-
+// level histogram so the score is read as a relative position, and a
+// modal exposes the underlying votes + a min/max position graphic.
+// ─────────────────────────────────────────────
+
+var VARD_GREEN    = "#15803d";
+var VARD_GREEN_BG = "#dcfce7";
+var VARD_RED      = "#b91c1c";
+var VARD_RED_BG   = "#fee2e2";
+var VARD_NEUTRAL  = "#94a3b8";
+
+function vardComputeIndex(rep, keyVotesData, rollCalls) {
+  if (!keyVotesData) return null;
+  var isSen = rep.chamber === "senate";
+  var chamber = isSen ? "senate" : "house";
+  var actual = 0;
+  var absSum = 0;
+  var voted = [];
+  var notVoted = [];
+  keyVotesData.votes.forEach(function (bill) {
+    if (bill.include_in_score === false) return;
+    var wasInOffice = rep.first_elected_year <= bill.year;
+    var optKey = null;
+    var foundChamber = null;
+    if (wasInOffice && rollCalls && rollCalls[bill.id]) {
+      var sMap = rollCalls[bill.id].senate;
+      var hMap = rollCalls[bill.id].house;
+      if (sMap && sMap[rep.bioguide_id]) { optKey = sMap[rep.bioguide_id]; foundChamber = "senate"; }
+      else if (hMap && hMap[rep.bioguide_id]) { optKey = hMap[rep.bioguide_id]; foundChamber = "house"; }
+    }
+    // Voice-vote detection: if the rep wasn't found in either roll-call and the chamber they
+    // belonged to at the time voted by voice, mark as voice vote (so it's not flagged "no record").
+    // For chamber-switchers we approximate: if neither chamber has them but one chamber has no
+    // recorded roll-call (= voice vote), they were probably in that chamber.
+    var isVoiceVote = false;
+    if (!optKey && wasInOffice) {
+      var senateVoice = bill.senate_roll_call === null;
+      var houseVoice  = bill.house_roll_call === null;
+      if (senateVoice || houseVoice) isVoiceVote = true;
+    }
+    var rec = { bill: bill, optKey: optKey, wasInOffice: wasInOffice, isVoiceVote: isVoiceVote };
+    if (optKey === "+") {
+      actual += bill.cbo_10yr_b;
+      absSum += Math.abs(bill.cbo_10yr_b);
+      voted.push(rec);
+    } else if (optKey === "-") {
+      actual -= bill.cbo_10yr_b;
+      absSum += Math.abs(bill.cbo_10yr_b);
+      voted.push(rec);
+    } else {
+      notVoted.push(rec);
+    }
+  });
+  if (absSum === 0) {
+    return { actual: 0, min: 0, max: 0, absSum: 0, indexPct: null, voted: voted, notVoted: notVoted };
+  }
+  var indexPct = (absSum - actual) / (2 * absSum) * 100;
+  return { actual: actual, min: -absSum, max: absSum, absSum: absSum, indexPct: indexPct, voted: voted, notVoted: notVoted };
+}
+
+function vardColor(pct) {
+  if (pct === null || pct === undefined) return VARD_NEUTRAL;
+  return pct > 50 ? VARD_GREEN : VARD_RED;
+}
+function vardBg(pct) {
+  if (pct === null || pct === undefined) return "#f9fafb";
+  return pct > 50 ? VARD_GREEN_BG : VARD_RED_BG;
+}
+
+function IndexDotPlotD({ chamberLabel, data, userReps }) {
+  var BINS  = 50;
+  var BIN_W = 100 / BINS;
+  var DOT   = 4;
+  var GAP   = 1;
+
+  var userByBg = useMemo(function () {
+    var s = {};
+    userReps.forEach(function (r) { s[r.bioguide_id] = true; });
+    return s;
+  }, [userReps]);
+
+  var bins = useMemo(function () {
+    var b = [];
+    for (var i = 0; i < BINS; i++) b.push([]);
+    data.forEach(function (d) {
+      if (d.indexPct === null || d.indexPct === undefined) return;
+      var idx = Math.min(BINS - 1, Math.floor(d.indexPct / BIN_W));
+      b[idx].push(d);
+    });
+    // User reps go last so they sit on top of their stack (column-reverse).
+    b.forEach(function (binArr) {
+      binArr.sort(function (a, c) {
+        var aU = userByBg[a.rep.bioguide_id] ? 1 : 0;
+        var cU = userByBg[c.rep.bioguide_id] ? 1 : 0;
+        return aU - cU;
+      });
+    });
+    return b;
+  }, [data, userByBg, BIN_W]);
+
+  var maxStack = bins.reduce(function (m, b) { return Math.max(m, b.length); }, 1);
+  var stackHeight = Math.max(40, maxStack * (DOT + GAP));
+
+  var markerGroups = useMemo(function () {
+    var groups = {};
+    userReps.forEach(function (r) {
+      var d = data.find(function (x) { return x.rep.bioguide_id === r.bioguide_id; });
+      if (!d || d.indexPct === null) return;
+      var key = Math.round(d.indexPct);
+      if (!groups[key]) groups[key] = { indexPct: d.indexPct, displayPct: key, reps: [] };
+      groups[key].reps.push(r);
+    });
+    return Object.values(groups);
+  }, [data, userReps]);
+
+  var MARKER_BG = "#374151";
+
+  var scoredCount = data.filter(function (d) { return d.indexPct !== null; }).length;
+
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>
+        {chamberLabel} — distribution of fiscal index ({scoredCount} members scored · 1 dot = 1 member)
+      </div>
+      <div style={{ position: "relative", padding: "30px 10px 4px", background: SURFACE, border: "1px solid " + BORDER, borderRadius: 8 }}>
+        {/* Marker layer */}
+        <div style={{ position: "absolute", top: 4, left: 10, right: 10, height: 24, pointerEvents: "none" }}>
+          {markerGroups.map(function (g, i) {
+            var displayLeft = Math.max(3, Math.min(97, g.indexPct));
+            var label = g.reps.map(function (r) { return r.name.last; }).join(", ");
+            return (
+              <div key={i} style={{ position: "absolute", left: displayLeft + "%", top: 0, transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div style={{
+                  background: MARKER_BG, color: "#fff", fontSize: 9.5, fontWeight: 800,
+                  padding: "2px 6px", borderRadius: 4, whiteSpace: "nowrap", lineHeight: 1.2,
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.15)",
+                }}>
+                  {label} · {g.displayPct}%
+                </div>
+                <div style={{
+                  width: 0, height: 0,
+                  borderLeft: "4px solid transparent",
+                  borderRight: "4px solid transparent",
+                  borderTop: "5px solid " + MARKER_BG,
+                  marginTop: 1,
+                }} />
+              </div>
+            );
+          })}
+        </div>
+        {/* Dot stacks */}
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 0, height: stackHeight }}>
+          {bins.map(function (binArr, i) {
+            return (
+              <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column-reverse", alignItems: "center", gap: GAP, height: "100%" }}>
+                {binArr.map(function (d, k) {
+                  var isUser = !!userByBg[d.rep.bioguide_id];
+                  var pc = partyBgColor(d.rep.party);
+                  return (
+                    <div key={k}
+                      title={d.rep.name.last + " (" + partyCode(d.rep.party) + ") · " + Math.round(d.indexPct) + "%"}
+                      style={{
+                        width: isUser ? DOT + 2 : DOT,
+                        height: isUser ? DOT + 2 : DOT,
+                        borderRadius: "50%",
+                        background: pc,
+                        opacity: isUser ? 1 : 0.6,
+                        border: isUser ? "1.5px solid " + TEXT : "none",
+                        flexShrink: 0,
+                      }} />
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
+        {/* X-axis */}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 9.5, color: MUTED, fontVariantNumeric: "tabular-nums" }}>
+          <span>0</span><span>25</span><span>50</span><span>75</span><span>100</span>
+        </div>
+        {/* Party legend */}
+        <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 10, color: MUTED, alignItems: "center" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#1d4ed8", display: "inline-block" }} /> Democrat
+          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#dc2626", display: "inline-block" }} /> Republican
+          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#7c3aed", display: "inline-block" }} /> Independent
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VariantDModal({ rep, scoreObj, onClose }) {
+  useEffect(function () {
+    function onKey(e) { if (e.key === "Escape") onClose(); }
+    window.addEventListener("keydown", onKey);
+    var prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return function () {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+
+  var pc     = partyCode(rep.party);
+  var pColor = partyBgColor(rep.party);
+  var isSen  = rep.chamber === "senate";
+  var label  = isSen ? "Sen." : "Rep.";
+  var locStr = isSen ? rep.state : rep.state + "-" + rep.district;
+  var idx    = scoreObj.indexPct;
+  var c      = vardColor(idx);
+
+  var leftPct = scoreObj.absSum > 0
+    ? ((scoreObj.max - scoreObj.actual) / (scoreObj.max - scoreObj.min)) * 100
+    : 50;
+  var markerLeft = Math.max(2, Math.min(98, leftPct));
+
+  return createPortal(
+    <div onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        zIndex: 9999, padding: 16,
+        fontFamily: "'Segoe UI', system-ui, sans-serif", color: TEXT,
+      }}>
+      <div onClick={function (e) { e.stopPropagation(); }}
+        style={{
+          background: SURFACE, borderRadius: 12, maxWidth: 640, width: "100%",
+          maxHeight: "calc(100vh - 32px)",
+          display: "flex", flexDirection: "column",
+          overflow: "hidden",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+          border: "1px solid " + BORDER,
+        }}>
+        {/* Header (fixed) */}
+        <div style={{ padding: "16px 18px", borderBottom: "1px solid " + BORDER, display: "flex", gap: 12, alignItems: "center", flexShrink: 0 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: TEXT, lineHeight: 1.25 }}>
+              {label} {rep.name.official_full}
+            </div>
+            <div style={{ display: "flex", gap: 6, alignItems: "center", marginTop: 4, flexWrap: "wrap" }}>
+              <span style={{ background: pColor, color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>{pc}</span>
+              <span style={{ fontSize: 11, color: MUTED }}>{locStr}</span>
+              {idx !== null && (
+                <span style={{
+                  background: c, color: "#fff", fontSize: 11, fontWeight: 800,
+                  padding: "2px 8px", borderRadius: 4, fontVariantNumeric: "tabular-nums",
+                }}>
+                  Index {Math.round(idx)}%
+                </span>
+              )}
+            </div>
+          </div>
+          <button onClick={onClose} aria-label="Close"
+            style={{ background: "none", border: "1px solid " + BORDER, borderRadius: 6, width: 30, height: 30, cursor: "pointer", fontSize: 18, color: MUTED, lineHeight: 1, padding: 0, flexShrink: 0 }}>
+            ×
+          </button>
+        </div>
+
+        {/* Scrollable body */}
+        <div style={{ flex: 1, overflowY: "auto", minHeight: 0, WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}>
+
+        {/* Methodology */}
+        <div style={{ padding: "14px 18px", borderBottom: "1px solid " + BORDER, fontSize: 12, color: TEXT, lineHeight: 1.65 }}>
+          <div style={{ fontWeight: 700, fontSize: 10.5, color: MUTED, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>How the index works</div>
+          We add the CBO 10-year deficit impact of every bill they voted <strong>Yea</strong> on and subtract the impact of every bill they voted <strong>Nay</strong> on. That "actual" number is then placed on a scale running from the most deficit-increasing record they could have produced (every vote flipped toward spending, 0%) to the most deficit-reducing one (every vote flipped toward savings, 100%). The headline figure is their position on that interval, so <strong>higher = more deficit-reducing</strong>. <strong>Bills they didn't vote on don't count</strong>, so the index doesn't penalize freshmen or absentees.
+        </div>
+
+        {/* Min/max line graphic */}
+        <div style={{ padding: "16px 18px", borderBottom: "1px solid " + BORDER }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>
+            Where they fall on their own range
+          </div>
+          {scoreObj.absSum > 0 ? (
+            <div style={{ position: "relative", paddingTop: 28 }}>
+              <div style={{ position: "relative", height: 14, borderRadius: 7, background: "linear-gradient(to right, " + VARD_RED + ", #fef9c3 50%, " + VARD_GREEN + ")" }}>
+                <div style={{
+                  position: "absolute", left: markerLeft + "%", top: "50%",
+                  transform: "translate(-50%, -50%)",
+                }}>
+                  <div style={{
+                    width: 20, height: 20, borderRadius: "50%",
+                    background: "#fff", border: "3px solid " + c,
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.25)",
+                  }} />
+                </div>
+                <div style={{
+                  position: "absolute", left: markerLeft + "%", top: -26, transform: "translateX(-50%)",
+                  fontSize: 11, fontWeight: 800, color: c, fontVariantNumeric: "tabular-nums",
+                  background: "#fff", padding: "2px 7px", borderRadius: 4, border: "1px solid " + BORDER, whiteSpace: "nowrap",
+                }}>
+                  Actual {varbFmtSigned(scoreObj.actual)}
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 10, color: MUTED, fontVariantNumeric: "tabular-nums" }}>
+                <span><strong style={{ color: VARD_RED }}>Most increasing</strong> · {varbFmtSigned(scoreObj.max)}</span>
+                <span>$0</span>
+                <span><strong style={{ color: VARD_GREEN }}>Most reducing</strong> · {varbFmtSigned(scoreObj.min)}</span>
+              </div>
+            </div>
+          ) : (
+            <div style={{ fontSize: 11, color: MUTED, fontStyle: "italic" }}>
+              No recorded votes — the index can't be computed.
+            </div>
+          )}
+        </div>
+
+        {/* Bills table */}
+        <div style={{ padding: "14px 18px" }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+            Bills counted in the index ({scoreObj.voted.length})
+          </div>
+          {scoreObj.voted.length > 0 ? (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid " + BORDER }}>
+                  <th style={{ padding: "0 4px 4px 0", textAlign: "left", fontSize: 9, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Bill</th>
+                  <th style={{ padding: "0 3px 4px", textAlign: "left", fontSize: 9, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Yr</th>
+                  <th style={{ padding: "0 4px 4px", textAlign: "center", fontSize: 9, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Vote</th>
+                  <th style={{ padding: "0 0 4px 6px", textAlign: "right", fontSize: 9, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>CBO 10y</th>
+                  <th style={{ padding: "0 0 4px 6px", textAlign: "right", fontSize: 9, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Contrib.</th>
+                </tr>
+              </thead>
+              <tbody>
+                {scoreObj.voted.map(function (row) {
+                  var b = row.bill.cbo_10yr_b;
+                  var contrib = row.optKey === "+" ? b : -b;
+                  var pos = contrib > 0;
+                  return (
+                    <tr key={row.bill.id} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                      <td style={{ padding: "4px 4px 4px 0", whiteSpace: "nowrap" }}>
+                        {row.bill.wikipedia_url ? (
+                          <a href={row.bill.wikipedia_url} target="_blank" rel="noreferrer"
+                            title={row.bill.name + " (" + row.bill.year + ")\n" + row.bill.description}
+                            style={{ color: "#2563eb", fontWeight: 600, textDecoration: "underline", textUnderlineOffset: 2 }}>
+                            {row.bill.short_name}
+                          </a>
+                        ) : (
+                          <span style={{ color: TEXT, fontWeight: 600 }}
+                            title={row.bill.name + " (" + row.bill.year + ")\n" + row.bill.description}>
+                            {row.bill.short_name}
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ padding: "4px 3px", color: MUTED, whiteSpace: "nowrap", fontSize: 10 }}>{row.bill.year}</td>
+                      <td style={{ padding: "4px 4px", textAlign: "center", whiteSpace: "nowrap" }}>
+                        <span style={{ background: "#f1f5f9", color: TEXT, fontSize: 9.5, fontWeight: 700, padding: "1.5px 6px", borderRadius: 3, border: "1px solid " + BORDER }}>
+                          {row.optKey === "+" ? "Yea" : "Nay"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "4px 0 4px 6px", textAlign: "right", whiteSpace: "nowrap", color: MUTED, fontVariantNumeric: "tabular-nums" }}>
+                        {fmtCBO(b)}
+                      </td>
+                      <td style={{ padding: "4px 0 4px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
+                        <span style={{
+                          background: pos ? VARD_RED_BG : VARD_GREEN_BG,
+                          color: pos ? VARD_RED : VARD_GREEN,
+                          fontSize: 10.5, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
+                          fontVariantNumeric: "tabular-nums",
+                        }}>
+                          {varbFmtSigned(contrib)}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <div style={{ fontSize: 11, color: MUTED, fontStyle: "italic" }}>No recorded Yea/Nay votes.</div>
+          )}
+
+          {scoreObj.notVoted.length > 0 && (
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid " + BORDER, fontSize: 10.5, color: MUTED, lineHeight: 1.5 }}>
+              <strong style={{ color: TEXT }}>Not counted ({scoreObj.notVoted.length}):</strong>{" "}
+              {scoreObj.notVoted.map(function (r) {
+                var why;
+                if (!r.wasInOffice) why = "not in office";
+                else if (r.isVoiceVote) why = "voice vote";
+                else if (r.optKey === "0") why = "absent";
+                else if (r.optKey === "P") why = "present";
+                else why = "no record";
+                return r.bill.short_name + " (" + why + ")";
+              }).join(", ")}.
+            </div>
+          )}
+        </div>
+
+        </div>{/* /Scrollable body */}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function RepCardD({ rep, scoreObj, onShowDetails }) {
+  var _imgErr = useState(false); var imgErr = _imgErr[0]; var setImgErr = _imgErr[1];
+  var pc     = partyCode(rep.party);
+  var pColor = partyBgColor(rep.party);
+  var isSen  = rep.chamber === "senate";
+  var label  = isSen ? "Sen." : "Rep.";
+  var locStr = isSen ? rep.state : rep.state + "-" + rep.district;
+  var idx    = scoreObj ? scoreObj.indexPct : null;
+  var nVotes = scoreObj ? scoreObj.voted.length : 0;
+  var nTotal = scoreObj ? (scoreObj.voted.length + scoreObj.notVoted.length) : 0;
+
+  return (
+    <div style={{
+      background: SURFACE, borderRadius: 12, border: "1px solid " + BORDER,
+      boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
+      width: 300, minWidth: 280, flexShrink: 0, flexGrow: 1, maxWidth: 340,
+      display: "flex", flexDirection: "column",
+    }}>
+      {/* Header */}
+      <div style={{ padding: "14px 14px 10px", borderBottom: "1px solid " + BORDER, display: "flex", gap: 10, alignItems: "flex-start" }}>
+        <div style={{ flexShrink: 0 }}>
+          {!imgErr ? (
+            <img
+              src={"https://bioguide.congress.gov/photo/" + rep.bioguide_id + ".jpg"}
+              onError={function () { setImgErr(true); }}
+              alt={rep.name.official_full}
+              style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover", border: "2px solid " + BORDER }}
+            />
+          ) : (
+            <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#e5e7eb", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, fontWeight: 800, color: MUTED }}>
+              {rep.name.first[0]}{rep.name.last[0]}
+            </div>
+          )}
+        </div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: 12, fontWeight: 800, color: TEXT, lineHeight: 1.25, marginBottom: 4 }}>
+            {label} {rep.name.official_full}
+          </div>
+          <div style={{ display: "flex", gap: 5, alignItems: "center", flexWrap: "wrap" }}>
+            <span style={{ background: pColor, color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 4 }}>{pc}</span>
+            <span style={{ fontSize: 11, color: MUTED }}>{locStr}</span>
+            <span style={{ fontSize: 10, color: MUTED }}>· Since {rep.first_elected_year}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Big fiscal index */}
+      <div style={{
+        padding: "18px 14px 14px", borderBottom: "1px solid " + BORDER,
+        background: vardBg(idx), textAlign: "center", flexGrow: 1,
+      }}>
+        <div style={{ fontSize: 9.5, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
+          Fiscal index
+        </div>
+        <div style={{
+          fontSize: 44, fontWeight: 800, color: vardColor(idx),
+          fontVariantNumeric: "tabular-nums", lineHeight: 1,
+        }}>
+          {idx === null ? "—" : Math.round(idx) + "%"}
+        </div>
+        <div style={{ fontSize: 9.5, color: MUTED, marginTop: 7, lineHeight: 1.5 }}>
+          {idx === null
+            ? "No recorded votes in this window"
+            : <span><strong style={{ color: VARD_RED }}>0</strong> = max increase · <strong style={{ color: VARD_GREEN }}>100</strong> = max reduction</span>}
+        </div>
+        <div style={{ fontSize: 10, color: MUTED, marginTop: 6 }}>
+          Based on {nVotes} of {nTotal} bills voted
+        </div>
+        {idx !== null && (
+          <button onClick={onShowDetails}
+            style={{
+              marginTop: 11, background: "#fff", border: "1px solid " + BORDER, borderRadius: 6,
+              padding: "6px 12px", fontSize: 11, fontWeight: 700, color: TEXT, cursor: "pointer",
+            }}>
+            View votes & methodology →
+          </button>
+        )}
+      </div>
+
+      {/* Contact footer */}
+      <div style={{ padding: "10px 14px", display: "flex", gap: 7, flexWrap: "wrap" }}>
+        {rep.phone && (
+          <a href={"tel:1" + rep.phone.replace(/\D/g, "")}
+            style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10.5, fontWeight: 600, color: "#1e3a5f", background: "#eff6ff", borderRadius: 6, padding: "5px 9px", textDecoration: "none", border: "1px solid #bfdbfe" }}>
+            📞 {rep.phone}
+          </a>
+        )}
+        {rep.website && (
+          <a href={rep.website} target="_blank" rel="noreferrer"
+            style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 10.5, fontWeight: 600, color: TEXT, background: "#f9fafb", borderRadius: 6, padding: "5px 9px", textDecoration: "none", border: "1px solid " + BORDER }}>
+            Website →
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RepresentativesPageD({ legislators, keyVotesData, rollCalls, zipDistricts }) {
+  var _zip       = useState("");   var zipInput = _zip[0]; var setZipInput = _zip[1];
+  var _reps      = useState(null); var foundReps = _reps[0]; var setFoundReps = _reps[1];
+  var _err       = useState(null); var error = _err[0]; var setError = _err[1];
+  var _manual    = useState(false); var showManual = _manual[0]; var setShowManual = _manual[1];
+  var _selState  = useState(""); var selState = _selState[0]; var setSelState = _selState[1];
+  var _selDist   = useState(""); var selDist = _selDist[0]; var setSelDist = _selDist[1];
+  var _multiOpts = useState(null); var multiOpts = _multiOpts[0]; var setMultiOpts = _multiOpts[1];
+  var _modal     = useState(null); var modalRep = _modal[0]; var setModalRep = _modal[1];
+
+  var allScored = useMemo(function () {
+    if (!legislators || !keyVotesData) return { senate: [], house: [], byBg: {} };
+    var senate = [];
+    var house = [];
+    var byBg = {};
+    legislators.forEach(function (r) {
+      var s = vardComputeIndex(r, keyVotesData, rollCalls);
+      var entry = { rep: r, indexPct: s ? s.indexPct : null, scoreObj: s };
+      byBg[r.bioguide_id] = entry;
+      if (r.chamber === "senate") senate.push(entry);
+      else if (r.chamber === "house") house.push(entry);
+    });
+    return { senate: senate, house: house, byBg: byBg };
+  }, [legislators, keyVotesData, rollCalls]);
+
+  var districtsByState = useMemo(function () {
+    if (!legislators) return {};
+    var out = {};
+    legislators.forEach(function (r) {
+      if (r.chamber !== "house" || r.district === null) return;
+      if (!out[r.state]) out[r.state] = [];
+      if (!out[r.state].includes(r.district)) out[r.state].push(r.district);
+    });
+    return out;
+  }, [legislators]);
+
+  function doLookup(state, district) {
+    if (!legislators) return;
+    var d = district === null ? null : Number(district);
+    var senators  = legislators.filter(function (r) { return r.chamber === "senate" && r.state === state; });
+    var houseMems = legislators.filter(function (r) {
+      if (r.chamber !== "house" || r.state !== state) return false;
+      if (d === null) return true;
+      return r.district === d || (d === 0 && r.district === 0);
+    });
+    if (senators.length === 0 && houseMems.length === 0) {
+      setError("No representatives found for " + state + (d ? " district " + d : "") + ". Check your ZIP or try the manual selector.");
+      setFoundReps(null);
+      return;
+    }
+    setError(null);
+    setFoundReps({ state: state, district: d, senators: senators, houseMember: houseMems[0] || null, zipUsed: zipInput });
+  }
+
+  function handleZipSubmit(e) {
+    e.preventDefault();
+    var z = zipInput.trim();
+    if (!/^\d{5}$/.test(z)) { setError("Please enter a valid 5-digit ZIP code."); return; }
+    if (!zipDistricts) { setShowManual(true); setError("ZIP lookup data hasn't loaded yet — use the manual selector below."); return; }
+    var val = zipDistricts[z];
+    if (!val) { setError("ZIP " + z + " not found. Try the manual selector below."); setShowManual(true); return; }
+    var vals = Array.isArray(val) ? val : [val];
+    if (vals.length > 1) { setMultiOpts(vals); setFoundReps(null); setError(null); return; }
+    setMultiOpts(null);
+    var parts = vals[0].split("-");
+    doLookup(parts[0], parts.length > 1 ? parseInt(parts[1]) : null);
+  }
+
+  function handleManualSubmit(e) {
+    e.preventDefault();
+    if (!selState) { setError("Please select your state."); return; }
+    var distNums = districtsByState[selState] || [];
+    var d = selDist !== "" ? Number(selDist) : (distNums.length === 1 ? distNums[0] : null);
+    if (d === null && distNums.length > 1) { setError("Please select your congressional district."); return; }
+    setZipInput("");
+    doLookup(selState, d);
+  }
+
+  var allReps = foundReps
+    ? [].concat(foundReps.senators || []).concat(foundReps.houseMember ? [foundReps.houseMember] : [])
+    : [];
+  var userSenators  = foundReps ? (foundReps.senators || []) : [];
+  var userHouseMems = foundReps && foundReps.houseMember ? [foundReps.houseMember] : [];
+
+  return (
+    <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", color: TEXT, maxWidth: 980, margin: "0 auto", paddingBottom: 40 }}>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: MUTED, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>Section IV — What Can You Do?</div>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: "0 0 10px", lineHeight: 1.25 }}>Your Representatives' Fiscal Record</h2>
+        <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.65, margin: 0, maxWidth: 660 }}>
+          Enter your ZIP code to see each rep's <strong>fiscal index</strong>. 100 means their record reduced the deficit as much as it possibly could have given the bills they voted on; 0 means it increased the deficit as much as possible. The percentage tells you how much of their voting record is improving or worsening the deficit over the next ten years.
+        </p>
+      </div>
+
+      <form onSubmit={handleZipSubmit} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
+        <input type="text" inputMode="numeric" placeholder="5-digit ZIP code"
+          value={zipInput}
+          onChange={function (e) { setZipInput(e.target.value.replace(/\D/g, "").slice(0, 5)); setError(null); }}
+          maxLength={5}
+          style={{ border: "1.5px solid " + BORDER, borderRadius: 8, padding: "9px 14px", fontSize: 14, fontFamily: "inherit", width: 155, outline: "none", color: TEXT }} />
+        <button type="submit" style={{ background: "#1e3a5f", color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+          Find My Reps
+        </button>
+      </form>
+
+      {error && <div style={{ fontSize: 12, color: VARD_RED, marginBottom: 10 }}>{error}</div>}
+
+      {multiOpts && (
+        <div style={{ marginBottom: 16, padding: "12px 14px", background: "#fffbeb", borderRadius: 8, border: "1px solid #fde68a" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#92400e", marginBottom: 8 }}>
+            Your ZIP spans multiple congressional districts — which one?
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {multiOpts.map(function (opt, i) {
+              var parts = opt.split("-");
+              var state = parts[0]; var dist = parts[1] ? parseInt(parts[1]) : null;
+              return (
+                <button key={i} onClick={function () { setMultiOpts(null); doLookup(state, dist); }}
+                  style={{ background: "#fff", border: "1px solid #fde68a", borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontWeight: 600, color: "#92400e" }}>
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <button onClick={function () { setShowManual(!showManual); }}
+        style={{ background: "none", border: "none", fontSize: 12, color: BLUE, cursor: "pointer", padding: 0, textDecoration: "underline", marginBottom: showManual ? 10 : 4 }}>
+        {showManual ? "Hide manual selector" : "Don't know your ZIP? Select state & district manually"}
+      </button>
+
+      {showManual && (
+        <form onSubmit={handleManualSubmit} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 16, flexWrap: "wrap" }}>
+          <select value={selState} onChange={function (e) { setSelState(e.target.value); setSelDist(""); }}
+            style={{ border: "1.5px solid " + BORDER, borderRadius: 8, padding: "8px 10px", fontSize: 13, fontFamily: "inherit", color: TEXT }}>
+            <option value="">— State —</option>
+            {US_STATE_LIST.map(function (s) { return <option key={s} value={s}>{s}</option>; })}
+          </select>
+          {selState && districtsByState[selState] && districtsByState[selState].length > 1 && (
+            <select value={selDist} onChange={function (e) { setSelDist(e.target.value); }}
+              style={{ border: "1.5px solid " + BORDER, borderRadius: 8, padding: "8px 10px", fontSize: 13, fontFamily: "inherit", color: TEXT }}>
+              <option value="">— House District —</option>
+              {(districtsByState[selState] || []).slice().sort(function (a, b) { return a - b; }).map(function (d) {
+                return <option key={d} value={d}>{selState}-{d}</option>;
+              })}
+            </select>
+          )}
+          <button type="submit" style={{ background: "#1e3a5f", color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+            Go
+          </button>
+        </form>
+      )}
+
+      {foundReps && allReps.length > 0 && (
+        <div>
+          <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>
+            Showing reps for <strong>{foundReps.state}{foundReps.district ? "-" + foundReps.district : ""}</strong>
+            {foundReps.zipUsed && <span> (ZIP {foundReps.zipUsed})</span>}
+          </div>
+
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 26 }}>
+            {allReps.map(function (rep) {
+              var entry = allScored.byBg[rep.bioguide_id];
+              return (
+                <RepCardD key={rep.bioguide_id}
+                  rep={rep}
+                  scoreObj={entry ? entry.scoreObj : null}
+                  onShowDetails={function () { setModalRep({ rep: rep, scoreObj: entry.scoreObj }); }} />
+              );
+            })}
+          </div>
+
+          {/* Chamber distributions */}
+          {userSenators.length > 0 && (
+            <IndexDotPlotD chamberLabel="Senate" data={allScored.senate} userReps={userSenators} />
+          )}
+          {userHouseMems.length > 0 && (
+            <IndexDotPlotD chamberLabel="House" data={allScored.house} userReps={userHouseMems} />
+          )}
+
+          <div style={{ marginTop: 18, padding: "14px 16px", background: "#f8fafc", borderRadius: 10, border: "1px solid " + BORDER, fontSize: 11, color: MUTED, lineHeight: 1.65 }}>
+            <strong style={{ color: TEXT }}>Data & methodology:</strong>{" "}
+            The fiscal index is computed per rep as (max − actual) / (max − min) × 100, where <em>actual</em> is the sum of CBO 10-year scores for bills they voted Yea on minus the sum for bills they voted Nay on, and <em>min</em> / <em>max</em> are the equivalent sums if those same votes had each been flipped to their most deficit-reducing / most deficit-increasing direction. The result runs 0 (most deficit-increasing record possible) to 100 (most deficit-reducing record possible). Bills the rep did not vote on — absences, voice votes, and bills passed before they took office — are excluded from both numerator and denominator. The chamber dot plots show the distribution of every member's score; markers indicate where the user's reps fall. Click <em>"View votes & methodology"</em> on a card for the bill-level breakdown and the rep's position on their own min/max range.
+            Vote records via{" "}
+            <a href="https://clerk.house.gov" target="_blank" rel="noreferrer" style={{ color: BLUE }}>House Clerk</a>,{" "}
+            <a href="https://www.senate.gov" target="_blank" rel="noreferrer" style={{ color: BLUE }}>Senate</a>, and{" "}
+            <a href="https://www.govtrack.us" target="_blank" rel="noreferrer" style={{ color: BLUE }}>GovTrack</a>;
+            fiscal figures from{" "}
+            <a href="https://www.cbo.gov" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO/JCT</a>.
+            ZIP-to-district mapping via U.S. Census Bureau ZCTA→Congressional District relationship file (119th Congress).
+          </div>
+        </div>
+      )}
+
+      {!legislators && (
+        <div style={{ fontSize: 13, color: MUTED, padding: "20px 0" }}>Loading representative data…</div>
+      )}
+
+      {modalRep && (
+        <VariantDModal rep={modalRep.rep} scoreObj={modalRep.scoreObj} onClose={function () { setModalRep(null); }} />
+      )}
+    </div>
+  );
+}
+
 var REP_VARIANTS = [
   { key: "A", label: "Current",   component: RepresentativesPageA },
   { key: "B", label: "Variant B", component: RepresentativesPageB },
   { key: "C", label: "Variant C", component: RepresentativesPageC },
+  { key: "D", label: "Variant D", component: RepresentativesPageD },
 ];
 
 function readQuery(name) {

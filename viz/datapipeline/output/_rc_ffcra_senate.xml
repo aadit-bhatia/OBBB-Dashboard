@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Source: https://www.senate.gov/legislative/LIS/roll_call_votes/vote1162/vote_116_2_00076.xml -->
+<!-- Bill: H.R. 6201 (Families First Coronavirus Response Act). Mar 18, 2020. Result: 90-8 -->
+<roll_call_vote>
+  <congress>116</congress>
+  <session>2</session>
+  <vote_number>76</vote_number>
+  <vote_date>March 18, 2020</vote_date>
+  <vote_result_text>Bill Passed (90-8, 3/5 majority required)</vote_result_text>
+  <count><yeas>90</yeas><nays>8</nays><present/><absent>2</absent></count>
+  <members>
+    <member><last_name>Alexander</last_name><state>TN</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S289</lis_member_id></member>
+    <member><last_name>Baldwin</last_name><state>WI</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S354</lis_member_id></member>
+    <member><last_name>Barrasso</last_name><state>WY</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S317</lis_member_id></member>
+    <member><last_name>Bennet</last_name><state>CO</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S330</lis_member_id></member>
+    <member><last_name>Blackburn</last_name><state>TN</state><party>R</party><vote_cast>Nay</vote_cast><lis_member_id>S396</lis_member_id></member>
+    <member><last_name>Blumenthal</last_name><state>CT</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S341</lis_member_id></member>
+    <member><last_name>Blunt</last_name><state>MO</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S342</lis_member_id></member>
+    <member><last_name>Booker</last_name><state>NJ</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S370</lis_member_id></member>
+    <member><last_name>Boozman</last_name><state>AR</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S343</lis_member_id></member>
+    <member><last_name>Braun</last_name><state>IN</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S397</lis_member_id></member>
+    <member><last_name>Brown</last_name><state>OH</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S307</lis_member_id></member>
+    <member><last_name>Burr</last_name><state>NC</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S300</lis_member_id></member>
+    <member><last_name>Cantwell</last_name><state>WA</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S275</lis_member_id></member>
+    <member><last_name>Capito</last_name><state>WV</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S372</lis_member_id></member>
+    <member><last_name>Cardin</last_name><state>MD</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S308</lis_member_id></member>
+    <member><last_name>Carper</last_name><state>DE</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S277</lis_member_id></member>
+    <member><last_name>Casey</last_name><state>PA</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S309</lis_member_id></member>
+    <member><last_name>Cassidy</last_name><state>LA</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S373</lis_member_id></member>
+    <member><last_name>Collins</last_name><state>ME</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S252</lis_member_id></member>
+    <member><last_name>Coons</last_name><state>DE</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S337</lis_member_id></member>
+    <member><last_name>Cornyn</last_name><state>TX</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S287</lis_member_id></member>
+    <member><last_name>Cortez Masto</last_name><state>NV</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S385</lis_member_id></member>
+    <member><last_name>Cotton</last_name><state>AR</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S374</lis_member_id></member>
+    <member><last_name>Cramer</last_name><state>ND</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S398</lis_member_id></member>
+    <member><last_name>Crapo</last_name><state>ID</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S266</lis_member_id></member>
+    <member><last_name>Cruz</last_name><state>TX</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S355</lis_member_id></member>
+    <member><last_name>Daines</last_name><state>MT</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S375</lis_member_id></member>
+    <member><last_name>Duckworth</last_name><state>IL</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S386</lis_member_id></member>
+    <member><last_name>Durbin</last_name><state>IL</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S253</lis_member_id></member>
+    <member><last_name>Enzi</last_name><state>WY</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S254</lis_member_id></member>
+    <member><last_name>Ernst</last_name><state>IA</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S376</lis_member_id></member>
+    <member><last_name>Feinstein</last_name><state>CA</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S221</lis_member_id></member>
+    <member><last_name>Fischer</last_name><state>NE</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S357</lis_member_id></member>
+    <member><last_name>Gardner</last_name><state>CO</state><party>R</party><vote_cast>Not Voting</vote_cast><lis_member_id>S377</lis_member_id></member>
+    <member><last_name>Gillibrand</last_name><state>NY</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S331</lis_member_id></member>
+    <member><last_name>Graham</last_name><state>SC</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S293</lis_member_id></member>
+    <member><last_name>Grassley</last_name><state>IA</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S153</lis_member_id></member>
+    <member><last_name>Harris</last_name><state>CA</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S387</lis_member_id></member>
+    <member><last_name>Hassan</last_name><state>NH</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S388</lis_member_id></member>
+    <member><last_name>Hawley</last_name><state>MO</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S399</lis_member_id></member>
+    <member><last_name>Heinrich</last_name><state>NM</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S359</lis_member_id></member>
+    <member><last_name>Hirono</last_name><state>HI</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S361</lis_member_id></member>
+    <member><last_name>Hoeven</last_name><state>ND</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S344</lis_member_id></member>
+    <member><last_name>Hyde-Smith</last_name><state>MS</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S395</lis_member_id></member>
+    <member><last_name>Inhofe</last_name><state>OK</state><party>R</party><vote_cast>Nay</vote_cast><lis_member_id>S236</lis_member_id></member>
+    <member><last_name>Johnson</last_name><state>WI</state><party>R</party><vote_cast>Nay</vote_cast><lis_member_id>S345</lis_member_id></member>
+    <member><last_name>Jones</last_name><state>AL</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S393</lis_member_id></member>
+    <member><last_name>Kaine</last_name><state>VA</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S362</lis_member_id></member>
+    <member><last_name>Kennedy</last_name><state>LA</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S389</lis_member_id></member>
+    <member><last_name>King</last_name><state>ME</state><party>I</party><vote_cast>Yea</vote_cast><lis_member_id>S363</lis_member_id></member>
+    <member><last_name>Klobuchar</last_name><state>MN</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S311</lis_member_id></member>
+    <member><last_name>Lankford</last_name><state>OK</state><party>R</party><vote_cast>Nay</vote_cast><lis_member_id>S378</lis_member_id></member>
+    <member><last_name>Leahy</last_name><state>VT</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S057</lis_member_id></member>
+    <member><last_name>Lee</last_name><state>UT</state><party>R</party><vote_cast>Nay</vote_cast><lis_member_id>S346</lis_member_id></member>
+    <member><last_name>Loeffler</last_name><state>GA</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S405</lis_member_id></member>
+    <member><last_name>Manchin</last_name><state>WV</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S338</lis_member_id></member>
+    <member><last_name>Markey</last_name><state>MA</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S369</lis_member_id></member>
+    <member><last_name>McConnell</last_name><state>KY</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S174</lis_member_id></member>
+    <member><last_name>McSally</last_name><state>AZ</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S400</lis_member_id></member>
+    <member><last_name>Menendez</last_name><state>NJ</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S306</lis_member_id></member>
+    <member><last_name>Merkley</last_name><state>OR</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S322</lis_member_id></member>
+    <member><last_name>Moran</last_name><state>KS</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S347</lis_member_id></member>
+    <member><last_name>Murkowski</last_name><state>AK</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S288</lis_member_id></member>
+    <member><last_name>Murphy</last_name><state>CT</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S364</lis_member_id></member>
+    <member><last_name>Murray</last_name><state>WA</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S229</lis_member_id></member>
+    <member><last_name>Paul</last_name><state>KY</state><party>R</party><vote_cast>Nay</vote_cast><lis_member_id>S348</lis_member_id></member>
+    <member><last_name>Perdue</last_name><state>GA</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S379</lis_member_id></member>
+    <member><last_name>Peters</last_name><state>MI</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S380</lis_member_id></member>
+    <member><last_name>Portman</last_name><state>OH</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S349</lis_member_id></member>
+    <member><last_name>Reed</last_name><state>RI</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S259</lis_member_id></member>
+    <member><last_name>Risch</last_name><state>ID</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S323</lis_member_id></member>
+    <member><last_name>Roberts</last_name><state>KS</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S260</lis_member_id></member>
+    <member><last_name>Romney</last_name><state>UT</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S401</lis_member_id></member>
+    <member><last_name>Rosen</last_name><state>NV</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S402</lis_member_id></member>
+    <member><last_name>Rounds</last_name><state>SD</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S381</lis_member_id></member>
+    <member><last_name>Rubio</last_name><state>FL</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S350</lis_member_id></member>
+    <member><last_name>Sanders</last_name><state>VT</state><party>I</party><vote_cast>Yea</vote_cast><lis_member_id>S313</lis_member_id></member>
+    <member><last_name>Sasse</last_name><state>NE</state><party>R</party><vote_cast>Nay</vote_cast><lis_member_id>S382</lis_member_id></member>
+    <member><last_name>Schatz</last_name><state>HI</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S353</lis_member_id></member>
+    <member><last_name>Schumer</last_name><state>NY</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S270</lis_member_id></member>
+    <member><last_name>Scott</last_name><state>FL</state><party>R</party><vote_cast>Not Voting</vote_cast><lis_member_id>S404</lis_member_id></member>
+    <member><last_name>Scott</last_name><state>SC</state><party>R</party><vote_cast>Nay</vote_cast><lis_member_id>S365</lis_member_id></member>
+    <member><last_name>Shaheen</last_name><state>NH</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S324</lis_member_id></member>
+    <member><last_name>Shelby</last_name><state>AL</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S184</lis_member_id></member>
+    <member><last_name>Sinema</last_name><state>AZ</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S403</lis_member_id></member>
+    <member><last_name>Smith</last_name><state>MN</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S394</lis_member_id></member>
+    <member><last_name>Stabenow</last_name><state>MI</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S284</lis_member_id></member>
+    <member><last_name>Sullivan</last_name><state>AK</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S383</lis_member_id></member>
+    <member><last_name>Tester</last_name><state>MT</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S314</lis_member_id></member>
+    <member><last_name>Thune</last_name><state>SD</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S303</lis_member_id></member>
+    <member><last_name>Tillis</last_name><state>NC</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S384</lis_member_id></member>
+    <member><last_name>Toomey</last_name><state>PA</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S351</lis_member_id></member>
+    <member><last_name>Udall</last_name><state>NM</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S326</lis_member_id></member>
+    <member><last_name>Van Hollen</last_name><state>MD</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S390</lis_member_id></member>
+    <member><last_name>Warner</last_name><state>VA</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S327</lis_member_id></member>
+    <member><last_name>Warren</last_name><state>MA</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S366</lis_member_id></member>
+    <member><last_name>Whitehouse</last_name><state>RI</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S316</lis_member_id></member>
+    <member><last_name>Wicker</last_name><state>MS</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S318</lis_member_id></member>
+    <member><last_name>Wyden</last_name><state>OR</state><party>D</party><vote_cast>Yea</vote_cast><lis_member_id>S247</lis_member_id></member>
+    <member><last_name>Young</last_name><state>IN</state><party>R</party><vote_cast>Yea</vote_cast><lis_member_id>S391</lis_member_id></member>
+  </members>
+</roll_call_vote>
