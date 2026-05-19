@@ -107,7 +107,7 @@
       },
       {
         "id": "cbo_52979",
-        "label": "CBO: H.R. 1628, Healthcare Freedom Act ('Skinny Repeal'), Score (Jul 2017)",
+        "label": "CBO: H.R. 1628, Healthcare Freedom Act, Score (Jul 2017)",
         "url": "https://www.cbo.gov/publication/52979"
       },
       {
@@ -846,7 +846,7 @@
       "cbo_10yr_b": -119,
       "cbo_note": "CBO/JCT cost estimate (May 24 2017, pub 52752): net deficit reduction of $119B over 2017-2026 (direct spending -$1,111B, revenues -$992B). Coverage effect: 23M fewer insured by 2026. Earlier pre-MacArthur version (pub 52516) was scored at -$337B; we cite the post-MacArthur score because that's the version the House actually voted on.",
       "cbo_source": "cbo_52752",
-      "description": "Republican plan to repeal and replace major portions of the ACA, including the individual mandate, expanded Medicaid, and the cost-sharing reduction subsidies. Passed House 217-213; never voted on the AHCA form in the Senate (the Senate pursued separate vehicles \u2014 see skinny_repeal_2017).",
+      "description": "Republican plan to repeal and replace major portions of the ACA, including the individual mandate, expanded Medicaid, and the cost-sharing reduction subsidies. Passed House 217-213; never voted on the AHCA form in the Senate (the Senate pursued separate vehicles \u2014 see hfa_2017).",
       "senate_roll_call": null,
       "senate_vote_note": "Senate did not vote on the House-passed AHCA. Separate Senate ACA-repeal attempts are tracked under hfa_2017 (Healthcare Freedom Act).",
       "house_roll_call": {
