@@ -163,7 +163,8 @@
       "include_in_score": true,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "bba_2018",
@@ -200,7 +201,8 @@
       "include_in_score": true,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "cares_2020",
@@ -230,7 +232,8 @@
       "include_in_score": true,
       "emergency": true,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": "house"
     },
     {
       "id": "caa_dec2020",
@@ -267,7 +270,8 @@
       "include_in_score": true,
       "emergency": true,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "arpa_2021",
@@ -304,7 +308,8 @@
       "include_in_score": true,
       "emergency": true,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "iija_2021",
@@ -341,7 +346,8 @@
       "include_in_score": true,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "pact_2022",
@@ -378,7 +384,8 @@
       "include_in_score": true,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "ira_2022",
@@ -415,7 +422,8 @@
       "include_in_score": true,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "fra_2023",
@@ -452,7 +460,8 @@
       "include_in_score": true,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "obbb_2025",
@@ -489,7 +498,8 @@
       "include_in_score": true,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "ffcra_2020",
@@ -526,7 +536,8 @@
       "include_in_score": true,
       "emergency": true,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "pppchea_2020",
@@ -556,7 +567,8 @@
       "include_in_score": true,
       "emergency": true,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": "senate"
     },
     {
       "id": "bba_2019",
@@ -593,7 +605,8 @@
       "include_in_score": true,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "chips_2022",
@@ -630,7 +643,8 @@
       "include_in_score": true,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "macra_2015",
@@ -667,7 +681,8 @@
       "include_in_score": false,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "caa_2016_path",
@@ -705,7 +720,8 @@
       "include_in_score": false,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "ssfa_2024",
@@ -742,7 +758,8 @@
       "include_in_score": false,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "fy25_cr_119_4",
@@ -779,7 +796,8 @@
       "include_in_score": false,
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "bbb_2021",
@@ -809,7 +827,8 @@
       "include_in_score": false,
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "ahca_2017",
@@ -839,7 +858,8 @@
       "include_in_score": false,
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "skinny_repeal_2017",
@@ -869,7 +889,8 @@
       "include_in_score": false,
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "heroes_2020",
@@ -899,7 +920,8 @@
       "include_in_score": false,
       "emergency": true,
       "outcome": "failed",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "dream_2021",
@@ -929,7 +951,8 @@
       "include_in_score": false,
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     },
     {
       "id": "rahfra_2016",
@@ -967,7 +990,8 @@
       "include_in_score": false,
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": true
+      "include_in_e_score": true,
+      "voice_chamber": null
     }
   ]
 }

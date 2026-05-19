@@ -5074,15 +5074,12 @@ function vardComputeIndex(rep, keyVotesData, rollCalls) {
       if (sMap && sMap[rep.bioguide_id]) { optKey = sMap[rep.bioguide_id]; foundChamber = "senate"; }
       else if (hMap && hMap[rep.bioguide_id]) { optKey = hMap[rep.bioguide_id]; foundChamber = "house"; }
     }
-    // Voice-vote detection: if the rep wasn't found in either roll-call and the chamber they
-    // belonged to at the time voted by voice, mark as voice vote (so it's not flagged "no record").
-    // For chamber-switchers we approximate: if neither chamber has them but one chamber has no
-    // recorded roll-call (= voice vote), they were probably in that chamber.
+    // Voice-vote detection: only when the bill explicitly marks a voice chamber.
+    // This distinguishes voice votes (CARES House, PPPHCEA Senate) from "the chamber simply
+    // did not vote" (e.g., failed bills where one chamber never took it up).
     var isVoiceVote = false;
-    if (!optKey && wasInOffice) {
-      var senateVoice = bill.senate_roll_call === null;
-      var houseVoice  = bill.house_roll_call === null;
-      if (senateVoice || houseVoice) isVoiceVote = true;
+    if (!optKey && wasInOffice && bill.voice_chamber) {
+      isVoiceVote = true;
     }
     var rec = { bill: bill, optKey: optKey, wasInOffice: wasInOffice, isVoiceVote: isVoiceVote };
     if (optKey === "+") {
@@ -5748,11 +5745,267 @@ function RepresentativesPageD({ legislators, keyVotesData, rollCalls, zipDistric
   );
 }
 
+// ─────────────────────────────────────────────
+// Variant E — broader-scope fiscal index
+//   * Bills: |10-yr CBO score| ≥ $25B, enacted OR failed-with-roll-call
+//     (gated by include_in_e_score === true on each bill entry)
+//   * Members: participation floor — must have ≥ 5 recorded Yea/Nay votes
+//     in E's universe to appear in the dot plot / rep cards
+//   * Reuses RepCardD, VariantDModal, IndexDotPlotD verbatim
+//   * Intro/methodology copy left blank for user to write
+// ─────────────────────────────────────────────
+
+var VARE_MIN_VOTES = 5;
+var VARE_THRESHOLD_B = 25;
+
+function vareComputeIndex(rep, keyVotesData, rollCalls) {
+  if (!keyVotesData) return null;
+  var actual = 0;
+  var absSum = 0;
+  var voted = [];
+  var notVoted = [];
+  keyVotesData.votes.forEach(function (bill) {
+    if (bill.include_in_e_score !== true) return;
+    if (Math.abs(bill.cbo_10yr_b) < VARE_THRESHOLD_B) return;
+    var wasInOffice = rep.first_elected_year <= bill.year;
+    var optKey = null;
+    if (wasInOffice && rollCalls && rollCalls[bill.id]) {
+      var sMap = rollCalls[bill.id].senate;
+      var hMap = rollCalls[bill.id].house;
+      if (sMap && sMap[rep.bioguide_id]) { optKey = sMap[rep.bioguide_id]; }
+      else if (hMap && hMap[rep.bioguide_id]) { optKey = hMap[rep.bioguide_id]; }
+    }
+    var isVoiceVote = false;
+    if (!optKey && wasInOffice && bill.voice_chamber) {
+      isVoiceVote = true;
+    }
+    var rec = { bill: bill, optKey: optKey, wasInOffice: wasInOffice, isVoiceVote: isVoiceVote };
+    if (optKey === "+") {
+      actual += bill.cbo_10yr_b;
+      absSum += Math.abs(bill.cbo_10yr_b);
+      voted.push(rec);
+    } else if (optKey === "-") {
+      actual -= bill.cbo_10yr_b;
+      absSum += Math.abs(bill.cbo_10yr_b);
+      voted.push(rec);
+    } else {
+      notVoted.push(rec);
+    }
+  });
+  if (absSum === 0) {
+    return { actual: 0, min: 0, max: 0, absSum: 0, indexPct: null, voted: voted, notVoted: notVoted };
+  }
+  var indexPct = (absSum - actual) / (2 * absSum) * 100;
+  return { actual: actual, min: -absSum, max: absSum, absSum: absSum, indexPct: indexPct, voted: voted, notVoted: notVoted };
+}
+
+function RepresentativesPageE({ legislators, keyVotesData, rollCalls, zipDistricts }) {
+  var _zip       = useState("");   var zipInput = _zip[0]; var setZipInput = _zip[1];
+  var _reps      = useState(null); var foundReps = _reps[0]; var setFoundReps = _reps[1];
+  var _err       = useState(null); var error = _err[0]; var setError = _err[1];
+  var _manual    = useState(false); var showManual = _manual[0]; var setShowManual = _manual[1];
+  var _selState  = useState(""); var selState = _selState[0]; var setSelState = _selState[1];
+  var _selDist   = useState(""); var selDist = _selDist[0]; var setSelDist = _selDist[1];
+  var _multiOpts = useState(null); var multiOpts = _multiOpts[0]; var setMultiOpts = _multiOpts[1];
+  var _modal     = useState(null); var modalRep = _modal[0]; var setModalRep = _modal[1];
+
+  var allScored = useMemo(function () {
+    if (!legislators || !keyVotesData) return { senate: [], house: [], byBg: {} };
+    var senate = [];
+    var house = [];
+    var byBg = {};
+    legislators.forEach(function (r) {
+      var s = vareComputeIndex(r, keyVotesData, rollCalls);
+      // Participation floor: members below the threshold get scoreObj=null so they
+      // disappear from the dot plot and render as "no recorded votes" in the card.
+      if (s && s.voted.length < VARE_MIN_VOTES) s = null;
+      var entry = { rep: r, indexPct: s ? s.indexPct : null, scoreObj: s };
+      byBg[r.bioguide_id] = entry;
+      if (r.chamber === "senate") senate.push(entry);
+      else if (r.chamber === "house") house.push(entry);
+    });
+    return { senate: senate, house: house, byBg: byBg };
+  }, [legislators, keyVotesData, rollCalls]);
+
+  var districtsByState = useMemo(function () {
+    if (!legislators) return {};
+    var out = {};
+    legislators.forEach(function (r) {
+      if (r.chamber !== "house" || r.district === null) return;
+      if (!out[r.state]) out[r.state] = [];
+      if (!out[r.state].includes(r.district)) out[r.state].push(r.district);
+    });
+    return out;
+  }, [legislators]);
+
+  function doLookup(state, district) {
+    if (!legislators) return;
+    var d = district === null ? null : Number(district);
+    var senators  = legislators.filter(function (r) { return r.chamber === "senate" && r.state === state; });
+    var houseMems = legislators.filter(function (r) {
+      if (r.chamber !== "house" || r.state !== state) return false;
+      if (d === null) return true;
+      return r.district === d || (d === 0 && r.district === 0);
+    });
+    if (senators.length === 0 && houseMems.length === 0) {
+      setError("No representatives found for " + state + (d ? " district " + d : "") + ". Check your ZIP or try the manual selector.");
+      setFoundReps(null);
+      return;
+    }
+    setError(null);
+    setFoundReps({ state: state, district: d, senators: senators, houseMember: houseMems[0] || null, zipUsed: zipInput });
+  }
+
+  function handleZipSubmit(e) {
+    e.preventDefault();
+    var z = zipInput.trim();
+    if (!/^\d{5}$/.test(z)) { setError("Please enter a valid 5-digit ZIP code."); return; }
+    if (!zipDistricts) { setShowManual(true); setError("ZIP lookup data hasn't loaded yet — use the manual selector below."); return; }
+    var val = zipDistricts[z];
+    if (!val) { setError("ZIP " + z + " not found. Try the manual selector below."); setShowManual(true); return; }
+    var vals = Array.isArray(val) ? val : [val];
+    if (vals.length > 1) { setMultiOpts(vals); setFoundReps(null); setError(null); return; }
+    setMultiOpts(null);
+    var parts = vals[0].split("-");
+    doLookup(parts[0], parts.length > 1 ? parseInt(parts[1]) : null);
+  }
+
+  function handleManualSubmit(e) {
+    e.preventDefault();
+    if (!selState) { setError("Please select your state."); return; }
+    var distNums = districtsByState[selState] || [];
+    var d = selDist !== "" ? Number(selDist) : (distNums.length === 1 ? distNums[0] : null);
+    if (d === null && distNums.length > 1) { setError("Please select your congressional district."); return; }
+    setZipInput("");
+    doLookup(selState, d);
+  }
+
+  var allReps = foundReps
+    ? [].concat(foundReps.senators || []).concat(foundReps.houseMember ? [foundReps.houseMember] : [])
+    : [];
+  var userSenators  = foundReps ? (foundReps.senators || []) : [];
+  var userHouseMems = foundReps && foundReps.houseMember ? [foundReps.houseMember] : [];
+
+  return (
+    <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", color: TEXT, maxWidth: 980, margin: "0 auto", paddingBottom: 40 }}>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: MUTED, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>Section IV — What Can You Do?</div>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: "0 0 10px", lineHeight: 1.25 }}>Your Representatives' Fiscal Record</h2>
+        <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.65, margin: 0, maxWidth: 660 }}>
+          Enter your ZIP code to see each rep's <strong>fiscal index</strong>. 100 means their record reduced the deficit as much as it possibly could have given the bills they voted on; 0 means it increased the deficit as much as possible. The percentage tells you how much of their voting record is improving or worsening the deficit over the next ten years.
+        </p>
+      </div>
+
+      <form onSubmit={handleZipSubmit} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
+        <input type="text" inputMode="numeric" placeholder="5-digit ZIP code"
+          value={zipInput}
+          onChange={function (e) { setZipInput(e.target.value.replace(/\D/g, "").slice(0, 5)); setError(null); }}
+          maxLength={5}
+          style={{ border: "1.5px solid " + BORDER, borderRadius: 8, padding: "9px 14px", fontSize: 14, fontFamily: "inherit", width: 155, outline: "none", color: TEXT }} />
+        <button type="submit" style={{ background: "#1e3a5f", color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+          Find My Reps
+        </button>
+      </form>
+
+      {error && <div style={{ fontSize: 12, color: VARD_RED, marginBottom: 10 }}>{error}</div>}
+
+      {multiOpts && (
+        <div style={{ marginBottom: 16, padding: "12px 14px", background: "#fffbeb", borderRadius: 8, border: "1px solid #fde68a" }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#92400e", marginBottom: 8 }}>
+            Your ZIP spans multiple congressional districts — which one?
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {multiOpts.map(function (opt, i) {
+              var parts = opt.split("-");
+              var state = parts[0]; var dist = parts[1] ? parseInt(parts[1]) : null;
+              return (
+                <button key={i} onClick={function () { setMultiOpts(null); doLookup(state, dist); }}
+                  style={{ background: "#fff", border: "1px solid #fde68a", borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontWeight: 600, color: "#92400e" }}>
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <button onClick={function () { setShowManual(!showManual); }}
+        style={{ background: "none", border: "none", fontSize: 12, color: BLUE, cursor: "pointer", padding: 0, textDecoration: "underline", marginBottom: showManual ? 10 : 4 }}>
+        {showManual ? "Hide manual selector" : "Don't know your ZIP? Select state & district manually"}
+      </button>
+
+      {showManual && (
+        <form onSubmit={handleManualSubmit} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 16, flexWrap: "wrap" }}>
+          <select value={selState} onChange={function (e) { setSelState(e.target.value); setSelDist(""); }}
+            style={{ border: "1.5px solid " + BORDER, borderRadius: 8, padding: "8px 10px", fontSize: 13, fontFamily: "inherit", color: TEXT }}>
+            <option value="">— State —</option>
+            {US_STATE_LIST.map(function (s) { return <option key={s} value={s}>{s}</option>; })}
+          </select>
+          {selState && districtsByState[selState] && districtsByState[selState].length > 1 && (
+            <select value={selDist} onChange={function (e) { setSelDist(e.target.value); }}
+              style={{ border: "1.5px solid " + BORDER, borderRadius: 8, padding: "8px 10px", fontSize: 13, fontFamily: "inherit", color: TEXT }}>
+              <option value="">— House District —</option>
+              {(districtsByState[selState] || []).slice().sort(function (a, b) { return a - b; }).map(function (d) {
+                return <option key={d} value={d}>{selState}-{d}</option>;
+              })}
+            </select>
+          )}
+          <button type="submit" style={{ background: "#1e3a5f", color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+            Go
+          </button>
+        </form>
+      )}
+
+      {foundReps && allReps.length > 0 && (
+        <div>
+          <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>
+            Showing reps for <strong>{foundReps.state}{foundReps.district ? "-" + foundReps.district : ""}</strong>
+            {foundReps.zipUsed && <span> (ZIP {foundReps.zipUsed})</span>}
+          </div>
+
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 26 }}>
+            {allReps.map(function (rep) {
+              var entry = allScored.byBg[rep.bioguide_id];
+              return (
+                <RepCardD key={rep.bioguide_id}
+                  rep={rep}
+                  scoreObj={entry ? entry.scoreObj : null}
+                  onShowDetails={function () { setModalRep({ rep: rep, scoreObj: entry.scoreObj }); }} />
+              );
+            })}
+          </div>
+
+          {userSenators.length > 0 && (
+            <IndexDotPlotD chamberLabel="Senate" data={allScored.senate} userReps={userSenators} />
+          )}
+          {userHouseMems.length > 0 && (
+            <IndexDotPlotD chamberLabel="House" data={allScored.house} userReps={userHouseMems} />
+          )}
+
+          <div style={{ marginTop: 18, padding: "14px 16px", background: "#f8fafc", borderRadius: 10, border: "1px solid " + BORDER, fontSize: 11, color: MUTED, lineHeight: 1.65 }}>
+            <strong style={{ color: TEXT }}>Data & methodology (Variant E):</strong>{" "}
+            (Copy to be written by site owner. Variant E uses bills with |10-yr CBO score| ≥ ${VARE_THRESHOLD_B}B, enacted or failed-with-roll-call. Members with fewer than {VARE_MIN_VOTES} recorded Yea/Nay votes in this universe are excluded.)
+          </div>
+        </div>
+      )}
+
+      {!legislators && (
+        <div style={{ fontSize: 13, color: MUTED, padding: "20px 0" }}>Loading representative data…</div>
+      )}
+
+      {modalRep && (
+        <VariantDModal rep={modalRep.rep} scoreObj={modalRep.scoreObj} onClose={function () { setModalRep(null); }} />
+      )}
+    </div>
+  );
+}
+
 var REP_VARIANTS = [
   { key: "A", label: "Current",   component: RepresentativesPageA },
   { key: "B", label: "Variant B", component: RepresentativesPageB },
   { key: "C", label: "Variant C", component: RepresentativesPageC },
   { key: "D", label: "Variant D", component: RepresentativesPageD },
+  { key: "E", label: "Variant E", component: RepresentativesPageE },
 ];
 
 function readQuery(name) {
