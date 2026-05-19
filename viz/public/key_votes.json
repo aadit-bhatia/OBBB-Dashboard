@@ -1025,7 +1025,7 @@
       "partisan_pattern": "Near party-line: 213D + 1R yea / 18D + 189R nay.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/HEROES_Act",
       "include_in_score": false,
-      "include_in_e_score": true,
+      "include_in_e_score": false,
       "emergency": true,
       "outcome": "failed",
       "voice_chamber": null
