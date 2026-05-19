@@ -5809,7 +5809,57 @@ function vareComputeIndex(rep, keyVotesData, rollCalls) {
   return { actual: actual, min: -absSum, max: absSum, absSum: absSum, indexPct: indexPct, voted: voted, notVoted: notVoted };
 }
 
-function RepresentativesPageE({ legislators, keyVotesData, rollCalls, zipDistricts }) {
+// Variant F — Variant E's universe filtered down to bills where BOTH chambers acted
+// (recorded vote or voice vote). Drops the failed-and-one-chamber-only bills like
+// BBB, AHCA, HFA, HEROES, HEROES 2.0, Dream and Promise. Keeps RAHFRA (both chambers
+// passed, then vetoed). Keeps CARES + PPPHCEA (one chamber recorded, the other voice).
+// 19 bills total.
+function varfComputeIndex(rep, keyVotesData, rollCalls) {
+  if (!keyVotesData) return null;
+  var actual = 0;
+  var absSum = 0;
+  var voted = [];
+  var notVoted = [];
+  keyVotesData.votes.forEach(function (bill) {
+    if (bill.include_in_e_score !== true) return;
+    if (Math.abs(bill.cbo_10yr_b) < VARE_THRESHOLD_B) return;
+    // F-specific gate: require both chambers to have acted on this bill.
+    var senateActed = bill.senate_roll_call !== null || bill.voice_chamber === "senate";
+    var houseActed  = bill.house_roll_call  !== null || bill.voice_chamber === "house";
+    if (!(senateActed && houseActed)) return;
+    var wasInOffice = rep.first_elected_year <= bill.year;
+    var optKey = null;
+    if (wasInOffice && rollCalls && rollCalls[bill.id]) {
+      var sMap = rollCalls[bill.id].senate;
+      var hMap = rollCalls[bill.id].house;
+      if (sMap && sMap[rep.bioguide_id]) { optKey = sMap[rep.bioguide_id]; }
+      else if (hMap && hMap[rep.bioguide_id]) { optKey = hMap[rep.bioguide_id]; }
+    }
+    var isVoiceVote = false;
+    if (!optKey && wasInOffice && bill.voice_chamber) {
+      isVoiceVote = true;
+    }
+    var rec = { bill: bill, optKey: optKey, wasInOffice: wasInOffice, isVoiceVote: isVoiceVote };
+    if (optKey === "+") {
+      actual += bill.cbo_10yr_b;
+      absSum += Math.abs(bill.cbo_10yr_b);
+      voted.push(rec);
+    } else if (optKey === "-") {
+      actual -= bill.cbo_10yr_b;
+      absSum += Math.abs(bill.cbo_10yr_b);
+      voted.push(rec);
+    } else {
+      notVoted.push(rec);
+    }
+  });
+  if (absSum === 0) {
+    return { actual: 0, min: 0, max: 0, absSum: 0, indexPct: null, voted: voted, notVoted: notVoted };
+  }
+  var indexPct = (absSum - actual) / (2 * absSum) * 100;
+  return { actual: actual, min: -absSum, max: absSum, absSum: absSum, indexPct: indexPct, voted: voted, notVoted: notVoted };
+}
+
+function ParticipationFilteredPage({ computeFn, legislators, keyVotesData, rollCalls, zipDistricts }) {
   var _zip       = useState("");   var zipInput = _zip[0]; var setZipInput = _zip[1];
   var _reps      = useState(null); var foundReps = _reps[0]; var setFoundReps = _reps[1];
   var _err       = useState(null); var error = _err[0]; var setError = _err[1];
@@ -5825,7 +5875,7 @@ function RepresentativesPageE({ legislators, keyVotesData, rollCalls, zipDistric
     var house = [];
     var byBg = {};
     legislators.forEach(function (r) {
-      var s = vareComputeIndex(r, keyVotesData, rollCalls);
+      var s = computeFn(r, keyVotesData, rollCalls);
       // Participation floor: below-threshold reps keep their scoreObj (so the modal
       // can still show what they voted for + the dollar contributions) but their
       // indexPct is nulled so they don't appear in the chamber dot plot or get a
@@ -5839,7 +5889,7 @@ function RepresentativesPageE({ legislators, keyVotesData, rollCalls, zipDistric
       else if (r.chamber === "house") house.push(entry);
     });
     return { senate: senate, house: house, byBg: byBg };
-  }, [legislators, keyVotesData, rollCalls]);
+  }, [legislators, keyVotesData, rollCalls, computeFn]);
 
   var districtsByState = useMemo(function () {
     if (!legislators) return {};
@@ -6014,12 +6064,20 @@ function RepresentativesPageE({ legislators, keyVotesData, rollCalls, zipDistric
   );
 }
 
+function RepresentativesPageE(props) {
+  return <ParticipationFilteredPage computeFn={vareComputeIndex} {...props} />;
+}
+function RepresentativesPageF(props) {
+  return <ParticipationFilteredPage computeFn={varfComputeIndex} {...props} />;
+}
+
 var REP_VARIANTS = [
   { key: "A", label: "Current",   component: RepresentativesPageA },
   { key: "B", label: "Variant B", component: RepresentativesPageB },
   { key: "C", label: "Variant C", component: RepresentativesPageC },
   { key: "D", label: "Variant D", component: RepresentativesPageD },
   { key: "E", label: "Variant E", component: RepresentativesPageE },
+  { key: "F", label: "Variant F", component: RepresentativesPageF },
 ];
 
 function readQuery(name) {
