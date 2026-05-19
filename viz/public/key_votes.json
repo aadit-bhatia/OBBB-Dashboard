@@ -74,6 +74,56 @@
         "id": "cbo_58319",
         "label": "CBO: H.R. 4346, CHIPS Act of 2022 \u2014 Estimated Budgetary Effects (Jul 2022)",
         "url": "https://www.cbo.gov/publication/58319"
+      },
+      {
+        "id": "cbo_52505",
+        "label": "CBO: Estimates of the Budgetary Effects of Legislation Enacted in the 114th Congress (Mar 2017)",
+        "url": "https://www.cbo.gov/publication/52505"
+      },
+      {
+        "id": "jct_jcx_143_15",
+        "label": "JCT: Estimated Revenue Effects of Division Q of H.R. 2029, the PATH Act (Dec 2015)",
+        "url": "https://www.jct.gov/publications/2015/jcx-143-15/"
+      },
+      {
+        "id": "cbo_60690",
+        "label": "CBO: H.R. 82, Social Security Fairness Act of 2023, Cost Estimate (Sep 2024)",
+        "url": "https://www.cbo.gov/publication/60690"
+      },
+      {
+        "id": "cbo_62240",
+        "label": "CBO: Estimates of the Budgetary Effects of Legislation Enacted in the First Session of the 119th Congress (Mar 2026)",
+        "url": "https://www.cbo.gov/publication/62240"
+      },
+      {
+        "id": "cbo_57627",
+        "label": "CBO: Build Back Better Act, H.R. 5376, as Passed by the House \u2014 Summary (Nov 2021)",
+        "url": "https://www.cbo.gov/publication/57627"
+      },
+      {
+        "id": "cbo_52752",
+        "label": "CBO: H.R. 1628, American Health Care Act (post-MacArthur amendment), Cost Estimate (May 2017)",
+        "url": "https://www.cbo.gov/publication/52752"
+      },
+      {
+        "id": "cbo_52979",
+        "label": "CBO: H.R. 1628, Healthcare Freedom Act ('Skinny Repeal'), Score (Jul 2017)",
+        "url": "https://www.cbo.gov/publication/52979"
+      },
+      {
+        "id": "cbo_56383",
+        "label": "CBO: H.R. 6800, HEROES Act, Cost Estimate (Jun 2020)",
+        "url": "https://www.cbo.gov/publication/56383"
+      },
+      {
+        "id": "cbo_57068",
+        "label": "CBO: H.R. 6, American Dream and Promise Act of 2021, Cost Estimate (Apr 2021)",
+        "url": "https://www.cbo.gov/publication/57068"
+      },
+      {
+        "id": "cbo_51107",
+        "label": "CBO/JCT: H.R. 3762, Restoring Americans' Healthcare Freedom Reconciliation Act, as Passed by the Senate (Dec 2015)",
+        "url": "https://www.cbo.gov/publication/51107"
       }
     ]
   },
@@ -111,7 +161,9 @@
       "partisan_pattern": "Near party-line: 51R yea / 48D-I nay in Senate; 224R yea / 201D nay in House",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Tax_Cuts_and_Jobs_Act_of_2017",
       "include_in_score": true,
-      "emergency": false
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "bba_2018",
@@ -146,7 +198,9 @@
       "partisan_pattern": "Bipartisan in Senate (71-28); mixed in House (167R+73D yea vs 67R+119D nay)",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Bipartisan_Budget_Act_of_2018",
       "include_in_score": true,
-      "emergency": false
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "cares_2020",
@@ -174,7 +228,9 @@
       "partisan_pattern": "Unanimous in Senate (96-0). House: voice vote, no roll call.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/CARES_Act",
       "include_in_score": true,
-      "emergency": true
+      "emergency": true,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "caa_dec2020",
@@ -209,7 +265,9 @@
       "partisan_pattern": "Strong bipartisan: 92-6 Senate; 359-53 House on the COVID-relief portion (Roll 251). A separate House vote (Roll 250, 327-85) covered the FY2021 funding portion.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Consolidated_Appropriations_Act,_2021",
       "include_in_score": true,
-      "emergency": true
+      "emergency": true,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "arpa_2021",
@@ -244,7 +302,9 @@
       "partisan_pattern": "Near party-line: 50D-I yea / 49R nay in Senate; 220D yea / 211R+1D nay in House",
       "wikipedia_url": "https://en.wikipedia.org/wiki/American_Rescue_Plan_Act_of_2021",
       "include_in_score": true,
-      "emergency": true
+      "emergency": true,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "iija_2021",
@@ -279,7 +339,9 @@
       "partisan_pattern": "Bipartisan in Senate (50D+19R yea); mostly D in House (215D+13R yea vs 200R+6D nay)",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Infrastructure_Investment_and_Jobs_Act",
       "include_in_score": true,
-      "emergency": false
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "pact_2022",
@@ -314,7 +376,9 @@
       "partisan_pattern": "Bipartisan in both chambers: 86-11 Senate (Aug 2, 2022, after a procedural fight over a tax provision); 342-88 House (July 13, 2022).",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Honoring_our_PACT_Act_of_2022",
       "include_in_score": true,
-      "emergency": false
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "ira_2022",
@@ -349,7 +413,9 @@
       "partisan_pattern": "Party-line: 51D yea (inc. VP Harris tiebreak) / 50R nay in Senate; 220D yea / 207R nay in House",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Inflation_Reduction_Act",
       "include_in_score": true,
-      "emergency": false
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "fra_2023",
@@ -384,7 +450,9 @@
       "partisan_pattern": "Bipartisan: 149R+165D yea vs 71R+46D nay in House; 17R+46D-I yea in Senate",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Fiscal_Responsibility_Act_of_2023",
       "include_in_score": true,
-      "emergency": false
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "obbb_2025",
@@ -419,7 +487,9 @@
       "partisan_pattern": "Near party-line: 50R yea + VP Vance / 50D-I nay in Senate; ~216R+2D yea vs all D + ~2R nay in House",
       "wikipedia_url": "https://en.wikipedia.org/wiki/One_Big_Beautiful_Bill_Act",
       "include_in_score": true,
-      "emergency": false
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "ffcra_2020",
@@ -454,7 +524,9 @@
       "partisan_pattern": "Strong bipartisan: 90-8 Senate; 363-40 House (all 40 nays were Republicans).",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Families_First_Coronavirus_Response_Act",
       "include_in_score": true,
-      "emergency": true
+      "emergency": true,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "pppchea_2020",
@@ -482,7 +554,9 @@
       "partisan_pattern": "Senate: voice vote, no recorded roll call. House: 388-5 (the 5 nays were 4 Republicans \u2014 Massie, Biggs, Buck, Hice \u2014 and 1 Democrat, Ocasio-Cortez).",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Paycheck_Protection_Program_and_Health_Care_Enhancement_Act",
       "include_in_score": true,
-      "emergency": true
+      "emergency": true,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "bba_2019",
@@ -517,7 +591,9 @@
       "partisan_pattern": "Bipartisan in both chambers: 67-28 Senate; 284-149 House.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Bipartisan_Budget_Act_of_2019",
       "include_in_score": true,
-      "emergency": false
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": true
     },
     {
       "id": "chips_2022",
@@ -552,7 +628,356 @@
       "partisan_pattern": "Bipartisan: 64-33 Senate (47D-I + 17R yea); 243-187 House (24 R crossed over to support).",
       "wikipedia_url": "https://en.wikipedia.org/wiki/CHIPS_and_Science_Act",
       "include_in_score": true,
-      "emergency": false
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": true
+    },
+    {
+      "id": "macra_2015",
+      "name": "Medicare Access and CHIP Reauthorization Act of 2015",
+      "short_name": "MACRA",
+      "public_law": "P.L. 114-10",
+      "congress": 114,
+      "year": 2015,
+      "date_enacted": "2015-04-16",
+      "cbo_10yr_b": 141,
+      "cbo_note": "CBO 114th-Congress mandatory report (pub 52505) Table 2: outlays +$144.7B, revenues +$3.7B over 2015-2025 = +$141B net deficit increase. Repealed the Sustainable Growth Rate (SGR) formula governing Medicare physician payments and replaced it with a permanent payment update; CHIP 2-year reauth.",
+      "cbo_source": "cbo_52505",
+      "description": "Permanent repeal of the SGR formula governing Medicare physician payments, plus 2-year extension of CHIP and ~$70B in offsetting Medicare cost-sharing changes. Strong bipartisan vote.",
+      "senate_roll_call": {
+        "number": 144,
+        "year": 2015,
+        "congress": 114,
+        "yea": 92,
+        "nay": 8,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1141/vote_114_1_00144.htm"
+      },
+      "house_roll_call": {
+        "number": 144,
+        "year": 2015,
+        "congress": 114,
+        "yea": 392,
+        "nay": 37,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2015144"
+      },
+      "partisan_pattern": "Strong bipartisan: 92-8 Senate; 392-37 House.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Medicare_Access_and_CHIP_Reauthorization_Act_of_2015",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": false
+    },
+    {
+      "id": "caa_2016_path",
+      "name": "Consolidated Appropriations Act, 2016 / PATH Act",
+      "short_name": "PATH 2015",
+      "public_law": "P.L. 114-113",
+      "congress": 114,
+      "year": 2015,
+      "date_enacted": "2015-12-18",
+      "cbo_10yr_b": 680,
+      "cbo_note": "CBO 114th-Congress mandatory report (pub 52505) Table 2: outlays +$157B, revenues -$523B over 2015-2025 = +$680B net deficit increase. PATH Act provisions (Division Q) drove the deficit impact; JCT JCX-143-15 scored the PATH tax provisions alone at +$622B in revenue loss over 10 years. House split the bill into two votes \u2014 Roll 703 covered the PATH Act tax provisions; we cite that as the policy-relevant House vote.",
+      "cbo_source": "cbo_52505",
+      "description": "Combined FY2016 omnibus appropriations with the Protecting Americans from Tax Hikes (PATH) Act, which made permanent many expiring tax provisions including the R&D credit, Section 179 expensing, and EITC/CTC enhancements.",
+      "senate_roll_call": {
+        "number": 339,
+        "year": 2015,
+        "congress": 114,
+        "yea": 65,
+        "nay": 33,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1141/vote_114_1_00339.htm"
+      },
+      "house_roll_call": {
+        "number": 703,
+        "year": 2015,
+        "congress": 114,
+        "yea": 318,
+        "nay": 109,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2015703",
+        "note": "House split the bill into two votes; this is Roll 703 covering Division Q (PATH Act tax provisions). Roll 705 covered the omnibus appropriations portion."
+      },
+      "partisan_pattern": "Senate 65-33; House PATH-portion 318-109.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Consolidated_Appropriations_Act,_2016",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": false
+    },
+    {
+      "id": "ssfa_2024",
+      "name": "Social Security Fairness Act of 2023",
+      "short_name": "SS Fairness",
+      "public_law": "P.L. 118-273",
+      "congress": 118,
+      "year": 2024,
+      "date_enacted": "2025-01-05",
+      "cbo_10yr_b": 196,
+      "cbo_note": "CBO cost estimate (Sep 9 2024, pub 60690): +$196B over 10 years. Repeals the Windfall Elimination Provision (WEP) and the Government Pension Offset (GPO). Off-budget Social Security spending increase; brings forward trust-fund exhaustion by ~6 months.",
+      "cbo_source": "cbo_60690",
+      "description": "Repealed two Social Security provisions (WEP and GPO) that had reduced benefits for ~3 million public-sector retirees (teachers, firefighters, etc.) who also received non-covered pensions.",
+      "senate_roll_call": {
+        "number": 338,
+        "year": 2024,
+        "congress": 118,
+        "yea": 76,
+        "nay": 20,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1182/vote_118_2_00338.htm"
+      },
+      "house_roll_call": {
+        "number": 456,
+        "year": 2024,
+        "congress": 118,
+        "yea": 327,
+        "nay": 75,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2024456"
+      },
+      "partisan_pattern": "Strong bipartisan: 76-20 Senate; 327-75 House.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Social_Security_Fairness_Act",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": false
+    },
+    {
+      "id": "fy25_cr_119_4",
+      "name": "Full-Year Continuing Appropriations and Extensions Act, 2025",
+      "short_name": "FY25 CR",
+      "public_law": "P.L. 119-4",
+      "congress": 119,
+      "year": 2025,
+      "date_enacted": "2025-03-15",
+      "cbo_10yr_b": 66,
+      "cbo_note": "CBO 119th-1 mandatory report (pub 62240): +$66B over 10 years. Score is driven almost entirely by the rescission of $20.2B in IRS enforcement funding originally appropriated by IRA 2022 \u2014 CBO models reduced enforcement leading to lower compliance and lower revenue collections. METHODOLOGICAL NOTE: this is the same mechanism that earned P.L. 118-47 a +$38B score in 118-2 (which we excluded). We include this one because the rescission IS the substantive policy choice rather than an incidental rider \u2014 but the asterisk applies.",
+      "cbo_source": "cbo_62240",
+      "description": "Full-year continuing resolution funding the federal government through FY2025, paired with a rescission of $20.2B in IRS enforcement funding from IRA 2022.",
+      "senate_roll_call": {
+        "number": 133,
+        "year": 2025,
+        "congress": 119,
+        "yea": 54,
+        "nay": 46,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1191/vote_119_1_00133.htm"
+      },
+      "house_roll_call": {
+        "number": 70,
+        "year": 2025,
+        "congress": 119,
+        "yea": 217,
+        "nay": 213,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/202570"
+      },
+      "partisan_pattern": "Near party-line: 54-46 Senate; 217-213 House.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Continuing_Resolution",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": false,
+      "outcome": "enacted",
+      "include_in_e_score": false
+    },
+    {
+      "id": "bbb_2021",
+      "name": "Build Back Better Act (House-passed version)",
+      "short_name": "BBB 2021",
+      "public_law": null,
+      "congress": 117,
+      "year": 2021,
+      "date_enacted": null,
+      "cbo_10yr_b": 367,
+      "cbo_note": "CBO summary (Nov 18 2021, pub 57627): +$367B net deficit increase over 2022-2031. CRFB's widely-cited $2.4T figure is gross spending; CBO net (after revenue offsets) is +$367B. Passed House on Nov 19 2021; never received a Senate floor vote in BBB form. The H.R. 5376 bill number was later reused as the vehicle for IRA 2022 (separate score, separate vote).",
+      "cbo_source": "cbo_57627",
+      "description": "Sweeping climate, social, and tax package: universal pre-K, extended Child Tax Credit, ~$555B in climate investments, Medicare drug price negotiation, ACA subsidy expansion. Passed House 220-213 on party lines; died in the Senate when Sen. Manchin announced opposition.",
+      "senate_roll_call": null,
+      "senate_vote_note": "Never received a Senate floor vote in BBB form. The H.R. 5376 vehicle was later passed by the Senate as the Inflation Reduction Act (Aug 2022) with substantially different content and a separate score.",
+      "house_roll_call": {
+        "number": 385,
+        "year": 2021,
+        "congress": 117,
+        "yea": 220,
+        "nay": 213,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2021385"
+      },
+      "partisan_pattern": "Party-line in House: 220D yea / 212R + 1D nay. No Senate vote.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Build_Back_Better_Act",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": false,
+      "outcome": "failed",
+      "include_in_e_score": false
+    },
+    {
+      "id": "ahca_2017",
+      "name": "American Health Care Act of 2017 (House-passed, post-MacArthur)",
+      "short_name": "AHCA",
+      "public_law": null,
+      "congress": 115,
+      "year": 2017,
+      "date_enacted": null,
+      "cbo_10yr_b": -119,
+      "cbo_note": "CBO/JCT cost estimate (May 24 2017, pub 52752): net deficit reduction of $119B over 2017-2026 (direct spending -$1,111B, revenues -$992B). Coverage effect: 23M fewer insured by 2026. Earlier pre-MacArthur version (pub 52516) was scored at -$337B; we cite the post-MacArthur score because that's the version the House actually voted on.",
+      "cbo_source": "cbo_52752",
+      "description": "Republican plan to repeal and replace major portions of the ACA, including the individual mandate, expanded Medicaid, and the cost-sharing reduction subsidies. Passed House 217-213; never voted on the AHCA form in the Senate (the Senate pursued separate vehicles \u2014 see skinny_repeal_2017).",
+      "senate_roll_call": null,
+      "senate_vote_note": "Senate did not vote on the House-passed AHCA. Separate Senate ACA-repeal attempts are tracked under skinny_repeal_2017 (Healthcare Freedom Act).",
+      "house_roll_call": {
+        "number": 256,
+        "year": 2017,
+        "congress": 115,
+        "yea": 217,
+        "nay": 213,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2017256"
+      },
+      "partisan_pattern": "Party-line: 217R yea / 193D + 20R nay. No Democrats supported.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/American_Health_Care_Act_of_2017",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": false,
+      "outcome": "failed",
+      "include_in_e_score": false
+    },
+    {
+      "id": "skinny_repeal_2017",
+      "name": "Healthcare Freedom Act / 'Skinny Repeal' (S.Amdt. 667 to H.R. 1628)",
+      "short_name": "Skinny Repeal",
+      "public_law": null,
+      "congress": 115,
+      "year": 2017,
+      "date_enacted": null,
+      "cbo_10yr_b": -179,
+      "cbo_note": "CBO score (pub 52979): net deficit reduction of $179B over 2017-2026. Senate-only attempt at partial ACA repeal \u2014 would have repealed the individual and employer mandates and the medical device tax. Failed 49-51 on Jul 28 2017 with McCain, Collins, and Murkowski voting nay.",
+      "cbo_source": "cbo_52979",
+      "description": "A bare-bones ACA partial-repeal package the Senate developed when the AHCA-equivalent and BCRA failed. Would have repealed the individual and employer mandates and the medical device tax while leaving the rest of the ACA intact. Famously defeated by John McCain's thumb-down vote at 1:30am.",
+      "senate_roll_call": {
+        "number": 179,
+        "year": 2017,
+        "congress": 115,
+        "yea": 49,
+        "nay": 51,
+        "result": "Rejected",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1151/vote_115_1_00179.htm"
+      },
+      "house_roll_call": null,
+      "house_vote_note": "Senate-only failed amendment; House did not vote on this version of H.R. 1628 (the House had previously passed the AHCA, scored separately).",
+      "partisan_pattern": "Near party-line: 49R yea (Collins, Murkowski, McCain nay) / 48D + 3R nay.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Health_Care_Freedom_Act_of_2017",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": false,
+      "outcome": "failed",
+      "include_in_e_score": false
+    },
+    {
+      "id": "heroes_2020",
+      "name": "Health and Economic Recovery Omnibus Emergency Solutions Act (H.R. 6800)",
+      "short_name": "HEROES",
+      "public_law": null,
+      "congress": 116,
+      "year": 2020,
+      "date_enacted": null,
+      "cbo_10yr_b": 3397,
+      "cbo_note": "CBO cost estimate (Jun 1 2020, pub 56383): +$3,397B net deficit increase over 2020-2030 (~$3.4 trillion). Largest single-bill score in the failed-bills set. House-Democrat COVID relief proposal; never received a Senate floor vote (Senate Republicans countered with the HEALS Act, which also never reached the floor). Many provisions later appeared at smaller scale in CAA Dec 2020 and ARPA 2021.",
+      "cbo_source": "cbo_56383",
+      "description": "House Democrats' second major COVID-19 relief package, following CARES. Would have provided ~$1T to state and local governments, expanded unemployment insurance, additional direct stimulus payments, and large education and healthcare provisions.",
+      "senate_roll_call": null,
+      "senate_vote_note": "Never received a Senate floor vote.",
+      "house_roll_call": {
+        "number": 109,
+        "year": 2020,
+        "congress": 116,
+        "yea": 208,
+        "nay": 199,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2020109"
+      },
+      "partisan_pattern": "Party-line in House: 207D + 1R yea / 14D + 185R nay.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/HEROES_Act",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": true,
+      "outcome": "failed",
+      "include_in_e_score": false
+    },
+    {
+      "id": "dream_2021",
+      "name": "American Dream and Promise Act of 2021 (H.R. 6)",
+      "short_name": "Dream and Promise",
+      "public_law": null,
+      "congress": 117,
+      "year": 2021,
+      "date_enacted": null,
+      "cbo_10yr_b": 31,
+      "cbo_note": "CBO cost estimate (Apr 19 2021, pub 57068): +$30.6B net deficit increase over 2021-2031 (outlays +$34B, revenues +$3.4B). Just clears the $25B threshold. JCT did not issue a separate revenue score; CBO score covers both.",
+      "cbo_source": "cbo_57068",
+      "description": "Provided a path to lawful permanent residence and eventual citizenship for Dreamers (DACA-eligible), TPS holders, and DED recipients. Passed House 228-197; Senate took no floor action.",
+      "senate_roll_call": null,
+      "senate_vote_note": "Senate took no floor action. A companion bill (S. 264, Durbin) was never brought to the floor.",
+      "house_roll_call": {
+        "number": 91,
+        "year": 2021,
+        "congress": 117,
+        "yea": 228,
+        "nay": 197,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/202191"
+      },
+      "partisan_pattern": "Near party-line in House: 219D + 9R yea / 197R + 0D nay.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/American_Dream_and_Promise_Act",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": false,
+      "outcome": "failed",
+      "include_in_e_score": false
+    },
+    {
+      "id": "rahfra_2016",
+      "name": "Restoring Americans' Healthcare Freedom Reconciliation Act (H.R. 3762)",
+      "short_name": "ACA Repeal '15-'16",
+      "public_law": null,
+      "congress": 114,
+      "year": 2016,
+      "date_enacted": null,
+      "cbo_10yr_b": -282,
+      "cbo_note": "CBO/JCT (Dec 11 2015, pub 51107): -$282B conventional net deficit reduction over 2016-2025 (-$474B with macroeconomic feedback; we cite the conventional figure to match the methodology used by the existing 14). ACA partial-repeal via budget reconciliation. Passed Senate 52-47, returned to House which concurred 240-181 on Jan 6 2016 (Roll 6). Vetoed by President Obama on Jan 8 2016. Override attempt failed 241-186 (short of 2/3) on Feb 2 2016.",
+      "cbo_source": "cbo_51107",
+      "description": "First reconciliation bill to actually pass both chambers attempting to repeal major portions of the ACA: Medicaid expansion, premium tax credits, the individual and employer mandates. Vetoed by Obama; the override attempt failed.",
+      "senate_roll_call": {
+        "number": 329,
+        "year": 2015,
+        "congress": 114,
+        "yea": 52,
+        "nay": 47,
+        "result": "Passed",
+        "url": "https://www.senate.gov/legislative/LIS/roll_call_votes/vote1141/vote_114_1_00329.htm"
+      },
+      "house_roll_call": {
+        "number": 6,
+        "year": 2016,
+        "congress": 114,
+        "yea": 240,
+        "nay": 181,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/20166",
+        "note": "Jan 6 2016 vote on motion to concur in Senate amendment \u2014 the version that went to the President. Earlier passage was Roll 568 (Oct 23 2015, 240-189), but we cite Roll 6 because it's the final form."
+      },
+      "partisan_pattern": "Near party-line: 52R yea / 46D + 1R + 2I nay in Senate; 239R + 1D yea / 181D + 3R nay in House.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Restoring_Americans%27_Healthcare_Freedom_Reconciliation_Act",
+      "include_in_score": false,
+      "include_in_score_note": "Pending per-member roll-call ingestion.",
+      "emergency": false,
+      "outcome": "failed",
+      "include_in_e_score": false
     }
   ]
 }
