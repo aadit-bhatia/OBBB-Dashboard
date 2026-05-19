@@ -1779,7 +1779,7 @@ function DeficitPage({ summaryData }) {
       <Card style={{ borderLeft: "4px solid " + RED }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 10 }}>
           <h3 style={{ fontSize: 17, fontWeight: 700, color: RED, margin: 0 }}>The Deficit</h3>
-          <span style={{ fontSize: 26, fontWeight: 800, color: RED }}>−${(Math.abs(deficit) / 1e6).toFixed(2)}T</span>
+          <span style={{ fontSize: 26, fontWeight: 800, color: RED }}>${(Math.abs(deficit) / 1e6).toFixed(2)}T</span>
         </div>
         <p style={{ fontSize: 14, color: TEXT, lineHeight: 1.6, margin: "0 0 16px" }}>
           Spending exceeded revenue by <strong style={{ color: RED }}>${(Math.abs(deficit) / 1e6).toFixed(2)} trillion</strong> — that's <strong style={{ color: RED }}>${((deficitBlockCount * BLOCK_SIZE) / 1e3 / 365).toFixed(1)}B per day</strong> added to the national debt.
@@ -2390,8 +2390,9 @@ function CrowdingOutTextPage() {
         },
         {
           heading: "Housing Costs",
-          body: "Higher interest rates have an outsized impact on housing construction which in turn leads to higher costs for new and existing homes and higher rents. As one example of this, the Philadelphia Federal Reserve Bank estimates that a '1 percentage point increase in rates reduces purchases [of homes] by 6%'",
-          source: "Philadelphia Federal Reserve Bank",
+          body: "Higher interest rates raise housing expenses for both renters and owners. For renters, a 1‑percentage‑point rise in mortgage rates can increase market rents by roughly 5–6%, as more would‑be buyers remain renters. For owner‑occupiers, higher rates sharply raise monthly mortgage payments—often by hundreds of dollars per month—more than offsetting any modest decline in home prices.",
+          source: "Columbia Business School Insights, “Higher Rates, Higher Rents”",
+          sourceUrl: "https://business.columbia.edu/press-release/cbs-press-releases/higher-rates-higher-rents-how-monetary-policy-affects-housing",
         },
         {
           heading: "Offsetting Effects",
