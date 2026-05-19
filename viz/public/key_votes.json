@@ -848,7 +848,7 @@
       "cbo_source": "cbo_52752",
       "description": "Republican plan to repeal and replace major portions of the ACA, including the individual mandate, expanded Medicaid, and the cost-sharing reduction subsidies. Passed House 217-213; never voted on the AHCA form in the Senate (the Senate pursued separate vehicles \u2014 see skinny_repeal_2017).",
       "senate_roll_call": null,
-      "senate_vote_note": "Senate did not vote on the House-passed AHCA. Separate Senate ACA-repeal attempts are tracked under skinny_repeal_2017 (Healthcare Freedom Act).",
+      "senate_vote_note": "Senate did not vote on the House-passed AHCA. Separate Senate ACA-repeal attempts are tracked under hfa_2017 (Healthcare Freedom Act).",
       "house_roll_call": {
         "number": 256,
         "year": 2017,
@@ -867,9 +867,9 @@
       "voice_chamber": null
     },
     {
-      "id": "skinny_repeal_2017",
-      "name": "Healthcare Freedom Act / 'Skinny Repeal' (S.Amdt. 667 to H.R. 1628)",
-      "short_name": "Skinny Repeal",
+      "id": "hfa_2017",
+      "name": "Healthcare Freedom Act (S.Amdt. 667 to H.R. 1628)",
+      "short_name": "Healthcare Freedom Act",
       "public_law": null,
       "congress": 115,
       "year": 2017,

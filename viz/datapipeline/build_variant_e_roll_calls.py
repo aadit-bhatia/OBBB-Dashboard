@@ -1,5 +1,5 @@
 """
-Build datapipeline/new_roll_calls_E.json patch from the 10 Variant-E roll-call XMLs.
+Build datapipeline/new_roll_calls_E.json patch from the 11 Variant-E roll-call XMLs.
 
 Reuses the parse_senate_xml / parse_house_xml / map_senate / convert_house helpers
 from build_new_roll_calls.py. Inputs in datapipeline/output/:
@@ -9,10 +9,10 @@ from build_new_roll_calls.py. Inputs in datapipeline/output/:
     _rc_caa2016path_senate.xml    — 114-1 #339  (Dec 18, 2015)  expected 65-33
     _rc_ssfa_senate.xml           — 118-2 #338  (Dec 21, 2024)  expected 76-20
     _rc_fy25cr_senate.xml         — 119-1 #133  (Mar 14, 2025)  expected 54-46
-    _rc_skinny_repeal_senate.xml  — 115-1 #179  (Jul 28, 2017)  expected 49-51 (FAILED)
+    _rc_hfa_senate.xml            — 115-1 #179  (Jul 28, 2017)  expected 49-51 (FAILED)
     _rc_rahfra_senate.xml         — 114-1 #329  (Dec 3, 2015)   expected 52-47
 
-  House (9):
+  House (10):
     _rc_macra_house.xml         — 2015 #144  (Mar 26, 2015)  expected 392-37
     _rc_caa2016path_house.xml   — 2015 #703  (Dec 17, 2015)  expected 318-109 (PATH portion)
     _rc_ssfa_house.xml          — 2024 #456  (Nov 12, 2024)  expected 327-75
@@ -20,11 +20,12 @@ from build_new_roll_calls.py. Inputs in datapipeline/output/:
     _rc_bbb_house.xml           — 2021 #385  (Nov 19, 2021)  expected 220-213 (FAILED)
     _rc_ahca_house.xml          — 2017 #256  (May 4, 2017)   expected 217-213 (FAILED)
     _rc_heroes_house.xml        — 2020 #109  (May 15, 2020)  expected 208-199 (FAILED)
+    _rc_heroes2_house.xml       — 2020 #214  (Oct 1, 2020)   expected 214-207 (FAILED — Heroes Act 2.0)
     _rc_dream_house.xml         — 2021 #91   (Mar 18, 2021)  expected 228-197 (FAILED)
     _rc_rahfra_house.xml        — 2016 #6    (Jan 6, 2016)   expected 240-181 (FAILED — vetoed)
 
-Both BBB and HEROES and Dream and AHCA had no Senate vote in this form.
-Skinny Repeal had no House vote (Senate-only amendment).
+BBB / AHCA / HEROES / HEROES 2.0 / Dream had no Senate vote in this form.
+Healthcare Freedom Act had no House vote (Senate-only amendment).
 """
 
 import json
@@ -48,8 +49,9 @@ BILLS = [
     ("fy25_cr_119_4",      "_rc_fy25cr_senate.xml",        "_rc_fy25cr_house.xml",        (54, 46),   (217, 213)),
     ("bbb_2021",           None,                           "_rc_bbb_house.xml",           None,       (220, 213)),
     ("ahca_2017",          None,                           "_rc_ahca_house.xml",          None,       (217, 213)),
-    ("skinny_repeal_2017", "_rc_skinny_repeal_senate.xml", None,                          (49, 51),   None),
+    ("hfa_2017", "_rc_hfa_senate.xml", None,                          (49, 51),   None),
     ("heroes_2020",        None,                           "_rc_heroes_house.xml",        None,       (208, 199)),
+    ("heroes2_2020",       None,                           "_rc_heroes2_house.xml",       None,       (214, 207)),
     ("dream_2021",         None,                           "_rc_dream_house.xml",         None,       (228, 197)),
     ("rahfra_2016",        "_rc_rahfra_senate.xml",        "_rc_rahfra_house.xml",        (52, 47),   (240, 181)),
 ]
