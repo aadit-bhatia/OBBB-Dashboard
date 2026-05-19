@@ -665,10 +665,9 @@
       "partisan_pattern": "Strong bipartisan: 92-8 Senate; 392-37 House.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Medicare_Access_and_CHIP_Reauthorization_Act_of_2015",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": false
+      "include_in_e_score": true
     },
     {
       "id": "caa_2016_path",
@@ -704,10 +703,9 @@
       "partisan_pattern": "Senate 65-33; House PATH-portion 318-109.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Consolidated_Appropriations_Act,_2016",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": false
+      "include_in_e_score": true
     },
     {
       "id": "ssfa_2024",
@@ -742,10 +740,9 @@
       "partisan_pattern": "Strong bipartisan: 76-20 Senate; 327-75 House.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Social_Security_Fairness_Act",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": false
+      "include_in_e_score": true
     },
     {
       "id": "fy25_cr_119_4",
@@ -780,10 +777,9 @@
       "partisan_pattern": "Near party-line: 54-46 Senate; 217-213 House.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Continuing_Resolution",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": false,
       "outcome": "enacted",
-      "include_in_e_score": false
+      "include_in_e_score": true
     },
     {
       "id": "bbb_2021",
@@ -811,10 +807,9 @@
       "partisan_pattern": "Party-line in House: 220D yea / 212R + 1D nay. No Senate vote.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Build_Back_Better_Act",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": false
+      "include_in_e_score": true
     },
     {
       "id": "ahca_2017",
@@ -842,10 +837,9 @@
       "partisan_pattern": "Party-line: 217R yea / 193D + 20R nay. No Democrats supported.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/American_Health_Care_Act_of_2017",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": false
+      "include_in_e_score": true
     },
     {
       "id": "skinny_repeal_2017",
@@ -873,10 +867,9 @@
       "partisan_pattern": "Near party-line: 49R yea (Collins, Murkowski, McCain nay) / 48D + 3R nay.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Health_Care_Freedom_Act_of_2017",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": false
+      "include_in_e_score": true
     },
     {
       "id": "heroes_2020",
@@ -904,10 +897,9 @@
       "partisan_pattern": "Party-line in House: 207D + 1R yea / 14D + 185R nay.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/HEROES_Act",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": true,
       "outcome": "failed",
-      "include_in_e_score": false
+      "include_in_e_score": true
     },
     {
       "id": "dream_2021",
@@ -935,10 +927,9 @@
       "partisan_pattern": "Near party-line in House: 219D + 9R yea / 197R + 0D nay.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/American_Dream_and_Promise_Act",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": false
+      "include_in_e_score": true
     },
     {
       "id": "rahfra_2016",
@@ -974,10 +965,9 @@
       "partisan_pattern": "Near party-line: 52R yea / 46D + 1R + 2I nay in Senate; 239R + 1D yea / 181D + 3R nay in House.",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Restoring_Americans%27_Healthcare_Freedom_Reconciliation_Act",
       "include_in_score": false,
-      "include_in_score_note": "Pending per-member roll-call ingestion.",
       "emergency": false,
       "outcome": "failed",
-      "include_in_e_score": false
+      "include_in_e_score": true
     }
   ]
 }
