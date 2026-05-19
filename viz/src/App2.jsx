@@ -5513,13 +5513,13 @@ function RepCardD({ rep, scoreObj, onShowDetails }) {
         </div>
         <div style={{ fontSize: 9.5, color: MUTED, marginTop: 7, lineHeight: 1.5 }}>
           {idx === null
-            ? "No recorded votes in this window"
+            ? (scoreObj && scoreObj.voted.length > 0 ? null : "No recorded votes in this window")
             : <span><strong style={{ color: VARD_RED }}>0</strong> = max increase · <strong style={{ color: VARD_GREEN }}>100</strong> = max reduction</span>}
         </div>
         <div style={{ fontSize: 10, color: MUTED, marginTop: 6 }}>
           Based on {nVotes} of {nTotal} bills voted
         </div>
-        {idx !== null && (
+        {scoreObj && scoreObj.voted.length > 0 && (
           <button onClick={onShowDetails}
             style={{
               marginTop: 11, background: "#fff", border: "1px solid " + BORDER, borderRadius: 6,
@@ -5826,9 +5826,13 @@ function RepresentativesPageE({ legislators, keyVotesData, rollCalls, zipDistric
     var byBg = {};
     legislators.forEach(function (r) {
       var s = vareComputeIndex(r, keyVotesData, rollCalls);
-      // Participation floor: members below the threshold get scoreObj=null so they
-      // disappear from the dot plot and render as "no recorded votes" in the card.
-      if (s && s.voted.length < VARE_MIN_VOTES) s = null;
+      // Participation floor: below-threshold reps keep their scoreObj (so the modal
+      // can still show what they voted for + the dollar contributions) but their
+      // indexPct is nulled so they don't appear in the chamber dot plot or get a
+      // misleading aggregate % on the card. The card renders a grey dash.
+      if (s && s.voted.length < VARE_MIN_VOTES) {
+        s = Object.assign({}, s, { indexPct: null });
+      }
       var entry = { rep: r, indexPct: s ? s.indexPct : null, scoreObj: s };
       byBg[r.bioguide_id] = entry;
       if (r.chamber === "senate") senate.push(entry);
