@@ -124,6 +124,11 @@
         "id": "cbo_51107",
         "label": "CBO/JCT: H.R. 3762, Restoring Americans' Healthcare Freedom Reconciliation Act, as Passed by the Senate (Dec 2015)",
         "url": "https://www.cbo.gov/publication/51107"
+      },
+      {
+        "id": "cbo_56686",
+        "label": "CBO: H.R. 925, HEROES Act (Updated/2.0), Cost Estimate (Oct 2020)",
+        "url": "https://www.cbo.gov/publication/56686"
       }
     ]
   },
@@ -991,6 +996,38 @@
       "emergency": false,
       "outcome": "failed",
       "include_in_e_score": true,
+      "voice_chamber": null
+    },
+    {
+      "id": "heroes2_2020",
+      "name": "HEROES Act (Updated, October 2020 \u2014 H.R. 925)",
+      "short_name": "HEROES 2.0",
+      "public_law": null,
+      "congress": 116,
+      "year": 2020,
+      "date_enacted": null,
+      "cbo_10yr_b": 2400,
+      "cbo_note": "CBO cost estimate (pub 56686): +$2.4 trillion net deficit increase over 2021-2030. Scaled-back successor to HEROES (H.R. 6800). Passed House 214-207 on Oct 1 2020 via motion to concur in Senate amendment with House amendment \u2014 the Senate amendment text (HEROES 2.0 content, the $2.2T package) replaced the original conservation bill H.R. 925. Senate never took it up; died at end of 116th Congress.",
+      "cbo_source": "cbo_56686",
+      "description": "House Democrats' second pass at pandemic relief after the original HEROES Act stalled in the Senate. Slimmed-down ~$2.2T package: extended unemployment, second round of stimulus checks, state and local aid, education funding, healthcare provisions.",
+      "senate_roll_call": null,
+      "senate_vote_note": "Senate never took up the House-passed HEROES 2.0; the bill died at end of 116th Congress.",
+      "house_roll_call": {
+        "number": 214,
+        "year": 2020,
+        "congress": 116,
+        "yea": 214,
+        "nay": 207,
+        "result": "Passed",
+        "url": "https://clerk.house.gov/Votes/2020214",
+        "note": "Motion to concur in Senate amendment to H.R. 925 with House amendment; the House amendment text was the HEROES Act 2.0."
+      },
+      "partisan_pattern": "Near party-line: 213D + 1R yea / 18D + 189R nay.",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/HEROES_Act",
+      "include_in_score": false,
+      "include_in_e_score": true,
+      "emergency": true,
+      "outcome": "failed",
       "voice_chamber": null
     }
   ]

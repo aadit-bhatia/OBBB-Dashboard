@@ -5427,7 +5427,17 @@ function VariantDModal({ rep, scoreObj, onClose }) {
                 else if (r.isVoiceVote) why = "voice vote";
                 else if (r.optKey === "0") why = "absent";
                 else if (r.optKey === "P") why = "present";
-                else why = "no record";
+                else {
+                  // Member was in office but no recorded vote. Distinguish "their chamber
+                  // didn't act on this bill" from "no record of their individual vote."
+                  var inSenate = rep.chamber === "senate";
+                  var inHouse  = rep.chamber === "house";
+                  var senateNoAction = r.bill.senate_roll_call === null && r.bill.voice_chamber !== "senate";
+                  var houseNoAction  = r.bill.house_roll_call  === null && r.bill.voice_chamber !== "house";
+                  if (inSenate && senateNoAction) why = "no Senate vote held";
+                  else if (inHouse && houseNoAction) why = "no House vote held";
+                  else why = "no record";
+                }
                 return r.bill.short_name + " (" + why + ")";
               }).join(", ")}.
             </div>
