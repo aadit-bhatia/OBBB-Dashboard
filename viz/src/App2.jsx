@@ -445,9 +445,9 @@ var TOUR_CONFIGS = {
   // Page 7 — OBBBA (includes debt pile)
   7: [
     { title: "Increases in the annual deficit", body: "Over the next 10 years, tax cuts under the OBBBA will grow the amount of money the government borrows by hundreds of billions. Each year's bar shows three scenarios: what would have happened if the OBBBA wasn't passed, what will happen if President Trump is able to cover some of his tax cuts with import tariffs, and what will happen if the tariffs are struck down and that money must be borrowed.", targetId: "obbba-deficit-card" },
-    { title: "Will tariffs offset any of the cost of the OBBBA?", body: "President Trump has claimed that his import tariffs are a way to make up the deficit spending from the OBBBA. The tariffs he announced in April 2025 were estimated by the CBO to raise $3.4 trillion over the next 10 years. However, the Supreme Court ruled he did not have the authority to apply taxes and that the money collected had to be refunded. Those refunds have started going out. Since then the original tariffs were replaced by temporary duties.", targetId: "obbba-deficit-card" },
+    { title: "Why might the tariffs be struck down?", body: "President Trump has touted his import tariffs as a way to make up the deficit spending from the OBBBA. The tariffs he announced in April 2025 were estimated by the CBO to raise $3.4 trillion over the next 10 years. However, the Supreme Court ruled he did not have the authority to apply taxes, and they were replaced by temporary duties.", targetId: "obbba-deficit-card" },
     { title: "Will the government still tax imports?", body: "Right now, it's unclear. There are ongoing lawsuits on which tariffs are legal, how high each tax will be, and whether the government has to pay back tariffs already collected. We believe that the revenue from tariffs from now till 2034 will fall somewhere between the no tariff revenue case and the CBO's projections assuming the July 2025 tariffs remain in place.", targetId: "obbba-deficit-card" },
-    { title: "Move the slider through the next decade", body: "Use the slider to see how each year's deficit adds to the national debt pile. The pile shows cumulative debt held by the public — gray is what we already owed at the end of 2024." },
+    { title: "Scrub through the next decade", body: "Use the slider to see how each year's deficit adds to the national debt pile. The pile shows cumulative debt held by the public — gray is what we already owed at the end of 2024." },
   ],
   // Page 8 — Consoles (no tour)
   // Page 9 — What Does This Mean for Future Generations? / consequences overview (no tour)
@@ -459,7 +459,7 @@ var TOUR_CONFIGS = {
   // Page 11 — Net Interest
   11: [
     { title: "Compare any program", body: "Use the dropdown to select any government program. The block grids below will update to show net interest payments alongside your chosen program for that year." },
-    { title: "Move the slider through time", body: "Use the slider to move from 1970 to 2024 and see how both figures have changed over time. Compare how fast spending on interest has grown versus other categories." },
+    { title: "Scrub through time", body: "Use the slider to move from 1970 to 2024 and see how both figures have changed over time. Compare how fast spending on interest has grown versus other categories." },
   ],
   // Page 12 — Budget Dilemma
   12: [
@@ -1779,7 +1779,7 @@ function DeficitPage({ summaryData }) {
       <Card style={{ borderLeft: "4px solid " + RED }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 10 }}>
           <h3 style={{ fontSize: 17, fontWeight: 700, color: RED, margin: 0 }}>The Deficit</h3>
-          <span style={{ fontSize: 26, fontWeight: 800, color: RED }}>${(Math.abs(deficit) / 1e6).toFixed(2)}T</span>
+          <span style={{ fontSize: 26, fontWeight: 800, color: RED }}>−${(Math.abs(deficit) / 1e6).toFixed(2)}T</span>
         </div>
         <p style={{ fontSize: 14, color: TEXT, lineHeight: 1.6, margin: "0 0 16px" }}>
           Spending exceeded revenue by <strong style={{ color: RED }}>${(Math.abs(deficit) / 1e6).toFixed(2)} trillion</strong> — that's <strong style={{ color: RED }}>${((deficitBlockCount * BLOCK_SIZE) / 1e3 / 365).toFixed(1)}B per day</strong> added to the national debt.
@@ -1927,7 +1927,7 @@ function ProjectionPanel({ years, baselineSeries, obbbaWithTariffSeries, obbbaNo
             <div key={s.label} style={{ flex: 1, minWidth: 120, background: s.bg, borderRadius: 6, padding: "8px 12px" }}>
               <div style={{ fontSize: 10, color: MUTED, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 2 }}>{s.label}</div>
               <div style={{ fontSize: 15, fontWeight: 700, color: s.color }}>
-                {primary}
+                {primary || dol}
                 {secondary && <span style={{ fontSize: 12, fontWeight: 500, color: MUTED, marginLeft: 6 }}>({secondary})</span>}
               </div>
             </div>
@@ -1961,7 +1961,7 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
     return out;
   }, [projSummary]);
 
-  var years   = [2026,2027,2028,2029,2030,2031,2032,2033,2034,2035];
+  var years   = [2026,2027,2028,2029,2030,2031,2032,2033,2034];
   var janDef  = deficitSeries["jan_2025_baseline"]     || {};
   var febDef  = deficitSeries["feb_2026_current_law"]  || {};
   var noTarDef = deficitSeries["no_tariff_revenue"]    || {};
@@ -1971,7 +1971,7 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
   var _pileScenario = useState("no_tariff_revenue"); var pileScenario = _pileScenario[0]; var setPileScenario = _pileScenario[1];
 
   // Debt pile constants
-  var PILE_YEARS       = [2025,2026,2027,2028,2029,2030,2031,2032,2033,2034,2035];
+  var PILE_YEARS       = [2025,2026,2027,2028,2029,2030,2031,2032,2033,2034];
   var ANCHOR_DEBT_B    = 28200;
   var PILE_BLOCK_B     = 10;
   var PILE_COLS        = 120;
@@ -1979,7 +1979,7 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
   var PILE_GAP         = 1;
   var PILE_CELL        = PILE_SZ + PILE_GAP;
   var PILE_YEAR_COLORS = ["#fecaca","#fca5a5","#f87171","#ef4444","#dc2626","#b91c1c",
-                          "#991b1b","#7f1d1d","#ef4444","#dc2626","#b91c1c"];
+                          "#991b1b","#7f1d1d","#ef4444","#dc2626"];
 
   var pileActiveSeries = useMemo(function () {
     var base = deficitSeries[pileScenario] || {};
@@ -2001,7 +2001,7 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
         <TourBtn onOpen={tour.reopen} />
       </div>
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 6px" }}>
-        The One Big Beautiful Bill Act (OBBBA) was passed in July 2025 as President Trump's flagship budget bill. It adds trillions to our debt over the next ten years. The combination of extending tax cuts and massive increases in defense and border spending make it the most costly budget bill in history. The OBBBA locks in a federal deficit through 2035. Here you can see how the OBBBA affects future deficits and the debt over time with and without an increase in tariff revenue from President Trump's promised tariffs.
+        The One Big Beautiful Bill Act (OBBBA) was passed in July 2025 as President Trump's flagship budget bill. It adds trillions to our debt over the next ten years. The combination of extending tax cuts and massive increases in defense and border spending make it the most costly budget bill in history. The OBBBA locks in a federal deficit through 2034. Here you can see how the OBBBA affects future deficits and the debt over time with and without an increase in tariff revenue from President Trump's promised tariffs.
       </p>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 0 20px", flexWrap: "wrap", gap: 12 }}>
         <p style={{ fontSize: 13, color: MUTED, margin: 0 }}>
@@ -2028,7 +2028,7 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
         <ProjectionPanel years={years} baselineSeries={janDef} obbbaWithTariffSeries={febDef} obbbaNoTariffSeries={noTarDef} gdpByYear={gdpByYear} mode={mode} />
       </Card>
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 16px" }}>
-        These deficits accumulate into a growing pile of public debt. Drag the slider to see how the debt grows year by year through 2035.
+        These deficits accumulate into a growing pile of public debt. Drag the slider to see how the debt grows year by year through 2034.
       </p>
       {(function () {
         var gdpY  = gdpByYear[scrubYear] || 0;
@@ -2052,14 +2052,14 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
         };
         return (
           <div style={{ display: "flex", gap: 24, marginBottom: 12, flexWrap: "wrap" }}>
-            {cell("Annual deficit",   defB,  2, "#fef2f2")}
-            {cell("Cumulative debt",  cumB,  1, "#fef2f2")}
+            {cell("Annual deficit",   defB,   2, "#fef2f2")}
+            {cell("Cumulative debt",  cumB,   1, "#fef2f2")}
             {cell("Added since 2024", addedB, 1, "#f9fafb")}
           </div>
         );
       })()}
       <div style={{ margin: "0 0 16px", display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 12, color: MUTED, whiteSpace: "nowrap" }}>Slide to change year:</span>
+        <span style={{ fontSize: 12, color: MUTED, whiteSpace: "nowrap" }}>Scrub year:</span>
         <input type="range" min={0} max={PILE_YEARS.length - 1}
           value={PILE_YEARS.indexOf(scrubYear) === -1 ? PILE_YEARS.length - 1 : PILE_YEARS.indexOf(scrubYear)}
           onChange={function (e) { setScrubYear(PILE_YEARS[Number(e.target.value)]); }}
@@ -2096,15 +2096,15 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
           })()}
         </div>
         {(function () {
-          var cum2035 = cumulativeByYear[2035] || 0;
-          var gdp2035 = gdpByYear[2035] || 0;
-          var dol = "$" + (cum2035 / 1000).toFixed(1) + "T";
-          var pct = gdp2035 ? (cum2035 / gdp2035 * 100).toFixed(1) + "% GDP" : "";
+          var cum2034 = cumulativeByYear[2034] || 0;
+          var gdp2034 = gdpByYear[2034] || 0;
+          var dol = "$" + (cum2034 / 1000).toFixed(1) + "T";
+          var pct = gdp2034 ? (cum2034 / gdp2034 * 100).toFixed(1) + "% GDP" : "";
           var primary   = mode === "pct" ? pct : dol;
           var secondary = mode === "pct" ? dol : pct;
           return (
             <div style={{ marginTop: 12, fontSize: 13, color: MUTED }}>
-              Total projected debt by 2035: <strong style={{ color: RED }}>{primary || dol}</strong>
+              Total projected debt by 2034: <strong style={{ color: RED }}>{primary || dol}</strong>
               {secondary && <span style={{ marginLeft: 6 }}>({secondary})</span>}
             </div>
           );
@@ -2134,10 +2134,9 @@ function ConsolesPage() {
 }
 
 /* ── III.a  Crowding Out ─────────────────── */
-function CrowdingOutPage({ spendingData, summaryData, niProj, projSummary }) {
+function CrowdingOutPage({ spendingData, summaryData }) {
   var tour = useTour(10);
   var _hov = useState(null); var hovYear = _hov[0]; var setHovYear = _hov[1];
-  var _hovProj = useState(null); var hovProjYear = _hovProj[0]; var setHovProjYear = _hovProj[1];
 
   var series = useMemo(function () {
     if (!spendingData || !summaryData) return [];
@@ -2161,44 +2160,15 @@ function CrowdingOutPage({ spendingData, summaryData, niProj, projSummary }) {
     return result;
   }, [spendingData, summaryData]);
 
-  // CBO Feb 2026 baseline projections — net interest and total revenue (billions)
-  var projSeries = useMemo(function () {
-    if (!niProj || !projSummary) return [];
-    var revenue = {};
-    projSummary.filter(function (r) {
-      return String(r.category).trim() === "Total Revenues";
-    }).forEach(function (r) { revenue[Number(r.year)] = Number(r.amount_billions); });
-
-    var interest = {};
-    niProj.filter(function (r) {
-      return r.scenario === "feb_2026_current_law";
-    }).forEach(function (r) { interest[Number(r.year)] = Number(r.net_interest_billions); });
-
-    var result = [];
-    for (var y = 2025; y <= 2036; y++) {
-      var ni = interest[y]; var rec = revenue[y];
-      if (ni != null && rec != null && rec > 0) {
-        // Convert billions → millions to match historical units in the callout
-        result.push({ year: y, pct: (ni / rec) * 100, ni: ni * 1000, receipts: rec * 1000 });
-      }
-    }
-    return result;
-  }, [niProj, projSummary]);
-
-  var hovProjRow = hovProjYear != null ? projSeries.find(function (r) { return r.year === hovProjYear; }) : null;
-  var projLast   = projSeries.length ? projSeries[projSeries.length - 1] : null;
-  var projDisplay = hovProjRow || projLast;
-
   var latest  = series.length ? series[series.length - 1] : null;
   var hovRow  = hovYear != null ? series.find(function (r) { return r.year === hovYear; }) : null;
   var display = hovRow || latest;
 
-  // 67 columns total (1970–2024 + 2025–2036). Card inner width ≈ 988px →
-  // 67 × 13 blocks + 66 × 1 gap = 937px → fills the Card almost edge-to-edge.
-  var BLK_SZ   = 13;
-  var BLK_GAP  = 1;
+  // 55 years, target ~900px wide → col = 900/55 ≈ 16px, gap 2px
+  var BLK_SZ   = 14;
+  var BLK_GAP  = 2;
   var BLK_CELL = BLK_SZ + BLK_GAP;
-  var COL_GAP  = 1;
+  var COL_GAP  = 2;
   var XAXIS_H  = 20;
   var MAX_CENTS = 22;
 
@@ -2242,13 +2212,9 @@ function CrowdingOutPage({ spendingData, summaryData, niProj, projSummary }) {
         </div>
       )}
 
-      {/* Block bar chart — historical + projections */}
+      {/* Block bar chart */}
       <Card style={{ borderLeft: "4px solid " + RED, marginBottom: 20 }}>
-        <p style={{ fontSize: 12, color: MUTED, margin: "0 0 12px" }}>
-          Each block = 1¢ of every tax dollar going to interest.{" "}
-          <span style={{ color: RED, fontWeight: 600 }}>Red</span> = historical and FY2025 actual (1970–2025);{" "}
-          <span style={{ color: "#f59e0b", fontWeight: 600 }}>Amber</span> = CBO Feb 2026 projections (2026–2036). Hover a column for detail.
-        </p>
+        <p style={{ fontSize: 12, color: MUTED, margin: "0 0 12px" }}>Each block = 1¢ of every tax dollar going to interest. Hover a column for detail.</p>
         <div style={{ overflowX: "auto" }}>
           <div style={{ display: "flex", alignItems: "flex-end", gap: COL_GAP + "px", paddingBottom: XAXIS_H + "px", position: "relative" }}>
             {series.map(function (r) {
@@ -2284,82 +2250,15 @@ function CrowdingOutPage({ spendingData, summaryData, niProj, projSummary }) {
                 </div>
               );
             })}
-            {projSeries.map(function (r) {
-              var blocks   = Math.round(r.pct);
-              var isHov    = hovProjYear === r.year;
-              var showLabel = r.year % 5 === 0;
-              var isActual = r.year === 2025;
-              return (
-                <div key={r.year}
-                  onMouseEnter={function () { setHovProjYear(r.year); }}
-                  onMouseLeave={function () { setHovProjYear(null); }}
-                  style={{ display: "flex", flexDirection: "column", alignItems: "center", cursor: "default", position: "relative", flexShrink: 0 }}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: BLK_GAP + "px" }}>
-                    {Array.from({ length: blocks }).map(function (_, b) {
-                      return (
-                        <div key={b} style={{
-                          width: BLK_SZ, height: BLK_SZ, borderRadius: 2,
-                          backgroundColor: isActual ? RED : "#f59e0b",
-                          opacity: isHov ? 1 : 0.75,
-                          transition: "opacity 0.1s",
-                        }} />
-                      );
-                    })}
-                  </div>
-                  <div style={{
-                    position: "absolute", bottom: -XAXIS_H,
-                    fontSize: 9, color: isHov ? TEXT : MUTED,
-                    fontWeight: isHov ? 700 : 400,
-                    whiteSpace: "nowrap",
-                    visibility: showLabel || isHov ? "visible" : "hidden",
-                  }}>
-                    {r.year}
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
       </Card>
-
-      <h3 style={{ fontSize: 18, fontWeight: 700, color: TEXT, margin: "8px 0 6px" }}>What's coming next: CBO projections through 2036</h3>
-      <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 6px" }}>
-        Under current law, the share of every tax dollar going to interest is projected to keep climbing. By 2036, the CBO projects <strong style={{ color: "#f59e0b" }}>{projDisplay ? projDisplay.pct.toFixed(1) : "—"}¢</strong> of every dollar in federal revenue will go to interest — even more than today.
-      </p>
-      <p style={{ fontSize: 13, color: MUTED, margin: "0 0 16px" }}>
-        {hovProjRow ? hovProjRow.year + " — " + hovProjRow.pct.toFixed(1) + "¢ per tax dollar (projected)" : "Hover any column to see that year."}
-      </p>
-
-      {/* Stat callout — projection */}
-      {projDisplay && (
-        <div style={{ display: "flex", gap: 16, margin: "0 0 20px", flexWrap: "wrap" }}>
-          <div style={{ background: "#fffbeb", borderRadius: 8, padding: "14px 20px", flexShrink: 0 }}>
-            <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
-              {hovProjRow ? hovProjRow.year : "FY" + projLast.year} — per tax dollar
-            </div>
-            <div style={{ fontSize: 48, fontWeight: 800, color: "#f59e0b", lineHeight: 1 }}>
-              {projDisplay.pct.toFixed(1)}¢
-            </div>
-            <div style={{ fontSize: 12, color: MUTED, marginTop: 4 }}>projected interest share</div>
-          </div>
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 8, minWidth: 180 }}>
-            <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 14px" }}>
-              <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected net interest</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: TEXT }}>${Math.round(projDisplay.ni / 1000)}B</div>
-            </div>
-            <div style={{ background: "#f9fafb", borderRadius: 8, padding: "10px 14px" }}>
-              <div style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected total revenue</div>
-              <div style={{ fontSize: 20, fontWeight: 700, color: TEXT }}>${Math.round(projDisplay.receipts / 1000)}B</div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 16px" }}>
         When the government borrows, it also competes with every other borrower in the economy, which pushes up interest rates. Higher rates mean more expensive mortgages, costlier business loans, and less private investment. The CBO estimates that for every dollar of deficit spending, private investment falls by about 33 cents.
       </p>
 
-      <p style={{ fontSize: 12, color: MUTED }}>Sources: <a href="https://www.whitehouse.gov/omb/information-resources/budget/historical-tables/" target="_blank" rel="noreferrer" style={{ color: BLUE }}>OMB Historical Tables</a> (historical net interest, total receipts). <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO, The Budget and Economic Outlook: 2026 to 2036</a> (projected net interest, total revenues, Table 1-1). CBO crowding-out estimate via <a href="https://www.pgpf.org/article/the-national-debt-can-crowd-out-investments-in-the-economy-heres-how/" target="_blank" rel="noreferrer" style={{ color: BLUE }}>Peter G. Peterson Foundation</a>.</p>
+      <p style={{ fontSize: 12, color: MUTED }}>Sources: <a href="https://www.whitehouse.gov/omb/information-resources/budget/historical-tables/" target="_blank" rel="noreferrer" style={{ color: BLUE }}>OMB Historical Tables</a> (net interest, total receipts). CBO crowding-out estimate via <a href="https://www.pgpf.org/article/the-national-debt-can-crowd-out-investments-in-the-economy-heres-how/" target="_blank" rel="noreferrer" style={{ color: BLUE }}>Peter G. Peterson Foundation</a>.</p>
     </div>
   );
 }
@@ -2390,9 +2289,8 @@ function CrowdingOutTextPage() {
         },
         {
           heading: "Housing Costs",
-          body: "Higher interest rates raise housing expenses for both renters and owners. For renters, a 1‑percentage‑point rise in mortgage rates can increase market rents by roughly 5–6%, as more would‑be buyers remain renters. For owner‑occupiers, higher rates sharply raise monthly mortgage payments—often by hundreds of dollars per month—more than offsetting any modest decline in home prices.",
-          source: "Columbia Business School Insights, “Higher Rates, Higher Rents”",
-          sourceUrl: "https://business.columbia.edu/press-release/cbs-press-releases/higher-rates-higher-rents-how-monetary-policy-affects-housing",
+          body: "Higher interest rates have an outsized impact on housing construction which in turn leads to higher costs for new and existing homes and higher rents. As one example of this, the Philadelphia Federal Reserve Bank estimates that a '1 percentage point increase in rates reduces purchases [of homes] by 6%'",
+          source: "Philadelphia Federal Reserve Bank",
         },
         {
           heading: "Offsetting Effects",
@@ -5074,12 +4972,15 @@ function vardComputeIndex(rep, keyVotesData, rollCalls) {
       if (sMap && sMap[rep.bioguide_id]) { optKey = sMap[rep.bioguide_id]; foundChamber = "senate"; }
       else if (hMap && hMap[rep.bioguide_id]) { optKey = hMap[rep.bioguide_id]; foundChamber = "house"; }
     }
-    // Voice-vote detection: only when the bill explicitly marks a voice chamber.
-    // This distinguishes voice votes (CARES House, PPPHCEA Senate) from "the chamber simply
-    // did not vote" (e.g., failed bills where one chamber never took it up).
+    // Voice-vote detection: if the rep wasn't found in either roll-call and the chamber they
+    // belonged to at the time voted by voice, mark as voice vote (so it's not flagged "no record").
+    // For chamber-switchers we approximate: if neither chamber has them but one chamber has no
+    // recorded roll-call (= voice vote), they were probably in that chamber.
     var isVoiceVote = false;
-    if (!optKey && wasInOffice && bill.voice_chamber) {
-      isVoiceVote = true;
+    if (!optKey && wasInOffice) {
+      var senateVoice = bill.senate_roll_call === null;
+      var houseVoice  = bill.house_roll_call === null;
+      if (senateVoice || houseVoice) isVoiceVote = true;
     }
     var rec = { bill: bill, optKey: optKey, wasInOffice: wasInOffice, isVoiceVote: isVoiceVote };
     if (optKey === "+") {
@@ -5427,17 +5328,7 @@ function VariantDModal({ rep, scoreObj, onClose }) {
                 else if (r.isVoiceVote) why = "voice vote";
                 else if (r.optKey === "0") why = "absent";
                 else if (r.optKey === "P") why = "present";
-                else {
-                  // Member was in office but no recorded vote. Distinguish "their chamber
-                  // didn't act on this bill" from "no record of their individual vote."
-                  var inSenate = rep.chamber === "senate";
-                  var inHouse  = rep.chamber === "house";
-                  var senateNoAction = r.bill.senate_roll_call === null && r.bill.voice_chamber !== "senate";
-                  var houseNoAction  = r.bill.house_roll_call  === null && r.bill.voice_chamber !== "house";
-                  if (inSenate && senateNoAction) why = "no Senate vote held";
-                  else if (inHouse && houseNoAction) why = "no House vote held";
-                  else why = "no record";
-                }
+                else why = "no record";
                 return r.bill.short_name + " (" + why + ")";
               }).join(", ")}.
             </div>
@@ -5513,13 +5404,13 @@ function RepCardD({ rep, scoreObj, onShowDetails }) {
         </div>
         <div style={{ fontSize: 9.5, color: MUTED, marginTop: 7, lineHeight: 1.5 }}>
           {idx === null
-            ? (scoreObj && scoreObj.voted.length > 0 ? null : "No recorded votes in this window")
+            ? "No recorded votes in this window"
             : <span><strong style={{ color: VARD_RED }}>0</strong> = max increase · <strong style={{ color: VARD_GREEN }}>100</strong> = max reduction</span>}
         </div>
         <div style={{ fontSize: 10, color: MUTED, marginTop: 6 }}>
           Based on {nVotes} of {nTotal} bills voted
         </div>
-        {scoreObj && scoreObj.voted.length > 0 && (
+        {idx !== null && (
           <button onClick={onShowDetails}
             style={{
               marginTop: 11, background: "#fff", border: "1px solid " + BORDER, borderRadius: 6,
@@ -5755,329 +5646,11 @@ function RepresentativesPageD({ legislators, keyVotesData, rollCalls, zipDistric
   );
 }
 
-// ─────────────────────────────────────────────
-// Variant E — broader-scope fiscal index
-//   * Bills: |10-yr CBO score| ≥ $25B, enacted OR failed-with-roll-call
-//     (gated by include_in_e_score === true on each bill entry)
-//   * Members: participation floor — must have ≥ 5 recorded Yea/Nay votes
-//     in E's universe to appear in the dot plot / rep cards
-//   * Reuses RepCardD, VariantDModal, IndexDotPlotD verbatim
-//   * Intro/methodology copy left blank for user to write
-// ─────────────────────────────────────────────
-
-var VARE_MIN_VOTES = 5;
-var VARE_THRESHOLD_B = 25;
-
-function vareComputeIndex(rep, keyVotesData, rollCalls) {
-  if (!keyVotesData) return null;
-  var actual = 0;
-  var absSum = 0;
-  var voted = [];
-  var notVoted = [];
-  keyVotesData.votes.forEach(function (bill) {
-    if (bill.include_in_e_score !== true) return;
-    if (Math.abs(bill.cbo_10yr_b) < VARE_THRESHOLD_B) return;
-    var wasInOffice = rep.first_elected_year <= bill.year;
-    var optKey = null;
-    if (wasInOffice && rollCalls && rollCalls[bill.id]) {
-      var sMap = rollCalls[bill.id].senate;
-      var hMap = rollCalls[bill.id].house;
-      if (sMap && sMap[rep.bioguide_id]) { optKey = sMap[rep.bioguide_id]; }
-      else if (hMap && hMap[rep.bioguide_id]) { optKey = hMap[rep.bioguide_id]; }
-    }
-    var isVoiceVote = false;
-    if (!optKey && wasInOffice && bill.voice_chamber) {
-      isVoiceVote = true;
-    }
-    var rec = { bill: bill, optKey: optKey, wasInOffice: wasInOffice, isVoiceVote: isVoiceVote };
-    if (optKey === "+") {
-      actual += bill.cbo_10yr_b;
-      absSum += Math.abs(bill.cbo_10yr_b);
-      voted.push(rec);
-    } else if (optKey === "-") {
-      actual -= bill.cbo_10yr_b;
-      absSum += Math.abs(bill.cbo_10yr_b);
-      voted.push(rec);
-    } else {
-      notVoted.push(rec);
-    }
-  });
-  if (absSum === 0) {
-    return { actual: 0, min: 0, max: 0, absSum: 0, indexPct: null, voted: voted, notVoted: notVoted };
-  }
-  var indexPct = (absSum - actual) / (2 * absSum) * 100;
-  return { actual: actual, min: -absSum, max: absSum, absSum: absSum, indexPct: indexPct, voted: voted, notVoted: notVoted };
-}
-
-// Variant F — Variant E's universe filtered down to bills where BOTH chambers acted
-// (recorded vote or voice vote). Drops the failed-and-one-chamber-only bills like
-// BBB, AHCA, HFA, HEROES, HEROES 2.0, Dream and Promise. Keeps RAHFRA (both chambers
-// passed, then vetoed). Keeps CARES + PPPHCEA (one chamber recorded, the other voice).
-// 19 bills total.
-function varfComputeIndex(rep, keyVotesData, rollCalls) {
-  if (!keyVotesData) return null;
-  var actual = 0;
-  var absSum = 0;
-  var voted = [];
-  var notVoted = [];
-  keyVotesData.votes.forEach(function (bill) {
-    if (bill.include_in_e_score !== true) return;
-    if (Math.abs(bill.cbo_10yr_b) < VARE_THRESHOLD_B) return;
-    // F-specific gate: require both chambers to have acted on this bill.
-    var senateActed = bill.senate_roll_call !== null || bill.voice_chamber === "senate";
-    var houseActed  = bill.house_roll_call  !== null || bill.voice_chamber === "house";
-    if (!(senateActed && houseActed)) return;
-    var wasInOffice = rep.first_elected_year <= bill.year;
-    var optKey = null;
-    if (wasInOffice && rollCalls && rollCalls[bill.id]) {
-      var sMap = rollCalls[bill.id].senate;
-      var hMap = rollCalls[bill.id].house;
-      if (sMap && sMap[rep.bioguide_id]) { optKey = sMap[rep.bioguide_id]; }
-      else if (hMap && hMap[rep.bioguide_id]) { optKey = hMap[rep.bioguide_id]; }
-    }
-    var isVoiceVote = false;
-    if (!optKey && wasInOffice && bill.voice_chamber) {
-      isVoiceVote = true;
-    }
-    var rec = { bill: bill, optKey: optKey, wasInOffice: wasInOffice, isVoiceVote: isVoiceVote };
-    if (optKey === "+") {
-      actual += bill.cbo_10yr_b;
-      absSum += Math.abs(bill.cbo_10yr_b);
-      voted.push(rec);
-    } else if (optKey === "-") {
-      actual -= bill.cbo_10yr_b;
-      absSum += Math.abs(bill.cbo_10yr_b);
-      voted.push(rec);
-    } else {
-      notVoted.push(rec);
-    }
-  });
-  if (absSum === 0) {
-    return { actual: 0, min: 0, max: 0, absSum: 0, indexPct: null, voted: voted, notVoted: notVoted };
-  }
-  var indexPct = (absSum - actual) / (2 * absSum) * 100;
-  return { actual: actual, min: -absSum, max: absSum, absSum: absSum, indexPct: indexPct, voted: voted, notVoted: notVoted };
-}
-
-function ParticipationFilteredPage({ computeFn, legislators, keyVotesData, rollCalls, zipDistricts }) {
-  var _zip       = useState("");   var zipInput = _zip[0]; var setZipInput = _zip[1];
-  var _reps      = useState(null); var foundReps = _reps[0]; var setFoundReps = _reps[1];
-  var _err       = useState(null); var error = _err[0]; var setError = _err[1];
-  var _manual    = useState(false); var showManual = _manual[0]; var setShowManual = _manual[1];
-  var _selState  = useState(""); var selState = _selState[0]; var setSelState = _selState[1];
-  var _selDist   = useState(""); var selDist = _selDist[0]; var setSelDist = _selDist[1];
-  var _multiOpts = useState(null); var multiOpts = _multiOpts[0]; var setMultiOpts = _multiOpts[1];
-  var _modal     = useState(null); var modalRep = _modal[0]; var setModalRep = _modal[1];
-
-  var allScored = useMemo(function () {
-    if (!legislators || !keyVotesData) return { senate: [], house: [], byBg: {} };
-    var senate = [];
-    var house = [];
-    var byBg = {};
-    legislators.forEach(function (r) {
-      var s = computeFn(r, keyVotesData, rollCalls);
-      // Participation floor: below-threshold reps keep their scoreObj (so the modal
-      // can still show what they voted for + the dollar contributions) but their
-      // indexPct is nulled so they don't appear in the chamber dot plot or get a
-      // misleading aggregate % on the card. The card renders a grey dash.
-      if (s && s.voted.length < VARE_MIN_VOTES) {
-        s = Object.assign({}, s, { indexPct: null });
-      }
-      var entry = { rep: r, indexPct: s ? s.indexPct : null, scoreObj: s };
-      byBg[r.bioguide_id] = entry;
-      if (r.chamber === "senate") senate.push(entry);
-      else if (r.chamber === "house") house.push(entry);
-    });
-    return { senate: senate, house: house, byBg: byBg };
-  }, [legislators, keyVotesData, rollCalls, computeFn]);
-
-  var districtsByState = useMemo(function () {
-    if (!legislators) return {};
-    var out = {};
-    legislators.forEach(function (r) {
-      if (r.chamber !== "house" || r.district === null) return;
-      if (!out[r.state]) out[r.state] = [];
-      if (!out[r.state].includes(r.district)) out[r.state].push(r.district);
-    });
-    return out;
-  }, [legislators]);
-
-  function doLookup(state, district) {
-    if (!legislators) return;
-    var d = district === null ? null : Number(district);
-    var senators  = legislators.filter(function (r) { return r.chamber === "senate" && r.state === state; });
-    var houseMems = legislators.filter(function (r) {
-      if (r.chamber !== "house" || r.state !== state) return false;
-      if (d === null) return true;
-      return r.district === d || (d === 0 && r.district === 0);
-    });
-    if (senators.length === 0 && houseMems.length === 0) {
-      setError("No representatives found for " + state + (d ? " district " + d : "") + ". Check your ZIP or try the manual selector.");
-      setFoundReps(null);
-      return;
-    }
-    setError(null);
-    setFoundReps({ state: state, district: d, senators: senators, houseMember: houseMems[0] || null, zipUsed: zipInput });
-  }
-
-  function handleZipSubmit(e) {
-    e.preventDefault();
-    var z = zipInput.trim();
-    if (!/^\d{5}$/.test(z)) { setError("Please enter a valid 5-digit ZIP code."); return; }
-    if (!zipDistricts) { setShowManual(true); setError("ZIP lookup data hasn't loaded yet — use the manual selector below."); return; }
-    var val = zipDistricts[z];
-    if (!val) { setError("ZIP " + z + " not found. Try the manual selector below."); setShowManual(true); return; }
-    var vals = Array.isArray(val) ? val : [val];
-    if (vals.length > 1) { setMultiOpts(vals); setFoundReps(null); setError(null); return; }
-    setMultiOpts(null);
-    var parts = vals[0].split("-");
-    doLookup(parts[0], parts.length > 1 ? parseInt(parts[1]) : null);
-  }
-
-  function handleManualSubmit(e) {
-    e.preventDefault();
-    if (!selState) { setError("Please select your state."); return; }
-    var distNums = districtsByState[selState] || [];
-    var d = selDist !== "" ? Number(selDist) : (distNums.length === 1 ? distNums[0] : null);
-    if (d === null && distNums.length > 1) { setError("Please select your congressional district."); return; }
-    setZipInput("");
-    doLookup(selState, d);
-  }
-
-  var allReps = foundReps
-    ? [].concat(foundReps.senators || []).concat(foundReps.houseMember ? [foundReps.houseMember] : [])
-    : [];
-  var userSenators  = foundReps ? (foundReps.senators || []) : [];
-  var userHouseMems = foundReps && foundReps.houseMember ? [foundReps.houseMember] : [];
-
-  return (
-    <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", color: TEXT, maxWidth: 980, margin: "0 auto", paddingBottom: 40 }}>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: MUTED, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 6 }}>Section IV — What Can You Do?</div>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: TEXT, margin: "0 0 10px", lineHeight: 1.25 }}>Your Representatives' Fiscal Record</h2>
-        <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.65, margin: 0, maxWidth: 660 }}>
-          Enter your ZIP code to see each rep's <strong>fiscal index</strong>. 100 means their record reduced the deficit as much as it possibly could have given the bills they voted on; 0 means it increased the deficit as much as possible. The percentage tells you how much of their voting record is improving or worsening the deficit over the next ten years.
-        </p>
-      </div>
-
-      <form onSubmit={handleZipSubmit} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
-        <input type="text" inputMode="numeric" placeholder="5-digit ZIP code"
-          value={zipInput}
-          onChange={function (e) { setZipInput(e.target.value.replace(/\D/g, "").slice(0, 5)); setError(null); }}
-          maxLength={5}
-          style={{ border: "1.5px solid " + BORDER, borderRadius: 8, padding: "9px 14px", fontSize: 14, fontFamily: "inherit", width: 155, outline: "none", color: TEXT }} />
-        <button type="submit" style={{ background: "#1e3a5f", color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-          Find My Reps
-        </button>
-      </form>
-
-      {error && <div style={{ fontSize: 12, color: VARD_RED, marginBottom: 10 }}>{error}</div>}
-
-      {multiOpts && (
-        <div style={{ marginBottom: 16, padding: "12px 14px", background: "#fffbeb", borderRadius: 8, border: "1px solid #fde68a" }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#92400e", marginBottom: 8 }}>
-            Your ZIP spans multiple congressional districts — which one?
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {multiOpts.map(function (opt, i) {
-              var parts = opt.split("-");
-              var state = parts[0]; var dist = parts[1] ? parseInt(parts[1]) : null;
-              return (
-                <button key={i} onClick={function () { setMultiOpts(null); doLookup(state, dist); }}
-                  style={{ background: "#fff", border: "1px solid #fde68a", borderRadius: 6, padding: "6px 12px", fontSize: 12, cursor: "pointer", fontWeight: 600, color: "#92400e" }}>
-                  {opt}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      <button onClick={function () { setShowManual(!showManual); }}
-        style={{ background: "none", border: "none", fontSize: 12, color: BLUE, cursor: "pointer", padding: 0, textDecoration: "underline", marginBottom: showManual ? 10 : 4 }}>
-        {showManual ? "Hide manual selector" : "Don't know your ZIP? Select state & district manually"}
-      </button>
-
-      {showManual && (
-        <form onSubmit={handleManualSubmit} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 16, flexWrap: "wrap" }}>
-          <select value={selState} onChange={function (e) { setSelState(e.target.value); setSelDist(""); }}
-            style={{ border: "1.5px solid " + BORDER, borderRadius: 8, padding: "8px 10px", fontSize: 13, fontFamily: "inherit", color: TEXT }}>
-            <option value="">— State —</option>
-            {US_STATE_LIST.map(function (s) { return <option key={s} value={s}>{s}</option>; })}
-          </select>
-          {selState && districtsByState[selState] && districtsByState[selState].length > 1 && (
-            <select value={selDist} onChange={function (e) { setSelDist(e.target.value); }}
-              style={{ border: "1.5px solid " + BORDER, borderRadius: 8, padding: "8px 10px", fontSize: 13, fontFamily: "inherit", color: TEXT }}>
-              <option value="">— House District —</option>
-              {(districtsByState[selState] || []).slice().sort(function (a, b) { return a - b; }).map(function (d) {
-                return <option key={d} value={d}>{selState}-{d}</option>;
-              })}
-            </select>
-          )}
-          <button type="submit" style={{ background: "#1e3a5f", color: "#fff", border: "none", borderRadius: 8, padding: "9px 18px", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-            Go
-          </button>
-        </form>
-      )}
-
-      {foundReps && allReps.length > 0 && (
-        <div>
-          <div style={{ fontSize: 12, color: MUTED, marginBottom: 14 }}>
-            Showing reps for <strong>{foundReps.state}{foundReps.district ? "-" + foundReps.district : ""}</strong>
-            {foundReps.zipUsed && <span> (ZIP {foundReps.zipUsed})</span>}
-          </div>
-
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginBottom: 26 }}>
-            {allReps.map(function (rep) {
-              var entry = allScored.byBg[rep.bioguide_id];
-              return (
-                <RepCardD key={rep.bioguide_id}
-                  rep={rep}
-                  scoreObj={entry ? entry.scoreObj : null}
-                  onShowDetails={function () { setModalRep({ rep: rep, scoreObj: entry.scoreObj }); }} />
-              );
-            })}
-          </div>
-
-          {userSenators.length > 0 && (
-            <IndexDotPlotD chamberLabel="Senate" data={allScored.senate} userReps={userSenators} />
-          )}
-          {userHouseMems.length > 0 && (
-            <IndexDotPlotD chamberLabel="House" data={allScored.house} userReps={userHouseMems} />
-          )}
-
-          <div style={{ marginTop: 18, padding: "14px 16px", background: "#f8fafc", borderRadius: 10, border: "1px solid " + BORDER, fontSize: 11, color: MUTED, lineHeight: 1.65 }}>
-            <strong style={{ color: TEXT }}>Data & methodology (Variant E):</strong>{" "}
-            (Copy to be written by site owner. Variant E uses bills with |10-yr CBO score| ≥ ${VARE_THRESHOLD_B}B, enacted or failed-with-roll-call. Members with fewer than {VARE_MIN_VOTES} recorded Yea/Nay votes in this universe are excluded.)
-          </div>
-        </div>
-      )}
-
-      {!legislators && (
-        <div style={{ fontSize: 13, color: MUTED, padding: "20px 0" }}>Loading representative data…</div>
-      )}
-
-      {modalRep && (
-        <VariantDModal rep={modalRep.rep} scoreObj={modalRep.scoreObj} onClose={function () { setModalRep(null); }} />
-      )}
-    </div>
-  );
-}
-
-function RepresentativesPageE(props) {
-  return <ParticipationFilteredPage computeFn={vareComputeIndex} {...props} />;
-}
-function RepresentativesPageF(props) {
-  return <ParticipationFilteredPage computeFn={varfComputeIndex} {...props} />;
-}
-
 var REP_VARIANTS = [
   { key: "A", label: "Current",   component: RepresentativesPageA },
   { key: "B", label: "Variant B", component: RepresentativesPageB },
   { key: "C", label: "Variant C", component: RepresentativesPageC },
   { key: "D", label: "Variant D", component: RepresentativesPageD },
-  { key: "E", label: "Variant E", component: RepresentativesPageE },
-  { key: "F", label: "Variant F", component: RepresentativesPageF },
 ];
 
 function readQuery(name) {
@@ -6418,7 +5991,7 @@ export default function App() {
     /* 7  */ <OBBBAPage         deficitProj={deficitProj} niProj={niProj} projSummary={projSummary} />,
     /* 8  */ <ConsolesPage />,
     /* 9  */ <CrowdingOutTextPage />,
-    /* 10 */ <CrowdingOutPage   spendingData={spendingData} summaryData={summaryData} niProj={niProj} projSummary={projSummary} />,
+    /* 10 */ <CrowdingOutPage   spendingData={spendingData} summaryData={summaryData} />,
     /* 11 */ <NetInterestPage   spendingData={spendingData} />,
     /* 12 */ <BudgetDilemmaPage spendingData={spendingData} summaryData={summaryData} />,
     /* 13 */ <TaxPage taxData={taxData} spendingData={spendingData} summaryData={summaryData}
