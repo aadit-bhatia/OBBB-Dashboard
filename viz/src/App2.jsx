@@ -1968,11 +1968,11 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
 
   var _mode = useState("pct"); var mode = _mode[0]; var setMode = _mode[1];
   var _scrubYear = useState(2026); var scrubYear = _scrubYear[0]; var setScrubYear = _scrubYear[1];
-  var _pileScenario = useState("no_tariff_revenue"); var pileScenario = _pileScenario[0]; var setPileScenario = _pileScenario[1];
+  var _pileScenario = useState("feb_2026_current_law"); var pileScenario = _pileScenario[0]; var setPileScenario = _pileScenario[1];
 
   // Debt pile constants
   var PILE_YEARS       = [2025,2026,2027,2028,2029,2030,2031,2032,2033,2034];
-  var ANCHOR_DEBT_B    = 28200;
+  var ANCHOR_DEBT_B    = 28196;   // CBO Feb 2026 — debt held by public at beginning of FY2025 ($B)
   var PILE_BLOCK_B     = 10;
   var PILE_COLS        = 120;
   var PILE_SZ          = 5;
@@ -3187,34 +3187,43 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
         <a href="https://taxpolicycenter.org/briefing-book/what-are-dynamic-scoring-and-dynamic-analysis" target="_blank" rel="noreferrer" style={{ color: BLUE }}>little difference</a>.
       </p>
 
-      {/* Progress bar */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ height: 14, background: "#f3f4f6", borderRadius: 7, overflow: "hidden", display: "flex" }}>
-          {/* Spending savings — green segment */}
-          {spendingSavings > 0 && (
-            <div style={{ height: "100%", width: Math.min(100, spendingSavings / DEFICIT_B * 100) + "%", background: BLOCK_POS, transition: "width 0.2s ease" }} />
-          )}
-          {/* Tax revenue — second segment */}
-          {additionalRevenue > 0 && (
-            <div style={{ height: "100%", width: Math.min(100 - Math.min(100, spendingSavings / DEFICIT_B * 100), additionalRevenue / DEFICIT_B * 100) + "%", background: "#166534", transition: "width 0.2s ease" }} />
-          )}
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={{ fontSize: 11, color: MUTED }}>{fmtAmt(DEFICIT_B * 1000)} deficit</span>
-            <div style={{ display: "flex", gap: 12 }}>
-              {spendingSavings > 0 && <span style={{ fontSize: 11, color: BLOCK_POS }}>▪ Spending cuts: {fmtAmt(spendingSavings * 1000)}</span>}
-              {additionalRevenue > 0 && <span style={{ fontSize: 11, color: "#166534" }}>▪ Tax revenue: {fmtAmt(additionalRevenue * 1000)}</span>}
+      {/* 2034 Debt-to-GDP impact bar — CBO Feb 2026 current-law baseline */}
+      {(function () {
+        var BASELINE_DEBT_B   = 50394;   // CBO Feb 2026 — end-FY2034 debt held by public ($B)
+        var BASELINE_GDP_B    = 43373;   // CBO Feb 2026 — FY2034 GDP ($B)
+        var BASELINE_DGDP_PCT = BASELINE_DEBT_B / BASELINE_GDP_B * 100; // ~116.2
+        var YEARS_HORIZON     = 9;       // 2026–2034 inclusive
+        var reductionB  = totalClosed * YEARS_HORIZON;
+        var newDebtB    = Math.max(0, BASELINE_DEBT_B - reductionB);
+        var newDgdpPct  = newDebtB / BASELINE_GDP_B * 100;
+        var reductionPp = BASELINE_DGDP_PCT - newDgdpPct;
+        var fillPct     = Math.min(100, Math.max(0, (reductionPp / BASELINE_DGDP_PCT) * 100));
+        return (
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Estimated 2034 Debt / GDP</span>
+              <span style={{ fontSize: 11, color: MUTED }}>Baseline {BASELINE_DGDP_PCT.toFixed(1)}%</span>
+            </div>
+            <div style={{ height: 14, background: "#fef2f2", borderRadius: 7, overflow: "hidden", display: "flex" }}>
+              {reductionPp > 0 && (
+                <div style={{ height: "100%", width: fillPct + "%", background: BLOCK_POS, transition: "width 0.2s ease" }} />
+              )}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, gap: 12 }}>
+              <span style={{ fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
+                Assumes slider savings are sustained each year 2026–2034 (9 yrs, the OBBBA tax-cut window); excludes interest savings and behavioral effects. Baseline: CBO Feb 2026 current law.
+              </span>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: MUTED, display: "block" }}>Your scenario</span>
+                <span style={{ fontSize: 20, fontWeight: 700, color: reductionPp > 0 ? BLOCK_POS : TEXT }}>
+                  {newDgdpPct.toFixed(1)}%
+                  {reductionPp > 0 && <span style={{ fontSize: 12, fontWeight: 500, color: MUTED, marginLeft: 6 }}>(−{reductionPp.toFixed(1)} pp)</span>}
+                </span>
+              </div>
             </div>
           </div>
-          <div style={{ textAlign: "right" }}>
-            <span style={{ fontSize: 11, color: MUTED, display: "block" }}>Deficit Closed</span>
-            <span style={{ fontSize: 20, fontWeight: 700, color: totalClosed >= DEFICIT_B ? BLOCK_POS : BLOCK_NEG }}>
-              {totalClosed >= DEFICIT_B ? "Surplus +" + fmtAmt((totalClosed - DEFICIT_B) * 1000) : fmtAmt(totalClosed * 1000) + " of " + fmtAmt(DEFICIT_B * 1000)}
-            </span>
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Section I — Spending */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 0 10px" }}>
