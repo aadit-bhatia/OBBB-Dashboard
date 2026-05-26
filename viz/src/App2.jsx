@@ -445,9 +445,9 @@ var TOUR_CONFIGS = {
   // Page 7 — OBBBA (includes debt pile)
   7: [
     { title: "Increases in the annual deficit", body: "Over the next 10 years, tax cuts under the OBBBA will grow the amount of money the government borrows by hundreds of billions. Each year's bar shows three scenarios: what would have happened if the OBBBA wasn't passed, what will happen if President Trump is able to cover some of his tax cuts with import tariffs, and what will happen if the tariffs are struck down and that money must be borrowed.", targetId: "obbba-deficit-card" },
-    { title: "Why might the tariffs be struck down?", body: "President Trump has touted his import tariffs as a way to make up the deficit spending from the OBBBA. The tariffs he announced in April 2025 were estimated by the CBO to raise $3.4 trillion over the next 10 years. However, the Supreme Court ruled he did not have the authority to apply taxes, and they were replaced by temporary duties.", targetId: "obbba-deficit-card" },
+    { title: "Will tariffs offset any of the cost of the OBBBA?", body: "President Trump has claimed that his import tariffs are a way to make up the deficit spending from the OBBBA. The tariffs he announced in April 2025 were estimated by the CBO to raise $3.4 trillion over the next 10 years. However, the Supreme Court ruled he did not have the authority to set these tariffs and that the money collected has to be refunded. Those refunds have started going out. Since then the original tariffs were replaced by temporary duties. Which again are being challenged in the courts.", targetId: "obbba-deficit-card" },
     { title: "Will the government still tax imports?", body: "Right now, it's unclear. There are ongoing lawsuits on which tariffs are legal, how high each tax will be, and whether the government has to pay back tariffs already collected. We believe that the revenue from tariffs from now till 2034 will fall somewhere between the no tariff revenue case and the CBO's projections assuming the July 2025 tariffs remain in place.", targetId: "obbba-deficit-card" },
-    { title: "Scrub through the next decade", body: "Use the slider to see how each year's deficit adds to the national debt pile. The pile shows cumulative debt held by the public — gray is what we already owed at the end of 2024." },
+    { title: "Move the slider through the next decade", body: "Use the slider to see how each year's deficit adds to the national debt pile. The pile shows cumulative debt held by the public — gray is what we already owed at the end of 2024." },
   ],
   // Page 8 — Consoles (no tour)
   // Page 9 — What Does This Mean for Future Generations? / consequences overview (no tour)
@@ -459,7 +459,7 @@ var TOUR_CONFIGS = {
   // Page 11 — Net Interest
   11: [
     { title: "Compare any program", body: "Use the dropdown to select any government program. The block grids below will update to show net interest payments alongside your chosen program for that year." },
-    { title: "Scrub through time", body: "Use the slider to move from 1970 to 2024 and see how both figures have changed over time. Compare how fast spending on interest has grown versus other categories." },
+    { title: "Move the slider through time", body: "Use the slider to move from 1970 to 2024 and see how both figures have changed over time. Compare how fast spending on interest has grown versus other categories." },
   ],
   // Page 12 — Budget Dilemma
   12: [
@@ -1779,7 +1779,7 @@ function DeficitPage({ summaryData }) {
       <Card style={{ borderLeft: "4px solid " + RED }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 10 }}>
           <h3 style={{ fontSize: 17, fontWeight: 700, color: RED, margin: 0 }}>The Deficit</h3>
-          <span style={{ fontSize: 26, fontWeight: 800, color: RED }}>−${(Math.abs(deficit) / 1e6).toFixed(2)}T</span>
+          <span style={{ fontSize: 26, fontWeight: 800, color: RED }}>${(Math.abs(deficit) / 1e6).toFixed(2)}T</span>
         </div>
         <p style={{ fontSize: 14, color: TEXT, lineHeight: 1.6, margin: "0 0 16px" }}>
           Spending exceeded revenue by <strong style={{ color: RED }}>${(Math.abs(deficit) / 1e6).toFixed(2)} trillion</strong> — that's <strong style={{ color: RED }}>${((deficitBlockCount * BLOCK_SIZE) / 1e3 / 365).toFixed(1)}B per day</strong> added to the national debt.
@@ -2289,8 +2289,9 @@ function CrowdingOutTextPage() {
         },
         {
           heading: "Housing Costs",
-          body: "Higher interest rates have an outsized impact on housing construction which in turn leads to higher costs for new and existing homes and higher rents. As one example of this, the Philadelphia Federal Reserve Bank estimates that a '1 percentage point increase in rates reduces purchases [of homes] by 6%'",
-          source: "Philadelphia Federal Reserve Bank",
+          body: "Higher interest rates raise housing expenses for both renters and owners. For renters, a 1‑percentage‑point rise in mortgage rates can increase market rents by roughly 5–6%, as more would‑be buyers remain renters. For owner‑occupiers, higher rates sharply raise monthly mortgage payments—often by hundreds of dollars per month—more than offsetting any modest decline in home prices.",
+          source: "Columbia Business School Insights, “Higher Rates, Higher Rents”",
+          sourceUrl: "https://business.columbia.edu/press-release/cbs-press-releases/higher-rates-higher-rents-how-monetary-policy-affects-housing",
         },
         {
           heading: "Offsetting Effects",
