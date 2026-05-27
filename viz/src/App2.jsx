@@ -5962,7 +5962,7 @@ function varfComputeIndex(rep, keyVotesData, rollCalls) {
   return { actual: actual, min: -absSum, max: absSum, absSum: absSum, indexPct: indexPct, voted: voted, notVoted: notVoted };
 }
 
-function ParticipationFilteredPage({ computeFn, legislators, keyVotesData, rollCalls, zipDistricts }) {
+function ParticipationFilteredPage({ computeFn, methodologyNote, legislators, keyVotesData, rollCalls, zipDistricts }) {
   var _zip       = useState("");   var zipInput = _zip[0]; var setZipInput = _zip[1];
   var _reps      = useState(null); var foundReps = _reps[0]; var setFoundReps = _reps[1];
   var _err       = useState(null); var error = _err[0]; var setError = _err[1];
@@ -6149,10 +6149,11 @@ function ParticipationFilteredPage({ computeFn, legislators, keyVotesData, rollC
             <IndexDotPlotD chamberLabel="House" data={allScored.house} userReps={userHouseMems} />
           )}
 
-          <div style={{ marginTop: 18, padding: "14px 16px", background: "#f8fafc", borderRadius: 10, border: "1px solid " + BORDER, fontSize: 11, color: MUTED, lineHeight: 1.65 }}>
-            <strong style={{ color: TEXT }}>Data & methodology (Variant E):</strong>{" "}
-            (Copy to be written by site owner. Variant E uses bills with |10-yr CBO score| ≥ ${VARE_THRESHOLD_B}B, enacted or failed-with-roll-call. Members with fewer than {VARE_MIN_VOTES} recorded Yea/Nay votes in this universe are excluded.)
-          </div>
+          {methodologyNote && (
+            <div style={{ marginTop: 18, padding: "14px 16px", background: "#f8fafc", borderRadius: 10, border: "1px solid " + BORDER, fontSize: 11, color: MUTED, lineHeight: 1.65 }}>
+              {methodologyNote}
+            </div>
+          )}
         </div>
       )}
 
@@ -6171,7 +6172,8 @@ function RepresentativesPageE(props) {
   return <ParticipationFilteredPage computeFn={vareComputeIndex} {...props} />;
 }
 function RepresentativesPageF(props) {
-  return <ParticipationFilteredPage computeFn={varfComputeIndex} {...props} />;
+  var note = "Variant F includes bills since 2015 with a 10-year CBO net deficit score of $25 billion or more, where both chambers acted on the bill (recorded vote or voice vote). Members with fewer than 5 recorded Yea or Nay votes in this set do not appear in the chart but remain searchable.";
+  return <ParticipationFilteredPage computeFn={varfComputeIndex} methodologyNote={note} {...props} />;
 }
 
 var REP_VARIANTS = [
