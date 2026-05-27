@@ -121,6 +121,73 @@ var SPEND_IMPACT = {
 };
 
 // ─────────────────────────────────────────────
+// OMB slider category → CBO Table 3-1 projection categories
+//
+// Maps the existing 8 OMB-style sliders onto CBO's 6 spending series.
+// Weights split CBO's "Other mandatory" and "Nondefense" across the OMB
+// sub-categories using their FY2024 OMB shares (derived from
+// public/spending_by_function.csv). Weights sum to 1.0 within each CBO series:
+//   Other mandatory: Income Security (.61) + Veterans (.24) + other-mandatory portion (.15) = 1.00
+//   Nondefense:      Education (.10) + other-discretionary portion (.90) = 1.00
+// Source: OMB Historical Tables, FY2024 actuals (already in spending_by_function.csv).
+// ─────────────────────────────────────────────
+var OMB_TO_CBO = {
+  "Social Security":                                    [{cbo: "Social Security", w: 1.0}],
+  "Medicare":                                           [{cbo: "Medicare",        w: 1.0}],
+  "Health":                                             [{cbo: "Medicaid",        w: 1.0}],
+  "Income Security":                                    [{cbo: "Other mandatory", w: 0.61}],
+  "National Defense":                                   [{cbo: "Defense",         w: 1.0}],
+  "Veterans Benefits and Services":                     [{cbo: "Other mandatory", w: 0.24}],
+  "Education, Training, Employment, and Social Services": [{cbo: "Nondefense",    w: 0.10}],
+  "other": [
+    {cbo: "Other mandatory", w: 0.15},
+    {cbo: "Nondefense",      w: 0.90},
+  ],
+};
+
+// Parse CBO baseline CSV into a lookup {series: {year: value}} + helper accessors.
+// CSV format: series, kind, 2026, 2027, ..., 2034
+function parseCboBaseline(rows) {
+  if (!rows || !rows.length) return null;
+  var lookup = {};
+  rows.forEach(function (r) {
+    if (!r.series) return;
+    lookup[r.series] = {};
+    [2026,2027,2028,2029,2030,2031,2032,2033,2034].forEach(function (y) {
+      var v = r[String(y)];
+      if (typeof v === "number") lookup[r.series][y] = v;
+    });
+    lookup[r.series]._kind = r.kind;
+  });
+  return {
+    lookup: lookup,
+    years: [2026,2027,2028,2029,2030,2031,2032,2033,2034],
+    get: function (series, year) {
+      var s = lookup[series]; if (!s) return 0;
+      return s[year] || 0;
+    },
+    // Slider amount = CBO 2026 baseline × allocation weights, summed across mapped CBO series.
+    sliderAmount2026: function (ombKey) {
+      var map = OMB_TO_CBO[ombKey] || [];
+      var sum = 0;
+      map.forEach(function (m) { sum += m.w * (lookup[m.cbo] && lookup[m.cbo][2026] || 0); });
+      return sum;
+    },
+    // For a given year, total scenario outlay savings from one OMB slider's percentage cut.
+    savingsForYear: function (ombKey, pct, year) {
+      var map = OMB_TO_CBO[ombKey] || [];
+      var sum = 0;
+      map.forEach(function (m) { sum += m.w * (lookup[m.cbo] && lookup[m.cbo][year] || 0); });
+      return (pct / 100) * sum;
+    },
+    seed: (lookup["Starting debt end-FY2025"] || {})[2026] || 30172,
+    gdp2026: (lookup["GDP"] || {})[2026] || 31902,
+    gdp2034: (lookup["GDP"] || {})[2034] || 43373,
+    baselineDebt2034: (lookup["Debt held by public"] || {})[2034] || 50394,
+  };
+}
+
+// ─────────────────────────────────────────────
 // BUDGET CATEGORIES  (shared by TaxPage + EconomicImpactPage)
 // ─────────────────────────────────────────────
 var SPEND_CATS = [
@@ -3169,7 +3236,7 @@ function BudgetDilemmaPage({ spendingData, summaryData }) {
 }
 
 /* ── III.d  Tax Page ─────────────────────── */
-function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, setRatesRaw }) {
+function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw }) {
   var tour = useTour(13);
 
   // Parse CSV into lookup
@@ -3178,26 +3245,15 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
     return taxData;
   }, [taxData]);
 
+  // Slider amounts come from CBO Feb 2026 baseline, anchored on the 2026 column.
+  var baseline = useMemo(function () { return parseCboBaseline(cboBaseline); }, [cboBaseline]);
+
   var catAmounts = useMemo(function () {
-    if (!spendingData || !summaryData) return {};
-    var spendRows = spendingData.filter(function (r) { return r.year === YEAR && !String(r.category).includes("Real"); });
-    var sumRow = summaryData.find(function (r) { return r.year === YEAR && r.category === "Total Outlays"; });
-    var totalOutlays = sumRow ? sumRow.amount : 0;
-    var niRow = spendRows.find(function (r) { return r.category === "Net interest"; });
-    var ni = niRow ? niRow.amount : 0;
-    var namedKeys = ["Social Security","Medicare","Health","Income Security",
-                     "National Defense","Veterans Benefits and Services",
-                     "Education, Training, Employment, and Social Services"];
-    var out = {}; var accounted = 0;
-    namedKeys.forEach(function (k) {
-      var row = spendRows.find(function (r) { return r.category === k; });
-      var amt = row ? row.amount : 0;
-      out[k] = amt / 1000; // millions → billions
-      accounted += amt;
-    });
-    out["other"] = Math.max(0, (totalOutlays - accounted - ni) / 1000);
+    if (!baseline) return {};
+    var out = {};
+    SPEND_CATS.forEach(function (c) { out[c.key] = baseline.sliderAmount2026(c.key); });
     return out;
-  }, [spendingData, summaryData]);
+  }, [baseline]);
 
   function setCut(key, val) { setCuts(function (prev) { return Object.assign({}, prev, { [key]: val }); }); }
   var _mandOpen = useState(true); var mandatoryOpen = _mandOpen[0]; var setMandatoryOpen = _mandOpen[1];
@@ -3233,9 +3289,8 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
     return rates[b.bucket] !== undefined && rates[b.bucket] !== b.effective_rate_pct;
   });
 
-  var DEFICIT_B = 1695; // FY2023 deficit in billions — matches IRS Tax Year 2023 data
-
-  // Additional revenue = delta from current rate * revenue_per_1pp
+  // Additional revenue = delta from current rate * revenue_per_1pp.
+  // (Tax brackets keep their existing math; we just sum the scenario revenue delta.)
   var additionalRevenue = useMemo(function () {
     return brackets.reduce(function (sum, b) {
       var currentRate = rates[b.bucket] !== undefined ? rates[b.bucket] : b.effective_rate_pct;
@@ -3244,8 +3299,56 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
     }, 0);
   }, [brackets, rates]);
 
-  var totalClosed = additionalRevenue + spendingSavings; // billions
-  var pctOfDeficit = Math.min(100, (totalClosed / DEFICIT_B) * 100);
+  // Year-by-year scenario projection using CBO Feb 2026 baseline.
+  // Reframed math: compute each year's deficit *change* (baseline_deficit − scenario_deficit),
+  // compound interest savings on running deficit reduction (~3.9% avg rate), then subtract
+  // total savings from CBO's baseline 2034 debt path. This sidesteps "other means of financing"
+  // and other below-the-line items that affect the debt stock — those are already baked into
+  // CBO's published 2034 debt number.
+  var projection = useMemo(function () {
+    if (!baseline) return null;
+    var running_savings = 0;       // cumulative deficit reduction + interest avoided, $B
+    var direct_savings = 0;        // policy-driven deficit reduction (excludes interest), $B
+    baseline.years.forEach(function (y) {
+      // Baseline year totals
+      var baseOutlay = 0;
+      ["Social Security","Medicare","Medicaid","Other mandatory","Offsetting receipts","Defense","Nondefense","Net interest"]
+        .forEach(function (s) { baseOutlay += baseline.get(s, y); });
+      var baseRevenue = 0;
+      ["Individual income tax","Payroll tax","Corporate income tax","Customs duties","Other revenue"]
+        .forEach(function (s) { baseRevenue += baseline.get(s, y); });
+      // Scenario adjustments — spending cuts allocated via OMB→CBO weights, tax delta annual.
+      var spendCutY = 0;
+      SPEND_CATS.forEach(function (c) {
+        spendCutY += baseline.savingsForYear(c.key, cuts[c.key] || 0, y);
+      });
+      var scenarioOutlay = baseOutlay - spendCutY;
+      var scenarioRevenue = baseRevenue + additionalRevenue;
+      var year_direct_savings = (baseOutlay - baseRevenue) - (scenarioOutlay - scenarioRevenue);
+      // Interest on prior-year cumulative savings (debt avoided last year doesn't accrue interest this year).
+      var rate = baseline.get("Average interest rate", y) || 0.039;
+      var year_interest_savings = running_savings * rate;
+      direct_savings += year_direct_savings;
+      running_savings += year_direct_savings + year_interest_savings;
+    });
+    var scenario_debt_2034 = baseline.baselineDebt2034 - running_savings;
+    var scenario_debt_gdp  = scenario_debt_2034 / baseline.gdp2034 * 100;
+    var baseline_debt_gdp  = baseline.baselineDebt2034 / baseline.gdp2034 * 100;
+    var pp_delta = baseline_debt_gdp - scenario_debt_gdp;
+    // CBO crowding-out estimate: $0.33 of private investment recovered per $1 of deficit reduction.
+    // Same elasticity cited on the Crowding Out page; sourced to CBO WP 2014-02.
+    var investment_b = direct_savings * 0.33;
+    return {
+      scenario_debt_gdp: scenario_debt_gdp,
+      baseline_debt_gdp: baseline_debt_gdp,
+      pp_delta: pp_delta,
+      cumulative_savings: direct_savings,       // policy savings (what user "did")
+      total_with_interest: running_savings,     // policy + compounded interest avoided
+      investment_b: investment_b,
+    };
+  }, [baseline, cuts, additionalRevenue]);
+
+  var totalClosed = additionalRevenue + spendingSavings; // billions (annual, for slider summaries below)
 
   var BUCKET_COLORS = {
     "Under $25K":   "#4a8b6f",
@@ -3267,7 +3370,7 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
     <div>
       {tour.show && <Tour steps={tour.steps} onDone={tour.done} />}
       <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: TEXT, margin: 0 }}>Balancing the Budget?</h2>
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: TEXT, margin: 0 }}>Your Fiscal Scenario</h2>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           {isDirty && (
             <button onClick={resetRates} style={{
@@ -3280,7 +3383,7 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
       </div>
 
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 10px" }}>
-        Suppose the government wanted to balance the budget. What composition of spending cuts and tax increases could do that? You can adjust the slider bars below to find out.
+        Adjust the sliders below to build a fiscal scenario. Spending cuts and tax-rate changes are applied to <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO's February 2026 baseline projections</a> for each year 2026 through 2034. The meter at the top shows the resulting end-of-2034 debt-to-GDP ratio and the implied gain in private investment.
       </p>
       <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.7, margin: "0 0 20px" }}>
         Note: Changes to the sliders below don't take into account how the economy might react to changes in the deficit and taxes. Increasing taxes could lead to less of a gain in revenue if, for example, there is more tax avoidance, people work fewer hours or more income is shifted into tax shelters. On the other hand, as explained before, lowering the deficit can increase future national income. The CBO's analysis of the 2017 tax cut showed that behavioral changes would offset about{" "}
@@ -3289,34 +3392,48 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
         <a href="https://taxpolicycenter.org/briefing-book/what-are-dynamic-scoring-and-dynamic-analysis" target="_blank" rel="noreferrer" style={{ color: BLUE }}>little difference</a>.
       </p>
 
-      {/* Progress bar */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ height: 14, background: "#f3f4f6", borderRadius: 7, overflow: "hidden", display: "flex" }}>
-          {/* Spending savings — green segment */}
-          {spendingSavings > 0 && (
-            <div style={{ height: "100%", width: Math.min(100, spendingSavings / DEFICIT_B * 100) + "%", background: BLOCK_POS, transition: "width 0.2s ease" }} />
-          )}
-          {/* Tax revenue — second segment */}
-          {additionalRevenue > 0 && (
-            <div style={{ height: "100%", width: Math.min(100 - Math.min(100, spendingSavings / DEFICIT_B * 100), additionalRevenue / DEFICIT_B * 100) + "%", background: "#166534", transition: "width 0.2s ease" }} />
-          )}
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={{ fontSize: 11, color: MUTED }}>{fmtAmt(DEFICIT_B * 1000)} deficit</span>
-            <div style={{ display: "flex", gap: 12 }}>
-              {spendingSavings > 0 && <span style={{ fontSize: 11, color: BLOCK_POS }}>▪ Spending cuts: {fmtAmt(spendingSavings * 1000)}</span>}
-              {additionalRevenue > 0 && <span style={{ fontSize: 11, color: "#166534" }}>▪ Tax revenue: {fmtAmt(additionalRevenue * 1000)}</span>}
+      {/* 2034 Debt-to-GDP + implied GDP boost — year-by-year CBO projection */}
+      {projection && (function () {
+        var fillPct = Math.min(100, Math.max(0, (projection.pp_delta / projection.baseline_debt_gdp) * 100));
+        var isImprove = projection.pp_delta > 0;
+        return (
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+              <span style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected 2034 Debt / GDP</span>
+              <span style={{ fontSize: 11, color: MUTED }}>Baseline {projection.baseline_debt_gdp.toFixed(1)}%</span>
             </div>
+            <div style={{ height: 14, background: "#fef2f2", borderRadius: 7, overflow: "hidden", display: "flex" }}>
+              {isImprove && (
+                <div style={{ height: "100%", width: fillPct + "%", background: BLOCK_POS, transition: "width 0.2s ease" }} />
+              )}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, gap: 12 }}>
+              <span style={{ fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
+                Applies your slider changes to <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO's Feb 2026 baseline</a> year by year (2026–2034). Excludes interest savings and behavioral effects.
+              </span>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: MUTED, display: "block" }}>Your scenario</span>
+                <span style={{ fontSize: 20, fontWeight: 700, color: isImprove ? BLOCK_POS : TEXT }}>
+                  {projection.scenario_debt_gdp.toFixed(1)}%
+                  {Math.abs(projection.pp_delta) > 0.05 && (
+                    <span style={{ fontSize: 12, fontWeight: 500, color: MUTED, marginLeft: 6 }}>
+                      ({projection.pp_delta > 0 ? "−" : "+"}{Math.abs(projection.pp_delta).toFixed(1)} pp)
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
+            {Math.abs(projection.cumulative_savings) > 1 && (
+              <div style={{ marginTop: 8, padding: "8px 12px", background: isImprove ? "#f0fdf4" : "#fef2f2", borderRadius: 6, fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
+                Cumulative 9-year deficit change: <strong style={{ color: isImprove ? BLOCK_POS : BLOCK_NEG }}>{projection.cumulative_savings > 0 ? "−" : "+"}{fmtAmt(Math.abs(projection.cumulative_savings) * 1000)}</strong>.
+                {isImprove && (
+                  <span> Implied private investment gain (<a href="https://www.cbo.gov/sites/default/files/cbofiles/attachments/45140-NSPDI_workingPaper.pdf" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO crowding-out elasticity, ~$0.33 per $1 of deficit reduction</a>): <strong style={{ color: BLOCK_POS }}>+{fmtAmt(projection.investment_b * 1000)}</strong>.</span>
+                )}
+              </div>
+            )}
           </div>
-          <div style={{ textAlign: "right" }}>
-            <span style={{ fontSize: 11, color: MUTED, display: "block" }}>Deficit Closed</span>
-            <span style={{ fontSize: 20, fontWeight: 700, color: totalClosed >= DEFICIT_B ? BLOCK_POS : BLOCK_NEG }}>
-              {totalClosed >= DEFICIT_B ? "Surplus +" + fmtAmt((totalClosed - DEFICIT_B) * 1000) : fmtAmt(totalClosed * 1000) + " of " + fmtAmt(DEFICIT_B * 1000)}
-            </span>
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Section I — Spending */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 0 10px" }}>
@@ -3490,10 +3607,11 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
         })}
       </div>
 
-      {/* Summary if anything selected */}
+      {/* Summary if anything selected — per-slider breakdown (annual, 2026 anchored).
+          The 2034 debt/GDP impact lives in the meter at the top of the page. */}
       {(additionalRevenue !== 0 || spendingSavings > 0) && (
-        <div style={{ background: totalClosed >= DEFICIT_B ? "#f0fdf4" : "#fef2f2", borderRadius: 10, padding: "16px 20px", marginBottom: 20, borderLeft: "4px solid " + (totalClosed >= DEFICIT_B ? BLOCK_POS : BLOCK_NEG) }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: TEXT, marginBottom: 8 }}>Summary</div>
+        <div style={{ background: SURFACE, borderRadius: 10, padding: "16px 20px", marginBottom: 20, borderLeft: "4px solid " + BLOCK_POS, border: "1px solid " + BORDER }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: TEXT, marginBottom: 8 }}>What your scenario does <span style={{ fontWeight: 400, color: MUTED, fontSize: 12 }}>(annual, anchored on 2026 CBO baseline)</span></div>
           <div style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 13, color: TEXT }}>
             {spendingSavings > 0 && SPEND_CATS.filter(function (c) { return (cuts[c.key] || 0) > 0; }).map(function (c) {
               var saved = ((cuts[c.key] || 0) / 100) * (catAmounts[c.key] || 0);
@@ -3518,16 +3636,11 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
               );
             })}
             <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid " + BORDER, paddingTop: 6, marginTop: 4, fontWeight: 700 }}>
-              <span>Total deficit reduction</span>
-              <span style={{ color: totalClosed >= DEFICIT_B ? BLOCK_POS : BLOCK_NEG }}>+{fmtAmt(totalClosed * 1000)}/yr</span>
+              <span>Annual deficit change (2026)</span>
+              <span style={{ color: totalClosed > 0 ? BLOCK_POS : BLOCK_NEG }}>{totalClosed > 0 ? "−" : "+"}{fmtAmt(Math.abs(totalClosed) * 1000)}</span>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
-              <span>Remaining deficit</span>
-              <span style={{ color: totalClosed >= DEFICIT_B ? BLOCK_POS : BLOCK_NEG }}>
-                {totalClosed >= DEFICIT_B
-                  ? "Surplus +" + fmtAmt((totalClosed - DEFICIT_B) * 1000)
-                  : fmtAmt((DEFICIT_B - totalClosed) * 1000) + " remaining"}
-              </span>
+            <div style={{ fontSize: 11, color: MUTED, marginTop: 4, lineHeight: 1.5 }}>
+              See the meter above for the compounded 2034 debt/GDP impact, which scales each cut against CBO's year-by-year projection (mandatory programs grow faster than discretionary).
             </div>
           </div>
         </div>
@@ -3550,7 +3663,7 @@ function TaxPage({ taxData, spendingData, summaryData, cuts, setCuts, ratesRaw, 
 
 
 /* ── III.e  Economic Feedback Effects ──────── */
-function EconomicImpactPage({ taxData, spendingData, summaryData, cuts, ratesRaw, multipliersData }) {
+function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersData }) {
   var tour = useTour(14);
 
   var brackets = useMemo(function () {
@@ -3565,26 +3678,15 @@ function EconomicImpactPage({ taxData, spendingData, summaryData, cuts, ratesRaw
     return init;
   }, [ratesRaw, brackets]);
 
+  // Slider amounts mirror TaxPage — anchored on CBO Feb 2026 baseline via the
+  // OMB→CBO mapping. Keeps page 13 and page 14 dollar amounts consistent.
+  var baseline = useMemo(function () { return parseCboBaseline(cboBaseline); }, [cboBaseline]);
   var catAmounts = useMemo(function () {
-    if (!spendingData || !summaryData) return {};
-    var spendRows = spendingData.filter(function (r) { return r.year === YEAR && !String(r.category).includes("Real"); });
-    var sumRow = summaryData.find(function (r) { return r.year === YEAR && r.category === "Total Outlays"; });
-    var totalOutlays = sumRow ? sumRow.amount : 0;
-    var niRow = spendRows.find(function (r) { return r.category === "Net interest"; });
-    var ni = niRow ? niRow.amount : 0;
-    var namedKeys = ["Social Security","Medicare","Health","Income Security",
-                     "National Defense","Veterans Benefits and Services",
-                     "Education, Training, Employment, and Social Services"];
-    var out = {}; var accounted = 0;
-    namedKeys.forEach(function (k) {
-      var row = spendRows.find(function (r) { return r.category === k; });
-      var amt = row ? row.amount : 0;
-      out[k] = amt / 1000;
-      accounted += amt;
-    });
-    out["other"] = Math.max(0, (totalOutlays - accounted - ni) / 1000);
+    if (!baseline) return {};
+    var out = {};
+    SPEND_CATS.forEach(function (c) { out[c.key] = baseline.sliderAmount2026(c.key); });
     return out;
-  }, [spendingData, summaryData]);
+  }, [baseline]);
 
   // Index multiplier data by key for O(1) lookup
   var spendMultMap = useMemo(function () {
@@ -3610,7 +3712,8 @@ function EconomicImpactPage({ taxData, spendingData, summaryData, cuts, ratesRaw
 
   var crowdInRatio = multipliersData ? multipliersData.crowding_in.gdp_per_dollar_deficit_reduction_central : 0.5;
 
-  var US_GDP_REF = 28000; // $B, approximate 2024 GDP — used only for % display
+  // 2026 nominal GDP from CBO Feb 2026 baseline; used only for the % display in this page.
+  var US_GDP_REF = baseline ? baseline.gdp2026 : 31902;
 
   // Core calculations
   var staticSpendSaved = SPEND_CATS.reduce(function (sum, c) {
@@ -6385,6 +6488,7 @@ export default function App() {
   var crowdingData    = useCSV("crowding_out.csv");
   var japanData       = useCSV("japan_case_study.csv");
   var taxData         = useCSV("tax_brackets.csv");
+  var cboBaseline     = useCSV("cbo_baseline_2026.csv");
   var multipliersData = useJSON("fiscal_multipliers.json");
   var legislators     = useJSON("legislators-current.json");
   var keyVotesData    = useJSON("key_votes.json");
@@ -6396,7 +6500,7 @@ export default function App() {
   var _bc = useState({});   var budgetCuts     = _bc[0]; var setBudgetCuts     = _bc[1];
   var _br = useState(null); var budgetRatesRaw = _br[0]; var setBudgetRatesRaw = _br[1];
 
-  var loading = !spendingData || !receiptsData || !summaryData || !debtData || !deficitProj || !niProj || !deficitData || !debtPctData || !stabilizersData || !stimulusData || !crowdingData || !taxData || !multipliersData || !legislators || !keyVotesData || !rollCalls;
+  var loading = !spendingData || !receiptsData || !summaryData || !debtData || !deficitProj || !niProj || !deficitData || !debtPctData || !stabilizersData || !stimulusData || !crowdingData || !taxData || !cboBaseline || !multipliersData || !legislators || !keyVotesData || !rollCalls;
 
   if (loading) {
     return (
@@ -6421,10 +6525,10 @@ export default function App() {
     /* 10 */ <CrowdingOutPage   spendingData={spendingData} summaryData={summaryData} niProj={niProj} projSummary={projSummary} />,
     /* 11 */ <NetInterestPage   spendingData={spendingData} />,
     /* 12 */ <BudgetDilemmaPage spendingData={spendingData} summaryData={summaryData} />,
-    /* 13 */ <TaxPage taxData={taxData} spendingData={spendingData} summaryData={summaryData}
+    /* 13 */ <TaxPage taxData={taxData} cboBaseline={cboBaseline}
                cuts={budgetCuts} setCuts={setBudgetCuts}
                ratesRaw={budgetRatesRaw} setRatesRaw={setBudgetRatesRaw} />,
-    /* 14 */ <EconomicImpactPage taxData={taxData} spendingData={spendingData} summaryData={summaryData}
+    /* 14 */ <EconomicImpactPage taxData={taxData} cboBaseline={cboBaseline}
                cuts={budgetCuts} ratesRaw={budgetRatesRaw} multipliersData={multipliersData} />,
     /* 15 */ <RepresentativesPage legislators={legislators} keyVotesData={keyVotesData}
                rollCalls={rollCalls} zipDistricts={zipDistricts} />,
