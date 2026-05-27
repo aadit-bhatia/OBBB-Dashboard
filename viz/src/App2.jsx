@@ -3335,16 +3335,15 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
     var scenario_debt_gdp  = scenario_debt_2034 / baseline.gdp2034 * 100;
     var baseline_debt_gdp  = baseline.baselineDebt2034 / baseline.gdp2034 * 100;
     var pp_delta = baseline_debt_gdp - scenario_debt_gdp;
-    // CBO crowding-out estimate: $0.33 of private investment recovered per $1 of deficit reduction.
-    // Same elasticity cited on the Crowding Out page; sourced to CBO WP 2014-02.
-    var investment_b = direct_savings * 0.33;
+    // GDP / private-investment impact is shown on the next page (Economic Feedback
+    // Effects) via fiscal_multipliers.json's crowding_in ratio — intentionally not
+    // duplicated here so the two pages don't double-display the same effect.
     return {
       scenario_debt_gdp: scenario_debt_gdp,
       baseline_debt_gdp: baseline_debt_gdp,
       pp_delta: pp_delta,
       cumulative_savings: direct_savings,       // policy savings (what user "did")
       total_with_interest: running_savings,     // policy + compounded interest avoided
-      investment_b: investment_b,
     };
   }, [baseline, cuts, additionalRevenue]);
 
@@ -3426,9 +3425,6 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
             {Math.abs(projection.cumulative_savings) > 1 && (
               <div style={{ marginTop: 8, padding: "8px 12px", background: isImprove ? "#f0fdf4" : "#fef2f2", borderRadius: 6, fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
                 Cumulative 9-year deficit change: <strong style={{ color: isImprove ? BLOCK_POS : BLOCK_NEG }}>{projection.cumulative_savings > 0 ? "−" : "+"}{fmtAmt(Math.abs(projection.cumulative_savings) * 1000)}</strong>.
-                {isImprove && (
-                  <span> Implied private investment gain (<a href="https://www.cbo.gov/sites/default/files/cbofiles/attachments/45140-NSPDI_workingPaper.pdf" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO crowding-out elasticity, ~$0.33 per $1 of deficit reduction</a>): <strong style={{ color: BLOCK_POS }}>+{fmtAmt(projection.investment_b * 1000)}</strong>.</span>
-                )}
               </div>
             )}
           </div>
