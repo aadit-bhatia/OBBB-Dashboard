@@ -2059,7 +2059,7 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
         );
       })()}
       <div style={{ margin: "0 0 16px", display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 12, color: MUTED, whiteSpace: "nowrap" }}>Scrub year:</span>
+        <span style={{ fontSize: 12, color: MUTED, whiteSpace: "nowrap" }}>Slide to change year:</span>
         <input type="range" min={0} max={PILE_YEARS.length - 1}
           value={PILE_YEARS.indexOf(scrubYear) === -1 ? PILE_YEARS.length - 1 : PILE_YEARS.indexOf(scrubYear)}
           onChange={function (e) { setScrubYear(PILE_YEARS[Number(e.target.value)]); }}
