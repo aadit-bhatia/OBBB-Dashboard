@@ -303,7 +303,7 @@ var PAGES = [
   {
     section: 2,
     component: "TaxPage",
-    title: "Balancing the Budget?",
+    title: "Your Fiscal Scenario",
     prompt: "What does this mean for the economy?",
   },
   {
