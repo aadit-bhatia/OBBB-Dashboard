@@ -3238,6 +3238,7 @@ function BudgetDilemmaPage({ spendingData, summaryData }) {
 /* ── III.d  Tax Page ─────────────────────── */
 function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw }) {
   var tour = useTour(13);
+  var _hoverIdx = useState(null); var hoverIdx = _hoverIdx[0]; var setHoverIdx = _hoverIdx[1];
 
   // Parse CSV into lookup
   var brackets = useMemo(function () {
@@ -3309,6 +3310,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
     if (!baseline) return null;
     var running_savings = 0;       // cumulative deficit reduction + interest avoided, $B
     var direct_savings = 0;        // policy-driven deficit reduction (excludes interest), $B
+    var trajectory = [];           // per-year debt/GDP for chart
     baseline.years.forEach(function (y) {
       // Baseline year totals
       var baseOutlay = 0;
@@ -3330,6 +3332,13 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
       var year_interest_savings = running_savings * rate;
       direct_savings += year_direct_savings;
       running_savings += year_direct_savings + year_interest_savings;
+      var baseDebt = baseline.get("Debt held by public", y);
+      var gdp = baseline.get("GDP", y);
+      trajectory.push({
+        year: y,
+        baseline: gdp ? baseDebt / gdp * 100 : null,
+        scenario: gdp ? (baseDebt - running_savings) / gdp * 100 : null,
+      });
     });
     var scenario_debt_2034 = baseline.baselineDebt2034 - running_savings;
     var scenario_debt_gdp  = scenario_debt_2034 / baseline.gdp2034 * 100;
@@ -3344,6 +3353,8 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
       pp_delta: pp_delta,
       cumulative_savings: direct_savings,       // policy savings (what user "did")
       total_with_interest: running_savings,     // policy + compounded interest avoided
+      interest_savings: running_savings - direct_savings,
+      trajectory: trajectory,
     };
   }, [baseline, cuts, additionalRevenue]);
 
@@ -3382,7 +3393,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
       </div>
 
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 10px" }}>
-        Adjust the sliders below to build a fiscal scenario. Spending cuts and tax-rate changes are applied to <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO's February 2026 baseline projections</a> for each year 2026 through 2034. The meter at the top shows the resulting end-of-2034 debt-to-GDP ratio and the implied gain in private investment.
+        Adjust the sliders below to build a fiscal scenario. Spending cuts and tax-rate changes are applied to <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO's February 2026 baseline projections</a> for each year 2026 through 2034. The chart at the top shows the resulting debt-to-GDP trajectory and the implied gain in private investment.
       </p>
       <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.7, margin: "0 0 20px" }}>
         Note: Changes to the sliders below don't take into account how the economy might react to changes in the deficit and taxes. Increasing taxes could lead to less of a gain in revenue if, for example, there is more tax avoidance, people work fewer hours or more income is shifted into tax shelters. On the other hand, as explained before, lowering the deficit can increase future national income. The CBO's analysis of the 2017 tax cut showed that behavioral changes would offset about{" "}
@@ -3391,24 +3402,124 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
         <a href="https://taxpolicycenter.org/briefing-book/what-are-dynamic-scoring-and-dynamic-analysis" target="_blank" rel="noreferrer" style={{ color: BLUE }}>little difference</a>.
       </p>
 
-      {/* 2034 Debt-to-GDP + implied GDP boost — year-by-year CBO projection */}
+      {/* Debt/GDP trajectory chart — year-by-year CBO projection with sustainable range */}
       {projection && (function () {
-        var fillPct = Math.min(100, Math.max(0, (projection.pp_delta / projection.baseline_debt_gdp) * 100));
+        var traj = projection.trajectory;
+        if (!traj || !traj.length) return null;
+        var CHART_W = 600, CHART_H = 200;
+        var PAD = { top: 16, right: 16, bottom: 24, left: 46 };
+        var plotW = CHART_W - PAD.left - PAD.right;
+        var plotH = CHART_H - PAD.top - PAD.bottom;
+        // Collect all values to compute Y range
+        var allVals = [];
+        traj.forEach(function (t) {
+          if (t.baseline != null) allVals.push(t.baseline);
+          if (t.scenario != null) allVals.push(t.scenario);
+        });
+        var maxVal = Math.max.apply(null, allVals);
+        var yMax = Math.ceil((maxVal * 1.15) / 10) * 10;
+        var yMin = 0;
+        // Scale functions
+        var yearMin = 2025.5;
+        var yearMax = 2034.5;
+        function scaleX(year) {
+          return PAD.left + ((year - yearMin) / (yearMax - yearMin)) * plotW;
+        }
+        function scaleY(val) {
+          return PAD.top + plotH - ((val - yMin) / (yMax - yMin)) * plotH;
+        }
+        // Path strings
+        var basePath = traj.filter(function (t) { return t.baseline != null; }).map(function (t, i) {
+          return (i === 0 ? "M" : "L") + scaleX(t.year).toFixed(1) + "," + scaleY(t.baseline).toFixed(1);
+        }).join(" ");
+        var scenPath = traj.filter(function (t) { return t.scenario != null; }).map(function (t, i) {
+          return (i === 0 ? "M" : "L") + scaleX(t.year).toFixed(1) + "," + scaleY(t.scenario).toFixed(1);
+        }).join(" ");
+        // Y-axis ticks
+        var yTicks = [];
+        for (var y = 0; y <= yMax; y += 20) yTicks.push(y);
+        // Hover state (from parent component)
+        var hoverPt = hoverIdx != null ? traj[hoverIdx] : null;
         var isImprove = projection.pp_delta > 0;
+        var interestSaved = projection.interest_savings || 0;
         return (
           <div style={{ marginBottom: 18 }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-              <span style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Projected 2034 Debt / GDP</span>
-              <span style={{ fontSize: 11, color: MUTED }}>Baseline {projection.baseline_debt_gdp.toFixed(1)}%</span>
+              <span style={{ fontSize: 11, color: MUTED, textTransform: "uppercase", letterSpacing: 0.5 }}>Debt / GDP Trajectory (2026–2034)</span>
+              <span style={{ fontSize: 11, color: MUTED }}>CBO baseline at 2034: {projection.baseline_debt_gdp.toFixed(1)}%</span>
             </div>
-            <div style={{ height: 14, background: "#fef2f2", borderRadius: 7, overflow: "hidden", display: "flex" }}>
-              {isImprove && (
-                <div style={{ height: "100%", width: fillPct + "%", background: BLOCK_POS, transition: "width 0.2s ease" }} />
+            <svg width="100%" viewBox={"0 0 " + CHART_W + " " + CHART_H} style={{ display: "block" }}>
+              {/* Sustainable range band */}
+              <rect x={PAD.left} y={scaleY(60)} width={plotW} height={scaleY(40) - scaleY(60)}
+                fill={BLOCK_POS} opacity="0.06" rx="2" />
+              <text x={PAD.left + 4} y={scaleY(60) - 4} fontSize="9" fill={MUTED} opacity="0.6">
+                Sustainable range (40–60%)
+              </text>
+              {/* Y-axis gridlines */}
+              {yTicks.map(function (tick) {
+                var yPos = scaleY(tick);
+                return (
+                  <React.Fragment key={"yt-" + tick}>
+                    <line x1={PAD.left} y1={yPos} x2={PAD.left + plotW} y2={yPos}
+                      stroke={BORDER} strokeWidth="1" />
+                    <text x={PAD.left - 4} y={yPos + 4} textAnchor="end" fontSize="10" fill={MUTED}>
+                      {tick}%
+                    </text>
+                  </React.Fragment>
+                );
+              })}
+              {/* Baseline path */}
+              <path d={basePath} fill="none" stroke={BLOCK_NEG} strokeWidth="1.5"
+                strokeDasharray="5 3" strokeLinejoin="round" />
+              {/* Scenario path */}
+              <path d={scenPath} fill="none" stroke={BLOCK_POS} strokeWidth="2"
+                strokeLinejoin="round" />
+              {/* X-axis year labels */}
+              {traj.map(function (t, i) {
+                return (
+                  <text key={"x-" + i} x={scaleX(t.year)} y={CHART_H - 4}
+                    textAnchor="middle" fontSize="10" fill={MUTED}>
+                    {String(t.year).slice(2)}
+                  </text>
+                );
+              })}
+              {/* Hover hit targets */}
+              {traj.map(function (t, i) {
+                var cx = scaleX(t.year);
+                return (
+                  <rect key={"hit-" + i} x={cx - 10} y={PAD.top} width={20} height={plotH}
+                    fill="transparent"
+                    onMouseEnter={function () { setHoverIdx(i); }}
+                    onMouseLeave={function () { setHoverIdx(null); }} />
+                );
+              })}
+              {/* Hover tooltip */}
+              {hoverPt && (
+                <g>
+                  <circle cx={scaleX(hoverPt.year)} cy={scaleY(hoverPt.scenario)}
+                    r={5} fill={BLOCK_POS} stroke="#fff" strokeWidth="1.5" />
+                  <rect x={Math.min(Math.max(scaleX(hoverPt.year) - 55, PAD.left), PAD.left + plotW - 110)}
+                    y={PAD.top - 34} width={110} height={30} rx={4}
+                    fill="#fff" stroke={BORDER} />
+                  <text x={Math.min(Math.max(scaleX(hoverPt.year), PAD.left + 55), PAD.left + plotW - 55)}
+                    y={PAD.top - 20} textAnchor="middle" fontSize="10" fontWeight="600" fill={TEXT}>
+                    {hoverPt.year}
+                  </text>
+                  <text x={Math.min(Math.max(scaleX(hoverPt.year), PAD.left + 55), PAD.left + plotW - 55)}
+                    y={PAD.top - 8} textAnchor="middle" fontSize="9" fill={MUTED}>
+                    Base: {hoverPt.baseline.toFixed(1)}%  Scen: {hoverPt.scenario.toFixed(1)}%
+                  </text>
+                </g>
               )}
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, gap: 12 }}>
+            </svg>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, gap: 12 }}>
               <span style={{ fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
-                Applies your slider changes to <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO's Feb 2026 baseline</a> year by year (2026–2034). Excludes interest savings and behavioral effects.
+                Applies changes to CBO's Feb 2026 baseline year by year (2026–2034).<br />
+                {interestSaved > 0 && (
+                  <span style={{ color: isImprove ? BLOCK_POS : MUTED }}>
+                    Cumulative interest savings: {fmtAmt(Math.abs(interestSaved) * 1000)}
+                  </span>
+                )}
               </span>
               <div style={{ textAlign: "right", flexShrink: 0 }}>
                 <span style={{ fontSize: 11, color: MUTED, display: "block" }}>Your scenario</span>
@@ -3422,11 +3533,6 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
                 </span>
               </div>
             </div>
-            {Math.abs(projection.cumulative_savings) > 1 && (
-              <div style={{ marginTop: 8, padding: "8px 12px", background: isImprove ? "#f0fdf4" : "#fef2f2", borderRadius: 6, fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
-                Cumulative 9-year deficit change: <strong style={{ color: isImprove ? BLOCK_POS : BLOCK_NEG }}>{projection.cumulative_savings > 0 ? "−" : "+"}{fmtAmt(Math.abs(projection.cumulative_savings) * 1000)}</strong>.
-              </div>
-            )}
           </div>
         );
       })()}
@@ -3636,7 +3742,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
               <span style={{ color: totalClosed > 0 ? BLOCK_POS : BLOCK_NEG }}>{totalClosed > 0 ? "−" : "+"}{fmtAmt(Math.abs(totalClosed) * 1000)}</span>
             </div>
             <div style={{ fontSize: 11, color: MUTED, marginTop: 4, lineHeight: 1.5 }}>
-              See the meter above for the compounded 2034 debt/GDP impact, which scales each cut against CBO's year-by-year projection (mandatory programs grow faster than discretionary).
+              See the chart above for the compounded 2034 debt/GDP impact, which scales each cut against CBO's year-by-year projection (mandatory programs grow faster than discretionary).
             </div>
           </div>
         </div>
@@ -3644,7 +3750,9 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
 
       <p style={{ fontSize: 12, color: MUTED }}>
         Source: <a href="https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304" target="_blank" rel="noreferrer" style={{ color: BLUE }}>IRS Statistics of Income, Publication 1304, Table 1.4, Tax Year 2023</a>.
-        Static scoring only — does not account for behavioral responses or supply-side effects.
+        Static scoring only — does not account for behavioral responses or supply-side effects.{' '}
+        Sustainable range reference: <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO, The Budget and Economic Outlook: 2026 to 2036</a>.
+        The 40–60% band approximates the 50‑year historical average for debt held by the public.
       </p>
 
       <div style={{ textAlign: "center", marginTop: 24, paddingTop: 20, borderTop: "1px solid " + BORDER }}>
