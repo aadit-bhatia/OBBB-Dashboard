@@ -2188,7 +2188,7 @@ function ConsolesPage() {
     <div>
       <h2 style={{ fontSize: 22, fontWeight: 700, color: TEXT, margin: "0 0 16px" }}>Does Government Debt Have to Be Repaid?</h2>
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 16px" }}>
-        A common misunderstanding is that someday governments will have to pay back the debt. Because creditors have to believe that people will be able to pay off their debts during their lifetimes, people can't run up unlimited debts. But governments don't have an expected lifetime so their ability to borrow isn't limited in the same way.
+        A common misunderstanding is that someday governments will have to pay back their debt. Because creditors have to believe that people will be able to pay off their debts during their lifetimes, people can't run up unlimited debts. But governments don't have an expected lifetime so their ability to borrow isn't limited in the same way.
       </p>
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 16px" }}>
         In fact many governments have issued debt that they never have to pay back — called <em>consoles</em> — and people bought them. Consoles pay interest, but the loan itself never has to be repaid. In fact, one such bond issued by the Dutch government in the 1600s was still paying interest a few years ago.
