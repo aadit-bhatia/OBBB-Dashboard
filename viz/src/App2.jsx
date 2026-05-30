@@ -3677,7 +3677,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <div style={{ fontSize: 11, color: MUTED }}>Additional revenue</div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: added > 0 ? color : added < 0 ? RED : MUTED }}>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: added > 0 ? BLOCK_POS : added < 0 ? RED : MUTED }}>
                     {added > 0 ? "+" + fmtAmt(added * 1000) : added < 0 ? "-" + fmtAmt(Math.abs(added) * 1000) : "—"}
                   </div>
                 </div>
@@ -3733,7 +3733,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
               return (
                 <div key={bucketName} style={{ display: "flex", justifyContent: "space-between" }}>
                   <span style={{ color: BUCKET_COLORS[bucketName] }}>{bucketName}: {b.effective_rate_pct}% → {cr.toFixed(1)}%</span>
-                  <span style={{ color: d > 0 ? BUCKET_COLORS[bucketName] : RED }}>{d > 0 ? "+" : ""}{fmtAmt(rev * 1000)}/yr</span>
+                  <span style={{ color: d > 0 ? BLOCK_POS : RED }}>{d > 0 ? "+" : ""}{fmtAmt(rev * 1000)}/yr</span>
                 </div>
               );
             })}
