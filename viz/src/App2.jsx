@@ -533,7 +533,7 @@ var TOUR_CONFIGS = {
     { title: "Hover a slice", body: "Click any slice of the donut to see what that category costs, why it's hard to cut, and polling data on public support. Red slices are mandatory spending — legally required by statute. Green slices are discretionary." },
     { title: "The math is brutal", body: "Even eliminating every green slice entirely: all of defense, education, veterans, foreign aid. It barely covers the deficit. Any plan to balance the budget requires some combination of cuts to mandatory programs, discretionary programs, and tax increases." },
   ],
-  // Page 13 — Balancing the Budget
+  // Page 13 — Your Fiscal Scenario
   13: [
     { title: "Drag the sliders", body: "Each slider raises the effective tax rate on that income group by up to 20 percentage points. The bar at the top fills in green as you close more of the deficit." },
     { title: "The static vs. real gap", body: "These numbers assume people keep earning and reporting the same income. In reality, higher rates lead to more deductions, income shifting, and deferral. The true revenue gain is real but smaller than what you see here." },
@@ -3754,13 +3754,6 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
         Sustainable range reference: <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO, The Budget and Economic Outlook: 2026 to 2036</a>.
         The 40–60% band approximates the 50‑year historical average for debt held by the public.
       </p>
-
-      <div style={{ textAlign: "center", marginTop: 24, paddingTop: 20, borderTop: "1px solid " + BORDER }}>
-        <a href="/obbba/" style={{
-          display: "inline-block", padding: "10px 24px", background: BLUE, color: "#fff",
-          borderRadius: 8, textDecoration: "none", fontSize: 15, fontWeight: 600,
-        }}>← Back to the Impact Map</a>
-      </div>
     </div>
   );
 }
@@ -6567,8 +6560,16 @@ function PageShell({ page, setPage, children, prompt }) {
           </button>
         )}
         {page === total - 1 && (
-          <div style={{ textAlign: "center", fontSize: 13, color: MUTED, paddingBottom: 12 }}>
-            End of tour · <a href="https://visualizepolicy.org" style={{ color: "#1e3a5f" }}>Visualize Policy</a>
+          <div style={{ textAlign: "center", paddingBottom: 12 }}>
+            <div style={{ marginBottom: 16 }}>
+              <a href="/obbba/" style={{
+                display: "inline-block", padding: "10px 24px", background: BLUE, color: "#fff",
+                borderRadius: 8, textDecoration: "none", fontSize: 15, fontWeight: 600,
+              }}>← Back to the Impact Map</a>
+            </div>
+            <div style={{ fontSize: 13, color: MUTED }}>
+              End of tour · <a href="https://visualizepolicy.org" style={{ color: "#1e3a5f" }}>Visualize Policy</a>
+            </div>
           </div>
         )}
       </div>
