@@ -4307,7 +4307,7 @@ function VariantDModal({ rep, scoreObj, onClose }) {
         {/* Methodology */}
         <div style={{ padding: "14px 18px", borderBottom: "1px solid " + BORDER, fontSize: 12, color: TEXT, lineHeight: 1.65 }}>
           <div style={{ fontWeight: 700, fontSize: 10.5, color: MUTED, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 6 }}>How the index works</div>
-          We add the CBO 10-year deficit impact of every bill they voted Yea on and subtract the impact of every bill they voted Nay on. That "actual" number is then placed on a scale running from the most deficit-increasing record they could have produced (every vote flipped toward spending, 0%) to the most deficit-reducing one (every vote flipped toward savings, 100%). The headline figure is their position on that interval, so higher = more deficit-reducing. Bills they didn't vote aren't counted in their index; to minimize outliers, we do not score representatives with less than 5 eligible votes in their tenure.
+          We add the CBO 10-year deficit impact of every bill they voted Yea on and subtract the impact of every bill they voted Nay on. That "actual" number is then placed on a scale running from the most deficit-increasing record they could have produced (every vote flipped toward spending, 0%) to the most deficit-reducing one (every vote flipped toward savings, 100%). The headline figure is their position on that interval, so higher = more deficit-reducing. Bills they didn't vote on aren't counted in their index; to minimize outliers, we do not score representatives with less than 5 eligible votes in their tenure.
         </div>
 
         {/* Min/max line graphic */}
