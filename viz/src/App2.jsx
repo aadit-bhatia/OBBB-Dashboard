@@ -3949,6 +3949,11 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
   }, [timeProfile, totalGDPDrag, dynamicDeficitRed, crowdInRatio]);
   var peakDrag = dynamicByYear.reduce(function (m, d) { return Math.max(m, d.drag); }, 0);
   var peakDragYear = (dynamicByYear.find(function (d) { return d.drag === peakDrag; }) || {}).year;
+  // Cumulative GDP impact over the modeled horizon (sum of the yearly effects).
+  var horizonYears = dynamicByYear.length;
+  var cumDrag = dynamicByYear.reduce(function (s, d) { return s + d.drag; }, 0);
+  var cumGain = dynamicByYear.reduce(function (s, d) { return s + d.gain; }, 0);
+  var cumNet  = cumGain - cumDrag;
 
   var hasChanges = staticSpendSaved > 0 || staticTaxRev !== 0;
 
@@ -4114,7 +4119,7 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
               {(function () {
                 var rows = dynamicByYear;
                 var W = 600, H = 210;
-                var PAD = { top: 16, right: 12, bottom: 30, left: 52 };
+                var PAD = { top: 16, right: 12, bottom: 30, left: 60 };
                 var plotW = W - PAD.left - PAD.right;
                 var plotH = H - PAD.top - PAD.bottom;
                 var maxUp = Math.max.apply(null, rows.map(function (d) { return d.gain; }).concat([0])) || 1;
@@ -4125,11 +4130,23 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
                 var band = plotW / rows.length, bw = Math.min(band * 0.5, 26);
                 return (
                   <svg width="100%" viewBox={"0 0 " + W + " " + H} style={{ display: "block" }}>
-                    {/* zero baseline */}
-                    <line x1={PAD.left} y1={zeroY} x2={PAD.left + plotW} y2={zeroY} stroke={MUTED} strokeWidth="1" />
-                    <text x={PAD.left - 6} y={PAD.top + 4} textAnchor="end" fontSize="9" fill={MUTED}>+{fmtAmt(top * 1000)}</text>
-                    <text x={PAD.left - 6} y={zeroY + 3} textAnchor="end" fontSize="9" fill={MUTED}>0</text>
-                    <text x={PAD.left - 6} y={PAD.top + plotH + 3} textAnchor="end" fontSize="9" fill={MUTED}>−{fmtAmt(bot * 1000)}</text>
+                    {/* Y axis: gridlines + value ticks (zero line emphasized) */}
+                    {[top, top / 2, 0, -bot / 2, -bot].map(function (tv, ti) {
+                      var yy = scaleY(tv);
+                      var isZero = Math.abs(tv) < 1e-9;
+                      return (
+                        <g key={"yt" + ti}>
+                          <line x1={PAD.left} y1={yy} x2={PAD.left + plotW} y2={yy}
+                            stroke={isZero ? MUTED : BORDER} strokeWidth="1" opacity={isZero ? 1 : 0.55} />
+                          <text x={PAD.left - 6} y={yy + 3} textAnchor="end" fontSize="9" fill={MUTED}>
+                            {(tv > 0 ? "+" : tv < 0 ? "−" : "") + (isZero ? "0" : fmtAmt(Math.abs(tv) * 1000))}
+                          </text>
+                        </g>
+                      );
+                    })}
+                    {/* Y axis line */}
+                    <line x1={PAD.left} y1={PAD.top} x2={PAD.left} y2={PAD.top + plotH} stroke={MUTED} strokeWidth="1" />
+                    <text transform={"rotate(-90 11 " + (PAD.top + plotH / 2) + ")"} x={11} y={PAD.top + plotH / 2} textAnchor="middle" fontSize="8.5" fill={MUTED}>Annual GDP effect</text>
                     {rows.map(function (d, i) {
                       var cx = PAD.left + band * i + band / 2;
                       var gTop = scaleY(d.gain), dBot = scaleY(-d.drag);
@@ -4160,15 +4177,19 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
             <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 10 }}>Bottom line</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: TEXT }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Short-run cost (peak GDP drag{peakDragYear ? ", ≈year " + peakDragYear : ""})</span>
-                <span style={{ color: BLOCK_NEG, fontWeight: 600 }}>−{fmtAmt(peakDrag * 1000)}</span>
+                <span>Cumulative short-run cost (GDP lost over {horizonYears} yrs)</span>
+                <span style={{ color: BLOCK_NEG, fontWeight: 600 }}>−{fmtAmt(cumDrag * 1000)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Long-run benefit (annual GDP gain by ~year 10)</span>
-                <span style={{ color: BLOCK_POS, fontWeight: 600 }}>+{fmtAmt(longRunGDPGain * 1000)}/yr</span>
+                <span>Cumulative crowding-in gain (extra GDP over {horizonYears} yrs)</span>
+                <span style={{ color: BLOCK_POS, fontWeight: 600 }}>+{fmtAmt(cumGain * 1000)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid " + BORDER, paddingTop: 6, fontWeight: 700 }}>
+                <span>Net cumulative GDP effect ({horizonYears} yrs)</span>
+                <span style={{ color: cumNet >= 0 ? BLOCK_POS : BLOCK_NEG }}>{cumNet >= 0 ? "+" : "−"}{fmtAmt(Math.abs(cumNet) * 1000)}</span>
               </div>
               <div style={{ borderTop: "1px solid " + BORDER, paddingTop: 6, fontSize: 12, color: MUTED, lineHeight: 1.55 }}>
-                These effects work in opposite directions on different timescales. The short-run contraction peaks around year 2 and fades within ~5 years; the long-run gain accumulates gradually toward its steady state by ~year 10.
+                Cumulative totals sum each year's effect over the {horizonYears}-year horizon above. The short-run contraction peaks around year 2 and fades within ~5 years; the crowding-in gain keeps accruing past this window, so the net benefit grows further over the long run.
               </div>
             </div>
           </div>
