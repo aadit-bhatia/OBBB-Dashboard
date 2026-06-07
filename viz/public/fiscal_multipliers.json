@@ -325,5 +325,11 @@
       { "value": 0.80, "source": "Upper bound: high-debt environment with meaningful risk premium channel; Laubach (2009) interest rate sensitivity implies larger investment response at current debt levels" }
     ],
     "notes": "CBO central estimate ($0.50) assumes a closed economy at full employment — likely an upper bound for the US. Open-economy adjustment (~0.30) more appropriate given floating dollar and global capital integration. Composition caveat: cuts to public investment (infrastructure, R&D, education) may crowd OUT private capital rather than in — the $0.50 figure applies to transfer cuts, not investment cuts."
+  },
+  "_time_profile": {
+    "demand_drag_weights": [1.0, 1.2, 0.8, 0.4, 0.1],
+    "crowding_in_ramp": [0, 0.08, 0.23, 0.39, 0.54, 0.66, 0.75, 0.82, 0.87, 0.91, 0.94],
+    "source_ids": ["imf-tnm-2014", "cbo-deficit-investment-2013"],
+    "notes": "demand_drag_weights: weight of a one-time fiscal change's demand effect by lag year (index 0 = year of the change .. index 4 = +4 years). Inverted-U peaking in year 2 at ~1.2x year 1, fading to ~0 by year 5 (IMF TNM 14/04). Year-1 weight = 1.0 anchors to the static per-category multipliers above. crowding_in_ramp: fraction of the long-run crowding-in GDP gain realized by year 0..10 — ~0 early, rising to the CBO steady state by ~year 10 (CBO WP 2014-02, gdp_per_dollar_deficit_reduction_central); intermediate years interpolated."
   }
 }

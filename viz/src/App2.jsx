@@ -188,6 +188,20 @@ function parseCboBaseline(rows) {
 }
 
 // ─────────────────────────────────────────────
+// FISCAL-SCENARIO MODELING PARAMETERS
+// ─────────────────────────────────────────────
+// The user's scenario phases in linearly over 3 years: year 1 = 1/3, year 2 = 2/3,
+// year 3 onward = full. (Index 0 = 2026, the first projection year.)
+var PHASE_IN_FRACTIONS = [0.3333, 0.6667, 1.0];
+function phaseInFactor(i) { return PHASE_IN_FRACTIONS[Math.min(i, PHASE_IN_FRACTIONS.length - 1)]; }
+// "Historically stable" debt-held-by-public target, % of GDP. CBO, Long-Term Budget
+// Outlook 2025 (pub 61270): the 50-year average of debt held by the public is 51% of GDP;
+// 50% is the round figure inside the chart's existing 40–60% sustainable band.
+var STABLE_DEBT_GDP = 50;
+// Search cap for "years to reach stable"; beyond this we report "not within N years".
+var EXTRAP_CAP_YEARS = 50;
+
+// ─────────────────────────────────────────────
 // BUDGET CATEGORIES  (shared by TaxPage + EconomicImpactPage)
 // ─────────────────────────────────────────────
 var SPEND_CATS = [
@@ -3311,7 +3325,8 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
     var running_savings = 0;       // cumulative deficit reduction + interest avoided, $B
     var direct_savings = 0;        // policy-driven deficit reduction (excludes interest), $B
     var trajectory = [];           // per-year debt/GDP for chart
-    baseline.years.forEach(function (y) {
+    baseline.years.forEach(function (y, i) {
+      var pf = phaseInFactor(i);   // 3-year linear phase-in of the scenario
       // Baseline year totals
       var baseOutlay = 0;
       ["Social Security","Medicare","Medicaid","Other mandatory","Offsetting receipts","Defense","Nondefense","Net interest"]
@@ -3324,8 +3339,9 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
       SPEND_CATS.forEach(function (c) {
         spendCutY += baseline.savingsForYear(c.key, cuts[c.key] || 0, y);
       });
+      spendCutY *= pf;   // phase in the spending cuts
       var scenarioOutlay = baseOutlay - spendCutY;
-      var scenarioRevenue = baseRevenue + additionalRevenue;
+      var scenarioRevenue = baseRevenue + additionalRevenue * pf;   // phase in the tax increases
       var year_direct_savings = (baseOutlay - baseRevenue) - (scenarioOutlay - scenarioRevenue);
       // Interest on prior-year cumulative savings (debt avoided last year doesn't accrue interest this year).
       var rate = baseline.get("Average interest rate", y) || 0.039;
@@ -3356,6 +3372,46 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
       interest_savings: running_savings - direct_savings,
       trajectory: trajectory,
     };
+  }, [baseline, cuts, additionalRevenue]);
+
+  // How long until the scenario brings debt/GDP down to the historically stable level
+  // (STABLE_DEBT_GDP). 2026–2034 use the CBO baseline; beyond 2034 we extrapolate — GDP and
+  // baseline debt grow at their 2033→2034 rates, the fully-phased-in annual policy improvement
+  // grows with GDP (so it stays ~constant as a share of GDP), and interest compounds at the
+  // 2034 average rate. Returns null if the target isn't reached within EXTRAP_CAP_YEARS.
+  var yearsToStable = useMemo(function () {
+    if (!baseline) return null;
+    var yrs = baseline.years;
+    var first = yrs[0];                            // 2026
+    var last  = yrs[yrs.length - 1];               // 2034
+    var gdpLast = baseline.get("GDP", last), gdpPrev = baseline.get("GDP", last - 1);
+    var gdpGrowth = gdpPrev ? (gdpLast / gdpPrev - 1) : 0.037;
+    var debtLast = baseline.get("Debt held by public", last), debtPrev = baseline.get("Debt held by public", last - 1);
+    var debtGrowth = debtPrev ? (debtLast / debtPrev - 1) : 0.05;
+    var rate = baseline.get("Average interest rate", last) || 0.039;
+
+    var running = 0, lastDirect = 0, baseDebt = 0, gdp = 0;
+    for (var k = 0; k < EXTRAP_CAP_YEARS; k++) {
+      var yr = first + k;
+      var pf = phaseInFactor(k);
+      var yearDirect;
+      if (k < yrs.length) {
+        var spendCutY = 0;
+        SPEND_CATS.forEach(function (c) { spendCutY += baseline.savingsForYear(c.key, cuts[c.key] || 0, yr); });
+        yearDirect = spendCutY * pf + additionalRevenue * pf;
+        baseDebt = baseline.get("Debt held by public", yr);
+        gdp = baseline.get("GDP", yr);
+      } else {
+        yearDirect = lastDirect * (1 + gdpGrowth);
+        baseDebt = baseDebt * (1 + debtGrowth);
+        gdp = gdp * (1 + gdpGrowth);
+      }
+      running += yearDirect + running * rate;
+      lastDirect = yearDirect;
+      var scenGdp = gdp ? (baseDebt - running) / gdp * 100 : null;
+      if (scenGdp != null && scenGdp <= STABLE_DEBT_GDP) return { years: k, reachYear: yr };
+    }
+    return null;
   }, [baseline, cuts, additionalRevenue]);
 
   var totalClosed = additionalRevenue + spendingSavings; // billions (annual, for slider summaries below)
@@ -3455,6 +3511,12 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
               <text x={PAD.left + 4} y={scaleY(60) - 4} fontSize="9" fill={MUTED} opacity="0.6">
                 Sustainable range (40–60%)
               </text>
+              {/* Historically stable target (~50%, CBO 50-yr average) */}
+              <line x1={PAD.left} y1={scaleY(STABLE_DEBT_GDP)} x2={PAD.left + plotW} y2={scaleY(STABLE_DEBT_GDP)}
+                stroke={BLOCK_POS} strokeWidth="1" strokeDasharray="2 2" opacity="0.7" />
+              <text x={PAD.left + plotW - 2} y={scaleY(STABLE_DEBT_GDP) - 3} textAnchor="end" fontSize="8.5" fill={BLOCK_POS} opacity="0.85">
+                stable ~{STABLE_DEBT_GDP}%
+              </text>
               {/* Y-axis gridlines */}
               {yTicks.map(function (tick) {
                 var yPos = scaleY(tick);
@@ -3532,6 +3594,15 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
                   )}
                 </span>
               </div>
+            </div>
+            {/* Years-to-stable readout */}
+            <div style={{ marginTop: 10, padding: "10px 12px", background: SURFACE, borderRadius: 8, border: "1px solid " + BORDER, fontSize: 13, color: TEXT, lineHeight: 1.5 }}>
+              {yearsToStable
+                ? <span>Phased in over 3 years, this scenario brings debt held by the public down to the historically stable level of about {STABLE_DEBT_GDP}% of GDP around <strong>{yearsToStable.reachYear}</strong> — roughly <strong>{yearsToStable.years} years</strong> from now.</span>
+                : <span>This scenario does <strong>not</strong> bring debt held by the public down to the historically stable level (about {STABLE_DEBT_GDP}% of GDP) within {EXTRAP_CAP_YEARS} years.</span>}
+              <span style={{ display: "block", marginTop: 4, fontSize: 11, color: MUTED }}>
+                Stable level ≈ the 50-year average of debt held by the public (<a href="https://www.cbo.gov/publication/61270" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO, Long-Term Budget Outlook 2025</a> — 51% of GDP). After 2034, GDP and debt are extrapolated at their 2034 growth rates.
+              </span>
             </div>
           </div>
         );
@@ -3851,6 +3922,39 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
   var totalGDPDrag   = gdpDragSpending + gdpDragTax;
   var longRunGDPGain = dynamicDeficitRed * crowdInRatio;
 
+  // ── Year-by-year time profile (overlapping impulse responses) ──────────────
+  // The policy phases in over 3 years; each year's increment generates its own demand-drag
+  // pulse (inverted-U, fades by ~yr5) while crowding-in tracks the cumulative sustained
+  // deficit reduction ramping to the CBO steady state by ~yr10. Coefficients:
+  // fiscal_multipliers.json _time_profile (IMF TNM 14/04; CBO WP 2014-02).
+  var timeProfile = multipliersData ? multipliersData._time_profile : null;
+  var dynamicByYear = useMemo(function () {
+    if (!timeProfile) return [];
+    var dragW = timeProfile.demand_drag_weights || [1];
+    var ramp  = timeProfile.crowding_in_ramp || [1];
+    var inc = function (k) { return phaseInFactor(k) - (k > 0 ? phaseInFactor(k - 1) : 0); };
+    var rows = [];
+    for (var t = 0; t < 12; t++) {
+      var drag = 0;
+      for (var k = 0; k <= t; k++) {
+        var f = inc(k); var lag = t - k;
+        if (f > 0 && lag < dragW.length) drag += f * totalGDPDrag * dragW[lag];
+      }
+      var sustainedRed = dynamicDeficitRed * phaseInFactor(t);   // reduction in place by year t
+      var rampF = t < ramp.length ? ramp[t] : 1.0;
+      var gain = sustainedRed * crowdInRatio * rampF;
+      rows.push({ year: t + 1, drag: drag, gain: gain, net: gain - drag });
+    }
+    return rows;
+  }, [timeProfile, totalGDPDrag, dynamicDeficitRed, crowdInRatio]);
+  var peakDrag = dynamicByYear.reduce(function (m, d) { return Math.max(m, d.drag); }, 0);
+  var peakDragYear = (dynamicByYear.find(function (d) { return d.drag === peakDrag; }) || {}).year;
+  // Cumulative GDP impact over the modeled horizon (sum of the yearly effects).
+  var horizonYears = dynamicByYear.length;
+  var cumDrag = dynamicByYear.reduce(function (s, d) { return s + d.drag; }, 0);
+  var cumGain = dynamicByYear.reduce(function (s, d) { return s + d.gain; }, 0);
+  var cumNet  = cumGain - cumDrag;
+
   var hasChanges = staticSpendSaved > 0 || staticTaxRev !== 0;
 
   var ORDER = ["Under $25K", "$25K to $75K", "$75K to $200K", "$200K to $1M", "Over $1M"];
@@ -3933,13 +4037,13 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
             )}
           </Card>
 
-          {/* Card 2 — Year-1 GDP Impact */}
+          {/* Card 2 — Short-run GDP drag */}
           <Card>
             <div style={{ fontSize: 13, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 14 }}>
-              Year-1 GDP Impact
+              Short-run GDP Drag
             </div>
             <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.55, margin: "0 0 14px" }}>
-              Fiscal multipliers measure how much GDP changes per $1 of spending cut or tax increase in the first year. A multiplier of 1.5 means a $100B cut reduces GDP by about $150B.
+              Fiscal multipliers measure how much GDP changes per $1 of spending cut or tax increase. A multiplier of 1.5 means a $100B cut reduces GDP by about $150B. As the policy phases in over three years, this drag builds, peaks around year 2–3, then fades within about five years (per-category figures below show the peak-year composition).
             </p>
             {gdpDragSpending > 0 && (
               <div style={{ marginBottom: 12 }}>
@@ -3973,11 +4077,11 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
               </div>
             )}
             <div style={{ borderTop: "2px solid " + BORDER, paddingTop: 10, display: "flex", justifyContent: "space-between", fontSize: 15, fontWeight: 800 }}>
-              <span>Total year-1 GDP drag</span>
-              <span style={{ color: BLOCK_NEG }}>−{fmtAmt(totalGDPDrag * 1000)} ({pctGDP(totalGDPDrag)}% of GDP)</span>
+              <span>Peak short-run GDP drag{peakDragYear ? " (≈year " + peakDragYear + ")" : ""}</span>
+              <span style={{ color: BLOCK_NEG }}>−{fmtAmt(peakDrag * 1000)} ({pctGDP(peakDrag)}% of GDP)</span>
             </div>
             <div style={{ marginTop: 10, fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
-              Source: CBO, "Estimated Impact of the American Recovery and Reinvestment Act" (Feb 2015), Table 2 multiplier ranges. Estimates reflect a near-ZLB environment; current-period multipliers may be somewhat lower. Effects fade as the economy adjusts — typically most of the demand drag resolves within 2–3 years.
+              Source: CBO, "Estimated Impact of the American Recovery and Reinvestment Act" (Feb 2015), Table 2 multiplier ranges. Time path per IMF TNM 14/04: the demand effect follows an inverted-U, peaking in the second year and fading within about five years.
             </div>
           </Card>
 
@@ -3996,27 +4100,98 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
               </span>
             </div>
             <div style={{ marginTop: 6, fontSize: 12, color: MUTED }}>
-              Applies to dynamic deficit reduction of {fmtAmt(dynamicDeficitRed * 1000)}/yr × {crowdInRatio} (CBO central estimate)
+              Applies to dynamic deficit reduction of {fmtAmt(dynamicDeficitRed * 1000)}/yr × {crowdInRatio} (CBO central estimate), reached gradually — roughly full by year 10 (see timeline below).
             </div>
             <div style={{ marginTop: 10, fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
               Source: CBO, "The Long-Run Effects of Federal Budget Deficits on National Saving, Private Domestic Investment, and International Capital Flows" (2013). Central estimate: $1 deficit reduction → $0.50 additional GDP by ≈year 10 (via capital-stock channel). This is a long-run steady-state effect, not a year-1 figure.
             </div>
           </Card>
 
+          {/* Card 4 — GDP effect over time */}
+          {dynamicByYear.length > 0 && (
+            <Card>
+              <div style={{ fontSize: 13, fontWeight: 700, color: MUTED, textTransform: "uppercase", letterSpacing: 1.2, marginBottom: 14 }}>
+                GDP Effect Over Time
+              </div>
+              <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.55, margin: "0 0 14px" }}>
+                The short-run drag and the long-run gain run on different clocks. The drag (red, below the line) peaks around year {peakDragYear} and fades within ~5 years; the crowding-in gain (green, above the line) builds gradually toward its ~year-10 steady state.
+              </p>
+              {(function () {
+                var rows = dynamicByYear;
+                var W = 600, H = 210;
+                var PAD = { top: 16, right: 12, bottom: 30, left: 60 };
+                var plotW = W - PAD.left - PAD.right;
+                var plotH = H - PAD.top - PAD.bottom;
+                var maxUp = Math.max.apply(null, rows.map(function (d) { return d.gain; }).concat([0]));
+                var maxDown = Math.max.apply(null, rows.map(function (d) { return d.drag; }).concat([0]));
+                // Symmetric range so each division is the same magnitude above and below zero.
+                var mag = (Math.max(maxUp, maxDown) || 1) * 1.15;
+                var top = mag, bot = mag;
+                function scaleY(v) { return PAD.top + (top - v) / (top + bot) * plotH; }
+                var zeroY = scaleY(0);
+                var band = plotW / rows.length, bw = Math.min(band * 0.5, 26);
+                return (
+                  <svg width="100%" viewBox={"0 0 " + W + " " + H} style={{ display: "block" }}>
+                    {/* Y axis: gridlines + value ticks (zero line emphasized) */}
+                    {[top, top / 2, 0, -bot / 2, -bot].map(function (tv, ti) {
+                      var yy = scaleY(tv);
+                      var isZero = Math.abs(tv) < 1e-9;
+                      return (
+                        <g key={"yt" + ti}>
+                          <line x1={PAD.left} y1={yy} x2={PAD.left + plotW} y2={yy}
+                            stroke={isZero ? MUTED : BORDER} strokeWidth="1" opacity={isZero ? 1 : 0.55} />
+                          <text x={PAD.left - 6} y={yy + 3} textAnchor="end" fontSize="9" fill={MUTED}>
+                            {(tv > 0 ? "+" : tv < 0 ? "−" : "") + (isZero ? "0" : fmtAmt(Math.abs(tv) * 1000))}
+                          </text>
+                        </g>
+                      );
+                    })}
+                    {/* Y axis line */}
+                    <line x1={PAD.left} y1={PAD.top} x2={PAD.left} y2={PAD.top + plotH} stroke={MUTED} strokeWidth="1" />
+                    <text transform={"rotate(-90 11 " + (PAD.top + plotH / 2) + ")"} x={11} y={PAD.top + plotH / 2} textAnchor="middle" fontSize="8.5" fill={MUTED}>Annual GDP effect</text>
+                    {rows.map(function (d, i) {
+                      var cx = PAD.left + band * i + band / 2;
+                      var gTop = scaleY(d.gain), dBot = scaleY(-d.drag);
+                      return (
+                        <g key={i}>
+                          {d.gain > 0.0001 && <rect x={cx - bw / 2} y={gTop} width={bw} height={Math.max(0, zeroY - gTop)} fill={BLOCK_POS} opacity="0.9" rx="1" />}
+                          {d.drag > 0.0001 && <rect x={cx - bw / 2} y={zeroY} width={bw} height={Math.max(0, dBot - zeroY)} fill={BLOCK_NEG} opacity="0.85" rx="1" />}
+                          <text x={cx} y={H - 16} textAnchor="middle" fontSize="9" fill={MUTED}>{d.year}</text>
+                        </g>
+                      );
+                    })}
+                    <text x={PAD.left + plotW / 2} y={H - 3} textAnchor="middle" fontSize="9" fill={MUTED}>Year</text>
+                  </svg>
+                );
+              })()}
+              <div style={{ display: "flex", gap: 18, justifyContent: "center", fontSize: 11, color: MUTED, marginTop: 4 }}>
+                <span><span style={{ display: "inline-block", width: 9, height: 9, background: BLOCK_NEG, borderRadius: 2, marginRight: 5, verticalAlign: "middle" }} />Short-run drag</span>
+                <span><span style={{ display: "inline-block", width: 9, height: 9, background: BLOCK_POS, borderRadius: 2, marginRight: 5, verticalAlign: "middle" }} />Crowding-in gain</span>
+              </div>
+              <div style={{ marginTop: 10, fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
+                Time profile: demand drag follows an inverted-U peaking in year 2, fading by ~year 5 (IMF TNM 14/04); crowding-in builds to its steady state by ~year 10 (CBO WP 2014-02). Both scale with the 3-year phase-in.
+              </div>
+            </Card>
+          )}
+
           {/* Net summary callout */}
           <div style={{ background: "#f8fafc", borderRadius: 10, padding: "16px 20px", border: "1px solid " + BORDER }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 10 }}>Bottom line</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 13, color: TEXT }}>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Short-run cost (year-1 GDP contraction)</span>
-                <span style={{ color: BLOCK_NEG, fontWeight: 600 }}>−{fmtAmt(totalGDPDrag * 1000)}</span>
+                <span>Cumulative short-run cost (GDP lost over {horizonYears} yrs)</span>
+                <span style={{ color: BLOCK_NEG, fontWeight: 600 }}>−{fmtAmt(cumDrag * 1000)}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Long-run benefit (annual GDP gain by ~2034)</span>
-                <span style={{ color: BLOCK_POS, fontWeight: 600 }}>+{fmtAmt(longRunGDPGain * 1000)}/yr</span>
+                <span>Cumulative crowding-in gain (extra GDP over {horizonYears} yrs)</span>
+                <span style={{ color: BLOCK_POS, fontWeight: 600 }}>+{fmtAmt(cumGain * 1000)}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid " + BORDER, paddingTop: 6, fontWeight: 700 }}>
+                <span>Net cumulative GDP effect ({horizonYears} yrs)</span>
+                <span style={{ color: cumNet >= 0 ? BLOCK_POS : BLOCK_NEG }}>{cumNet >= 0 ? "+" : "−"}{fmtAmt(Math.abs(cumNet) * 1000)}</span>
               </div>
               <div style={{ borderTop: "1px solid " + BORDER, paddingTop: 6, fontSize: 12, color: MUTED, lineHeight: 1.55 }}>
-                These effects work in opposite directions on different timescales. The short-run contraction typically fades within 2–3 years. The long-run gain accumulates gradually as deficit reduction compounds over time.
+                Cumulative totals sum each year's effect over the {horizonYears}-year horizon above. The short-run contraction peaks around year 2 and fades within ~5 years; the crowding-in gain keeps accruing past this window, so the net benefit grows further over the long run.
               </div>
             </div>
           </div>
