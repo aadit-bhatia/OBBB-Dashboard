@@ -4122,9 +4122,11 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
                 var PAD = { top: 16, right: 12, bottom: 30, left: 60 };
                 var plotW = W - PAD.left - PAD.right;
                 var plotH = H - PAD.top - PAD.bottom;
-                var maxUp = Math.max.apply(null, rows.map(function (d) { return d.gain; }).concat([0])) || 1;
-                var maxDown = Math.max.apply(null, rows.map(function (d) { return d.drag; }).concat([0])) || 1;
-                var top = maxUp * 1.15, bot = maxDown * 1.15;
+                var maxUp = Math.max.apply(null, rows.map(function (d) { return d.gain; }).concat([0]));
+                var maxDown = Math.max.apply(null, rows.map(function (d) { return d.drag; }).concat([0]));
+                // Symmetric range so each division is the same magnitude above and below zero.
+                var mag = (Math.max(maxUp, maxDown) || 1) * 1.15;
+                var top = mag, bot = mag;
                 function scaleY(v) { return PAD.top + (top - v) / (top + bot) * plotH; }
                 var zeroY = scaleY(0);
                 var band = plotW / rows.length, bw = Math.min(band * 0.5, 26);
