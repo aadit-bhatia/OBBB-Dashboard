@@ -4109,34 +4109,46 @@ function EconomicImpactPage({ taxData, cboBaseline, cuts, ratesRaw, multipliersD
                 GDP Effect Over Time
               </div>
               <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.55, margin: "0 0 14px" }}>
-                The short-run drag and the long-run gain run on different clocks. The drag peaks around year {peakDragYear} and fades within ~5 years; the crowding-in gain builds gradually toward its ~year-10 steady state. Net effect by year:
+                The short-run drag and the long-run gain run on different clocks. The drag (red, below the line) peaks around year {peakDragYear} and fades within ~5 years; the crowding-in gain (green, above the line) builds gradually toward its ~year-10 steady state.
               </p>
-              <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ color: MUTED }}>
-                    <th style={{ textAlign: "left", padding: "2px 0", fontWeight: 600 }}>Year</th>
-                    <th style={{ textAlign: "right", fontWeight: 600 }}>Drag</th>
-                    <th style={{ textAlign: "right", fontWeight: 600 }}>Crowding-in</th>
-                    <th style={{ textAlign: "right", fontWeight: 600 }}>Net</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[1, 2, 3, 5, 7, 10].map(function (yy) {
-                    var d = dynamicByYear[yy - 1];
-                    if (!d) return null;
-                    return (
-                      <tr key={yy}>
-                        <td style={{ textAlign: "left", padding: "3px 0", color: TEXT }}>Year {yy}</td>
-                        <td style={{ textAlign: "right", color: BLOCK_NEG }}>−{fmtAmt(d.drag * 1000)}</td>
-                        <td style={{ textAlign: "right", color: BLOCK_POS }}>+{fmtAmt(d.gain * 1000)}</td>
-                        <td style={{ textAlign: "right", fontWeight: 700, color: d.net >= 0 ? BLOCK_POS : BLOCK_NEG }}>
-                          {d.net >= 0 ? "+" : "−"}{fmtAmt(Math.abs(d.net) * 1000)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              {(function () {
+                var rows = dynamicByYear;
+                var W = 600, H = 210;
+                var PAD = { top: 16, right: 12, bottom: 30, left: 52 };
+                var plotW = W - PAD.left - PAD.right;
+                var plotH = H - PAD.top - PAD.bottom;
+                var maxUp = Math.max.apply(null, rows.map(function (d) { return d.gain; }).concat([0])) || 1;
+                var maxDown = Math.max.apply(null, rows.map(function (d) { return d.drag; }).concat([0])) || 1;
+                var top = maxUp * 1.15, bot = maxDown * 1.15;
+                function scaleY(v) { return PAD.top + (top - v) / (top + bot) * plotH; }
+                var zeroY = scaleY(0);
+                var band = plotW / rows.length, bw = Math.min(band * 0.5, 26);
+                return (
+                  <svg width="100%" viewBox={"0 0 " + W + " " + H} style={{ display: "block" }}>
+                    {/* zero baseline */}
+                    <line x1={PAD.left} y1={zeroY} x2={PAD.left + plotW} y2={zeroY} stroke={MUTED} strokeWidth="1" />
+                    <text x={PAD.left - 6} y={PAD.top + 4} textAnchor="end" fontSize="9" fill={MUTED}>+{fmtAmt(top * 1000)}</text>
+                    <text x={PAD.left - 6} y={zeroY + 3} textAnchor="end" fontSize="9" fill={MUTED}>0</text>
+                    <text x={PAD.left - 6} y={PAD.top + plotH + 3} textAnchor="end" fontSize="9" fill={MUTED}>−{fmtAmt(bot * 1000)}</text>
+                    {rows.map(function (d, i) {
+                      var cx = PAD.left + band * i + band / 2;
+                      var gTop = scaleY(d.gain), dBot = scaleY(-d.drag);
+                      return (
+                        <g key={i}>
+                          {d.gain > 0.0001 && <rect x={cx - bw / 2} y={gTop} width={bw} height={Math.max(0, zeroY - gTop)} fill={BLOCK_POS} opacity="0.9" rx="1" />}
+                          {d.drag > 0.0001 && <rect x={cx - bw / 2} y={zeroY} width={bw} height={Math.max(0, dBot - zeroY)} fill={BLOCK_NEG} opacity="0.85" rx="1" />}
+                          <text x={cx} y={H - 16} textAnchor="middle" fontSize="9" fill={MUTED}>{d.year}</text>
+                        </g>
+                      );
+                    })}
+                    <text x={PAD.left + plotW / 2} y={H - 3} textAnchor="middle" fontSize="9" fill={MUTED}>Year</text>
+                  </svg>
+                );
+              })()}
+              <div style={{ display: "flex", gap: 18, justifyContent: "center", fontSize: 11, color: MUTED, marginTop: 4 }}>
+                <span><span style={{ display: "inline-block", width: 9, height: 9, background: BLOCK_NEG, borderRadius: 2, marginRight: 5, verticalAlign: "middle" }} />Short-run drag</span>
+                <span><span style={{ display: "inline-block", width: 9, height: 9, background: BLOCK_POS, borderRadius: 2, marginRight: 5, verticalAlign: "middle" }} />Crowding-in gain</span>
+              </div>
               <div style={{ marginTop: 10, fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
                 Time profile: demand drag follows an inverted-U peaking in year 2, fading by ~year 5 (IMF TNM 14/04); crowding-in builds to its steady state by ~year 10 (CBO WP 2014-02). Both scale with the 3-year phase-in.
               </div>
