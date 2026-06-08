@@ -194,11 +194,11 @@ function parseCboBaseline(rows) {
 // year 3 onward = full. (Index 0 = 2026, the first projection year.)
 var PHASE_IN_FRACTIONS = [0.3333, 0.6667, 1.0];
 function phaseInFactor(i) { return PHASE_IN_FRACTIONS[Math.min(i, PHASE_IN_FRACTIONS.length - 1)]; }
-// "Historically stable" debt-held-by-public target, % of GDP. CBO, Long-Term Budget
+// Fifty-year-average debt-held-by-public benchmark, % of GDP. CBO, Long-Term Budget
 // Outlook 2025 (pub 61270): the 50-year average of debt held by the public is 51% of GDP;
-// 50% is the round figure inside the chart's existing 40–60% sustainable band.
-var STABLE_DEBT_GDP = 50;
-// Search cap for "years to reach stable"; beyond this we report "not within N years".
+// 50% is the round figure used as the page's benchmark.
+var TARGET_DEBT_GDP = 50;
+// Search cap for "years to reach the 50% benchmark"; beyond this we report "not within N years".
 var EXTRAP_CAP_YEARS = 50;
 
 // ─────────────────────────────────────────────
@@ -549,10 +549,10 @@ var TOUR_CONFIGS = {
   ],
   // Page 13 — Your Fiscal Scenario
   13: [
-    { title: "Drag the sliders", body: "Each slider raises the effective tax rate on that income group by up to 20 percentage points. The bar at the top fills in green as you close more of the deficit." },
-    { title: "The static vs. real gap", body: "These numbers assume people keep earning and reporting the same income. In reality, higher rates lead to more deductions, income shifting, and deferral. The true revenue gain is real but smaller than what you see here." },
-    { title: "Cutting spending", body: "Spending is divided into two groups. Discretionary spending — defense, veterans, education — is set annually by Congress and can be cut directly. This happened in 2013 through the Budget Control Act's sequestration, which imposed across-the-board cuts after Congress failed to agree on a deficit plan. Mandatory programs require new legislation to cut. While rare, the OBBBA cut Medicare spending to fund some of its tax cuts." },
-    { title: "In the real world", body: "In reality, some of these effects work against you. Cutting government spending reduces growth and new investments, but increasing taxes does the same. Economists disagree on how much each factor matters." },
+    { title: "Build a scenario with the sliders", body: "Use the sliders below to cut spending or raise taxes. Spending sliders cut a percentage of each program; tax sliders raise the rate paid by each income group. Your changes phase in gradually over the first three years." },
+    { title: "Read the chart", body: "The chart at the top tracks debt held by the public as a share of GDP. The red dashed line is CBO's current-law baseline; the green line is your scenario. The shaded band marks the fifty-year average." },
+    { title: "Watch the numbers move", body: "As you drag the sliders, the green line and the figures update live: the gap from the baseline (in percentage points) and the cumulative interest savings show how much your scenario bends the path by 2034." },
+    { title: "See the outcome", body: "The box under the chart tells you whether your scenario brings debt down to about 50% of GDP, and if so, roughly how many years it takes. The next page then shows how the economy might react to your plan." },
   ],
   // Page 14 — Economic Feedback Effects
   14: [
@@ -2457,7 +2457,7 @@ function CrowdingOutTextPage() {
       steps: [
         {
           heading: "Crowding Out Investment",
-          body: "CBO estimates that for every dollar the federal deficit increases, private investment falls by 33 cents — with a range of 15 to 50 cents depending on how much private saving and foreign capital offset the borrowing. Over 30 years, rising debt under current law could reduce average income growth by 16% relative to a debt-stable scenario.",
+          body: "CBO estimates that for every dollar the federal deficit increases, private investment falls by 33 cents — with a range of 15 to 50 cents depending on how much private saving and foreign capital offset the borrowing. Over 30 years, rising debt under current law could reduce average income growth by 16% relative to a long-term average scenario.",
           source: "CBO, The Long-Run Effects of Federal Budget Deficits on National Saving and Private Domestic Investment, Working Paper 2014-02",
           sourceUrl: "https://www.cbo.gov/sites/default/files/cbofiles/attachments/45140-NSPDI_workingPaper.pdf",
         },
@@ -3374,12 +3374,12 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
     };
   }, [baseline, cuts, additionalRevenue]);
 
-  // How long until the scenario brings debt/GDP down to the historically stable level
-  // (STABLE_DEBT_GDP). 2026–2034 use the CBO baseline; beyond 2034 we extrapolate — GDP and
+  // How long until the scenario brings debt/GDP down to the 50% benchmark
+  // (TARGET_DEBT_GDP). 2026–2034 use the CBO baseline; beyond 2034 we extrapolate — GDP and
   // baseline debt grow at their 2033→2034 rates, the fully-phased-in annual policy improvement
   // grows with GDP (so it stays ~constant as a share of GDP), and interest compounds at the
   // 2034 average rate. Returns null if the target isn't reached within EXTRAP_CAP_YEARS.
-  var yearsToStable = useMemo(function () {
+  var yearsToTarget = useMemo(function () {
     if (!baseline) return null;
     var yrs = baseline.years;
     var first = yrs[0];                            // 2026
@@ -3409,7 +3409,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
       running += yearDirect + running * rate;
       lastDirect = yearDirect;
       var scenGdp = gdp ? (baseDebt - running) / gdp * 100 : null;
-      if (scenGdp != null && scenGdp <= STABLE_DEBT_GDP) return { years: k, reachYear: yr };
+      if (scenGdp != null && scenGdp <= TARGET_DEBT_GDP) return { years: k, reachYear: yr };
     }
     return null;
   }, [baseline, cuts, additionalRevenue]);
@@ -3449,7 +3449,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
       </div>
 
       <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 10px" }}>
-        Adjust the sliders below to build a fiscal scenario. Spending cuts and tax-rate changes are applied to <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO's February 2026 baseline projections</a> for each year 2026 through 2034. The chart at the top shows the resulting debt-to-GDP trajectory and the implied gain in private investment.
+        On the U.S.'s current path, the national debt is projected to grow continually. You have just read about the potential problems this causes, as well as the difficulty of addressing the issue through spending cuts alone. On this page, you can adjust the sliders for spending programs and taxes to attempt to bring the debt-to-GDP ratio down to a historically normal level of approximately 50% within 50 years. Spending cuts and tax-rate changes are applied to <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO's February 2026 baseline projections</a> for each year 2026 through 2034. Beyond 2034, we assume the economy and the debt keep growing at their final projected (2034) rates, your policy changes hold steady as a share of the economy, and interest accrues at the 2034 average rate.
       </p>
       <p style={{ fontSize: 13, color: MUTED, lineHeight: 1.7, margin: "0 0 20px" }}>
         Note: Changes to the sliders below don't take into account how the economy might react to changes in the deficit and taxes. Increasing taxes could lead to less of a gain in revenue if, for example, there is more tax avoidance, people work fewer hours or more income is shifted into tax shelters. On the other hand, as explained before, lowering the deficit can increase future national income. The CBO's analysis of the 2017 tax cut showed that behavioral changes would offset about{" "}
@@ -3458,7 +3458,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
         <a href="https://taxpolicycenter.org/briefing-book/what-are-dynamic-scoring-and-dynamic-analysis" target="_blank" rel="noreferrer" style={{ color: BLUE }}>little difference</a>.
       </p>
 
-      {/* Debt/GDP trajectory chart — year-by-year CBO projection with sustainable range */}
+      {/* Debt/GDP trajectory chart — year-by-year CBO projection with fifty-year-average band */}
       {projection && (function () {
         var traj = projection.trajectory;
         if (!traj || !traj.length) return null;
@@ -3505,17 +3505,17 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
               <span style={{ fontSize: 11, color: MUTED }}>CBO baseline at 2034: {projection.baseline_debt_gdp.toFixed(1)}%</span>
             </div>
             <svg width="100%" viewBox={"0 0 " + CHART_W + " " + CHART_H} style={{ display: "block" }}>
-              {/* Sustainable range band */}
+              {/* Fifty-year-average band (40–60%) */}
               <rect x={PAD.left} y={scaleY(60)} width={plotW} height={scaleY(40) - scaleY(60)}
                 fill={BLOCK_POS} opacity="0.06" rx="2" />
               <text x={PAD.left + 4} y={scaleY(60) - 4} fontSize="9" fill={MUTED} opacity="0.6">
-                Sustainable range (40–60%)
+                Fifty year average debt to GDP ratio
               </text>
-              {/* Historically stable target (~50%, CBO 50-yr average) */}
-              <line x1={PAD.left} y1={scaleY(STABLE_DEBT_GDP)} x2={PAD.left + plotW} y2={scaleY(STABLE_DEBT_GDP)}
+              {/* 50% benchmark line (CBO 50-yr average) */}
+              <line x1={PAD.left} y1={scaleY(TARGET_DEBT_GDP)} x2={PAD.left + plotW} y2={scaleY(TARGET_DEBT_GDP)}
                 stroke={BLOCK_POS} strokeWidth="1" strokeDasharray="2 2" opacity="0.7" />
-              <text x={PAD.left + plotW - 2} y={scaleY(STABLE_DEBT_GDP) - 3} textAnchor="end" fontSize="8.5" fill={BLOCK_POS} opacity="0.85">
-                stable ~{STABLE_DEBT_GDP}%
+              <text x={PAD.left + plotW - 2} y={scaleY(TARGET_DEBT_GDP) - 3} textAnchor="end" fontSize="8.5" fill={BLOCK_POS} opacity="0.85">
+                ≈{TARGET_DEBT_GDP}%
               </text>
               {/* Y-axis gridlines */}
               {yTicks.map(function (tick) {
@@ -3595,13 +3595,13 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
                 </span>
               </div>
             </div>
-            {/* Years-to-stable readout */}
+            {/* Years-to-target readout */}
             <div style={{ marginTop: 10, padding: "10px 12px", background: SURFACE, borderRadius: 8, border: "1px solid " + BORDER, fontSize: 13, color: TEXT, lineHeight: 1.5 }}>
-              {yearsToStable
-                ? <span>Phased in over 3 years, this scenario brings debt held by the public down to the historically stable level of about {STABLE_DEBT_GDP}% of GDP around <strong>{yearsToStable.reachYear}</strong> — roughly <strong>{yearsToStable.years} years</strong> from now.</span>
-                : <span>This scenario does <strong>not</strong> bring debt held by the public down to the historically stable level (about {STABLE_DEBT_GDP}% of GDP) within {EXTRAP_CAP_YEARS} years.</span>}
+              {yearsToTarget
+                ? <span>Phased in over 3 years, this scenario brings debt held by the public down to about {TARGET_DEBT_GDP}% of GDP — its fifty-year average — around <strong>{yearsToTarget.reachYear}</strong>, roughly <strong>{yearsToTarget.years} years</strong> from now.</span>
+                : <span>This scenario does <strong>not</strong> bring debt held by the public down to about {TARGET_DEBT_GDP}% of GDP within {EXTRAP_CAP_YEARS} years.</span>}
               <span style={{ display: "block", marginTop: 4, fontSize: 11, color: MUTED }}>
-                Stable level ≈ the 50-year average of debt held by the public (<a href="https://www.cbo.gov/publication/61270" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO, Long-Term Budget Outlook 2025</a> — 51% of GDP). After 2034, GDP and debt are extrapolated at their 2034 growth rates.
+                The {TARGET_DEBT_GDP}% mark ≈ the 50-year average of debt held by the public (<a href="https://www.cbo.gov/publication/61270" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO, Long-Term Budget Outlook 2025</a> — 51% of GDP). After 2034, GDP and debt are extrapolated at their 2034 growth rates.
               </span>
             </div>
           </div>
@@ -3822,7 +3822,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
       <p style={{ fontSize: 12, color: MUTED }}>
         Source: <a href="https://www.irs.gov/statistics/soi-tax-stats-individual-income-tax-returns-complete-report-publication-1304" target="_blank" rel="noreferrer" style={{ color: BLUE }}>IRS Statistics of Income, Publication 1304, Table 1.4, Tax Year 2023</a>.
         Static scoring only — does not account for behavioral responses or supply-side effects.{' '}
-        Sustainable range reference: <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO, The Budget and Economic Outlook: 2026 to 2036</a>.
+        Fifty-year-average reference: <a href="https://www.cbo.gov/publication/61882" target="_blank" rel="noreferrer" style={{ color: BLUE }}>CBO, The Budget and Economic Outlook: 2026 to 2036</a>.
         The 40–60% band approximates the 50‑year historical average for debt held by the public.
       </p>
     </div>
