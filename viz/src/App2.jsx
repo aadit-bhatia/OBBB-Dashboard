@@ -525,9 +525,9 @@ var TOUR_CONFIGS = {
   ],
   // Page 7 — OBBBA (includes debt pile)
   7: [
-    { title: "Increases in the annual deficit", body: "Over the next 10 years, tax cuts under the OBBBA will grow the amount of money the government borrows by hundreds of billions. Each year's bar shows three scenarios: what would have happened if the OBBBA wasn't passed, what will happen if President Trump is able to cover some of his tax cuts with import tariffs, and what will happen if that tariff revenue doesn't materialize and the money must be borrowed instead.", targetId: "obbba-deficit-card" },
-    { title: "Will tariffs offset any of the cost of the OBBBA?", body: "President Trump has claimed that his import tariffs are a way to make up the deficit spending from the OBBBA. The tariffs he announced in April 2025 were estimated by the CBO to raise $3.4 trillion over the next 10 years. Our with tariffs case assumes this level of revenue. However, the Supreme Court ruled that the President did not have the power to set tariffs based on the rationale he used, and that the money collected had to be refunded. Those refunds have started going out. Since then the original tariffs were replaced by temporary duties.", targetId: "obbba-deficit-card" },
-    { title: "Will the government still tax imports?", body: "Right now, it's unclear. There are ongoing lawsuits on which tariffs are legal, how high each tax will be, and whether the government has to pay back tariffs already collected. We believe that the revenue from tariffs between now and 2034 will fall somewhere between the no tariff revenue case and the CBO's projections assuming the July 2025 tariffs remain in place.", targetId: "obbba-deficit-card" },
+    { title: "Increases in the annual deficit", body: "Over the next 10 years, tax cuts under the OBBBA will grow the amount of money the government borrows by hundreds of billions. Each year's bar shows three scenarios: what would have happened if the OBBBA wasn't passed, what will happen if President Trump is able to cover some of his tax cuts with import tariffs, and what will happen if that tariff revenue doesn't materialize and the money must be borrowed instead." },
+    { title: "Will tariffs offset any of the cost of the OBBBA?", body: "President Trump has claimed that his import tariffs are a way to make up the deficit spending from the OBBBA. The tariffs he announced in April 2025 were estimated by the CBO to raise $3.4 trillion over the next 10 years. Our with tariffs case assumes this level of revenue. However, the Supreme Court ruled that the President did not have the power to set tariffs based on the rationale he used, and that the money collected had to be refunded. Those refunds have started going out. Since then the original tariffs were replaced by temporary duties." },
+    { title: "Will the government still tax imports?", body: "Right now, it's unclear. There are ongoing lawsuits on which tariffs are legal, how high each tax will be, and whether the government has to pay back tariffs already collected. We believe that the revenue from tariffs between now and 2034 will fall somewhere between the no tariff revenue case and the CBO's projections assuming the July 2025 tariffs remain in place." },
     { title: "Move the slider through the next decade", body: "Use the slider to see how each year's deficit adds to the national debt pile. The pile shows cumulative debt held by the public — gray is what we already owed at the end of 2024." },
   ],
   // Page 8 — Consoles (no tour)
@@ -573,7 +573,6 @@ function Tour({ steps, onDone }) {
   if (!steps) return null;
 
   var _step = useState(0); var step = _step[0]; var setStep = _step[1];
-  var _arrowPos = useState(null); var arrowPos = _arrowPos[0]; var setArrowPos = _arrowPos[1];
   var cur = steps[step];
   var isLast = step === steps.length - 1;
 
@@ -582,24 +581,14 @@ function Tour({ steps, onDone }) {
     if (el) el.scrollTop = 0;
   }, []);
 
-  // Compute highlight position on target element
-  useEffect(function () {
-    if (!cur.targetId) { setArrowPos(null); return; }
-    var target = document.getElementById(cur.targetId);
-    if (!target) { setArrowPos(null); return; }
-    var rect = target.getBoundingClientRect();
-    setArrowPos({ x: Math.round(rect.left + rect.width / 2), y: Math.round(rect.top + 20) });
-  }, [step, cur.targetId]);
-
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1000, pointerEvents: "none" }}>
 
-      {/* Tour panel — centered above content, works at any viewport width */}
+      {/* Tour panel — pinned to the top-right so it stays clear of the centered content */}
       <div style={{
         position: "fixed",
         top: 80,
-        left: "50%",
-        transform: "translateX(-50%)",
+        right: 16,
         width: "min(340px, calc(100vw - 32px))",
         pointerEvents: "auto",
         zIndex: 1001,
@@ -1604,7 +1593,6 @@ function AutoStabPanel({ data, stimulusByYear, yearStart, yearEnd, maxRows, labe
           {filtered.map(function (row, i) {
             var totalPct   = Math.abs(row.deficit_pct_with_stabilizers);
             var structPct  = Math.abs(row.deficit_pct_without_stabilizers);
-            var gdp        = row.gdp_billions || 1;
             var stimPct    = stimulusByYear[row.year] || 0;
 
             var totalBlocks  = Math.round(totalPct  / STAB_BLOCK_PCT);
@@ -2019,7 +2007,7 @@ function ProjectionPanel({ years, baselineSeries, obbbaWithTariffSeries, obbbaNo
   );
 }
 
-function OBBBAPage({ deficitProj, niProj, projSummary }) {
+function OBBBAPage({ deficitProj, projSummary }) {
   var tour = useTour(7);
 
   var deficitSeries = useMemo(function () {
@@ -2049,7 +2037,7 @@ function OBBBAPage({ deficitProj, niProj, projSummary }) {
 
   var _mode = useState("pct"); var mode = _mode[0]; var setMode = _mode[1];
   var _scrubYear = useState(2026); var scrubYear = _scrubYear[0]; var setScrubYear = _scrubYear[1];
-  var _pileScenario = useState("feb_2026_current_law"); var pileScenario = _pileScenario[0]; var setPileScenario = _pileScenario[1];
+  var pileScenario = "feb_2026_current_law";
 
   // Debt pile constants
   var PILE_YEARS       = [2025,2026,2027,2028,2029,2030,2031,2032,2033,2034];
@@ -2673,237 +2661,6 @@ function CrowdingOutTextPage() {
   );
 }
 
-// Keep JapanPage defined but unused — remove if confirmed not needed
-function JapanPage({ japanData }) {
-  var _hov     = useState(null); var hovYear  = _hov[0];  var setHovYear  = _hov[1];
-  var _eraStep = useState(0);    var eraStep  = _eraStep[0]; var setEraStep = _eraStep[1];
-  var _tourOn  = useState(true);
-  var tourOn   = _tourOn[0]; var setTourOn = _tourOn[1];
-
-  function doneTour() { setTourOn(false); setEraStep(-1); }
-  function reopenTour() { setTourOn(true); setEraStep(0); }
-
-  // Era definitions
-  var ERAS = [
-    { id: "lost",    label: "Lost Decade",  years: [1991, 2002], color: "#fef2f2", border: "#dc2626",
-      title: "The Lost Decade (1991–2002)",
-      body: "After Japan's asset bubble burst in 1991, GDP growth collapsed and stayed near zero for over a decade. Debt began climbing rapidly as the government ran deficits in an effort to stimulate the economy. Despite the crisis, bond yields stayed relatively high." },
-    { id: "zirp",    label: "ZIRP",         years: [2000, 2013], color: "#f0fdf4", border: "#2d6a4f",
-      title: "Zero Interest Rate Policy (2000–2013)",
-      body: "The Bank of Japan pioneered zero interest rate policy (ZIRP) to make borrowing easier, driving yields near zero. Debt continued rising through the 2008 financial crisis and the 2011 Tōhoku earthquake in efforts to stimulate the economy. The combination of near-zero rates and growing debt created the illusion of sustainability." },
-    { id: "ycc",     label: "YCC",          years: [2013, 2024], color: "#fef2f2", border: "#dc2626",
-      title: "Yield Curve Control / Abenomics (2013–2024)",
-      body: "Under Prime Minister Abe, the Bank of Japan dramatically expanded bond purchases and eventually introduced Yield Curve Control, a policy capping 10-year yields at 0%. The government could borrow money for free, but only because the Bank of Japan purchased any outstanding debt. By 2023 the BoJ owned nearly half of all outstanding government bonds. Debt stabilized near 240% of GDP, but only because the central bank was absorbing all the supply." },
-    { id: "now",     label: "Now",          years: [2024, 2025], color: "#e0f2fe", border: "#0369a1",
-      title: "The Reckoning (2024–present)",
-      body: "After COVID, Japan experienced inflation for the first time in decades and the BoJ ended YCC in March 2024. Interest rates surged to their highest levels since 1999. Japan's massive debt now carries a rising interest bill projected to double by 2030, crowding out healthcare, education, and defense spending. The consequences of decades of spending were deferred until now. The Japanese government must figure out how to foot the bill, and maintain programs for their aging population." },
-  ];
-
-  var activeEra = tourOn && eraStep >= 0 && eraStep < ERAS.length ? ERAS[eraStep] : null;
-
-  var data = useMemo(function () {
-    if (!japanData) return [];
-    return japanData.filter(function (r) { return r.year >= 1990 && r.year <= 2025; });
-  }, [japanData]);
-
-  var hovRow = hovYear != null ? data.find(function (r) { return r.year === hovYear; }) : null;
-
-  var CHART_W = 560;
-  var CHART_H = 160;
-  var PAD     = { top: 12, right: 20, bottom: 24, left: 44 };
-  var plotW   = CHART_W - PAD.left - PAD.right;
-  var plotH   = CHART_H - PAD.top  - PAD.bottom;
-
-  function scaleX(year) {
-    return PAD.left + ((year - 1990) / (2025 - 1990)) * plotW;
-  }
-  function scaleY(val, lo, hi) {
-    return PAD.top + plotH - ((val - lo) / (hi - lo)) * plotH;
-  }
-
-  function LineChart({ series, color, yMin, yMax, yTicks, yLabel }) {
-    var pts = series.filter(function (r) { return r.val != null && !isNaN(r.val); });
-    var pathD = pts.map(function (r, i) {
-      return (i === 0 ? "M" : "L") + scaleX(r.year).toFixed(1) + "," + scaleY(r.val, yMin, yMax).toFixed(1);
-    }).join(" ");
-
-    // Determine dim region: years outside active era
-    var eraX1 = activeEra ? scaleX(activeEra.years[0]) : null;
-    var eraX2 = activeEra ? scaleX(activeEra.years[1]) : null;
-
-    return (
-      <svg width="100%" viewBox={"0 0 " + CHART_W + " " + CHART_H} style={{ display: "block" }}>
-        {/* Y gridlines */}
-        {yTicks.map(function (t) {
-          var y = scaleY(t, yMin, yMax);
-          return (
-            <React.Fragment key={t}>
-              <line x1={PAD.left} y1={y} x2={PAD.left + plotW} y2={y} stroke={BORDER} strokeWidth="1" />
-              <text x={PAD.left - 4} y={y + 4} textAnchor="end" fontSize="10" fill={MUTED}>{t}%</text>
-            </React.Fragment>
-          );
-        })}
-        {/* Zero line */}
-        {yMin < 0 && yMax > 0 && (
-          <line x1={PAD.left} y1={scaleY(0, yMin, yMax)} x2={PAD.left + plotW} y2={scaleY(0, yMin, yMax)}
-            stroke="#9ca3af" strokeWidth="1.5" strokeDasharray="4 2" />
-        )}
-        {/* X axis labels */}
-        {[1990, 2000, 2010, 2020].map(function (yr) {
-          return <text key={yr} x={scaleX(yr)} y={CHART_H - 4} textAnchor="middle" fontSize="10" fill={MUTED}>{yr}</text>;
-        })}
-        {/* Era highlight band */}
-        {activeEra && (
-          <rect x={eraX1} y={PAD.top} width={eraX2 - eraX1} height={plotH}
-            fill={activeEra.color} opacity="0.7" />
-        )}
-        {/* Dim overlay outside era */}
-        {activeEra && (
-          <React.Fragment>
-            <rect x={PAD.left} y={PAD.top} width={Math.max(0, eraX1 - PAD.left)} height={plotH}
-              fill="white" opacity="0.55" />
-            <rect x={eraX2} y={PAD.top} width={Math.max(0, PAD.left + plotW - eraX2)} height={plotH}
-              fill="white" opacity="0.55" />
-          </React.Fragment>
-        )}
-        {/* Data line */}
-        <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinejoin="round" />
-        {/* Era border lines */}
-        {activeEra && (
-          <React.Fragment>
-            <line x1={eraX1} y1={PAD.top} x2={eraX1} y2={PAD.top + plotH}
-              stroke={activeEra.border} strokeWidth="1.5" strokeDasharray="4 2" />
-            <line x1={eraX2} y1={PAD.top} x2={eraX2} y2={PAD.top + plotH}
-              stroke={activeEra.border} strokeWidth="1.5" strokeDasharray="4 2" />
-          </React.Fragment>
-        )}
-        {/* Hover dot */}
-        {hovRow && !activeEra && (function () {
-          var pt = pts.find(function (r) { return r.year === hovRow.year; });
-          if (!pt) return null;
-          return <circle cx={scaleX(pt.year)} cy={scaleY(pt.val, yMin, yMax)} r={5} fill={color} stroke="#fff" strokeWidth="1.5" />;
-        })()}
-        {/* Invisible hover targets (only when tour not active) */}
-        {!activeEra && pts.map(function (r) {
-          return (
-            <rect key={r.year} x={scaleX(r.year) - 5} y={PAD.top} width="10" height={plotH}
-              fill="transparent"
-              onMouseEnter={function () { setHovYear(r.year); }}
-              onMouseLeave={function () { setHovYear(null); }} />
-          );
-        })}
-        <text x={8} y={PAD.top + plotH / 2} textAnchor="middle" fontSize="10" fill={MUTED}
-          transform={"rotate(-90," + 8 + "," + (PAD.top + plotH / 2) + ")"}>{yLabel}</text>
-      </svg>
-    );
-  }
-
-  var debtSeries  = data.map(function (r) { return { year: r.year, val: r.japan_debt_pct_gdp }; });
-  var yieldSeries = data.map(function (r) { return { year: r.year, val: r.japan_10y_yield }; });
-  var gdpSeries   = data.map(function (r) { return { year: r.year, val: r.japan_real_gdp_growth }; });
-
-  return (
-    <div>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 6 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: TEXT, margin: 0 }}>A Case Study: Japan</h2>
-        <button onClick={reopenTour} style={{ background: "none", border: "1px solid " + BORDER, borderRadius: "50%", width: 26, height: 26, fontSize: 13, color: MUTED, cursor: "pointer", flexShrink: 0 }}>?</button>
-      </div>
-      <p style={{ fontSize: 15, color: TEXT, lineHeight: 1.75, margin: "0 0 16px" }}>
-        Japan is often cited as proof that deficits don't cause high interest rates — its debt reached 260% of GDP while bond yields stayed near zero for three decades. But that stability had a hidden engine: the Bank of Japan bought nearly half of all outstanding government bonds, directly suppressing yields. When that ended in 2024, the bill came due.
-      </p>
-
-      {/* Era nav pills */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
-        {ERAS.map(function (era, i) {
-          var active = tourOn && eraStep === i;
-          return (
-            <button key={era.id} onClick={function () { setTourOn(true); setEraStep(i); }} style={{
-              padding: "4px 12px", fontSize: 12, borderRadius: 20, cursor: "pointer",
-              border: "1.5px solid " + (active ? era.border : BORDER),
-              background: active ? era.color : SURFACE,
-              color: active ? "#111" : MUTED,
-              fontWeight: active ? 600 : 400,
-              transition: "all 0.15s",
-            }}>{era.label}</button>
-          );
-        })}
-        {tourOn && (
-          <button onClick={doneTour} style={{
-            padding: "4px 12px", fontSize: 12, borderRadius: 20, cursor: "pointer",
-            border: "1px solid " + BORDER, background: SURFACE, color: MUTED,
-          }}>Clear</button>
-        )}
-      </div>
-
-      {/* Era annotation card */}
-      {activeEra && (
-        <div style={{
-          background: activeEra.color, border: "1.5px solid " + activeEra.border,
-          borderRadius: 8, padding: "12px 16px", marginBottom: 14,
-          display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16,
-        }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: TEXT, marginBottom: 4 }}>{activeEra.title}</div>
-            <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.65, margin: 0 }}>{activeEra.body}</p>
-          </div>
-          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-            {eraStep > 0 && (
-              <button onClick={function () { setEraStep(eraStep - 1); }} style={{
-                padding: "4px 12px", fontSize: 12, borderRadius: 6, cursor: "pointer",
-                border: "1px solid " + BORDER, background: SURFACE, color: TEXT,
-              }}>← Back</button>
-            )}
-            {eraStep < ERAS.length - 1 && (
-              <button onClick={function () { setEraStep(eraStep + 1); }} style={{
-                padding: "4px 12px", fontSize: 12, borderRadius: 6, cursor: "pointer",
-                border: "none", background: "#1e3a5f", color: "#fff", fontWeight: 600,
-              }}>Next →</button>
-            )}
-            {eraStep === ERAS.length - 1 && (
-              <button onClick={doneTour} style={{
-                padding: "4px 12px", fontSize: 12, borderRadius: 6, cursor: "pointer",
-                border: "none", background: "#1e3a5f", color: "#fff", fontWeight: 600,
-              }}>Done</button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Hover callout (only when tour not active) */}
-      {!activeEra && (
-        <div style={{ minHeight: 28, marginBottom: 10 }}>
-          {hovRow ? (
-            <div style={{ display: "flex", gap: 20, flexWrap: "wrap", alignItems: "baseline" }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: TEXT }}>{hovRow.year}</span>
-              {hovRow.japan_debt_pct_gdp != null && <span style={{ fontSize: 13, color: RED }}>Debt: {hovRow.japan_debt_pct_gdp.toFixed(0)}% of GDP</span>}
-              {hovRow.japan_10y_yield != null && <span style={{ fontSize: 13, color: "#2d6a4f" }}>10yr yield: {hovRow.japan_10y_yield.toFixed(2)}%</span>}
-              {hovRow.japan_real_gdp_growth != null && <span style={{ fontSize: 13, color: "#4a8b6f" }}>GDP growth: {hovRow.japan_real_gdp_growth.toFixed(1)}%</span>}
-            </div>
-          ) : (
-            <span style={{ fontSize: 13, color: MUTED }}>Hover any chart to see values for that year</span>
-          )}
-        </div>
-      )}
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-        <Card style={{ borderLeft: "4px solid #4a0000", padding: "16px 20px" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: RED, marginBottom: 6 }}>Government Debt (% of GDP)</div>
-          <LineChart series={debtSeries} color="#4a0000" yMin={50} yMax={280} yTicks={[100,150,200,250]} yLabel="% GDP" />
-        </Card>
-        <Card style={{ borderLeft: "4px solid " + BLUE, padding: "16px 20px" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: BLUE, marginBottom: 6 }}>10-Year Government Bond Yield</div>
-          <LineChart series={yieldSeries} color={"#2d6a4f"} yMin={-0.5} yMax={4} yTicks={[0,1,2,3]} yLabel="%" />
-        </Card>
-        <Card style={{ borderLeft: "4px solid #4a8b6f", padding: "16px 20px" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#4a8b6f", marginBottom: 6 }}>Real GDP Growth</div>
-          <LineChart series={gdpSeries} color="#4a8b6f" yMin={-8} yMax={8} yTicks={[-4,0,4]} yLabel="%" />
-        </Card>
-      </div>
-      <p style={{ fontSize: 12, color: MUTED, marginTop: 12 }}>Sources: <a href="https://fred.stlouisfed.org/series/GGGDTAJPA188N" target="_blank" rel="noreferrer" style={{ color: BLUE }}>FRED GGGDTAJPA188N</a> / <a href="https://fred.stlouisfed.org/series/GGGDTPJPA188N" target="_blank" rel="noreferrer" style={{ color: BLUE }}>GGGDTPJPA188N</a> (IMF); <a href="https://fred.stlouisfed.org/series/IRLTLT01JPM156N" target="_blank" rel="noreferrer" style={{ color: BLUE }}>IRLTLT01JPM156N</a> (OECD); <a href="https://fred.stlouisfed.org/series/JPNRGDPEXP" target="_blank" rel="noreferrer" style={{ color: BLUE }}>JPNRGDPEXP</a> (Cabinet Office Japan). Debt 2024+ are IMF projections.</p>
-    </div>
-  );
-}
-
 /* ── III.b.i  Net Interest ───────────────── */
 // Ported from App.jsx NetInterestPage, unchanged.
 function NetInterestPage({ spendingData }) {
@@ -3127,10 +2884,6 @@ function BudgetDilemmaPage({ spendingData, summaryData }) {
 
   var hovSeg = hovSlice ? segments.find(function (s) { return s.slice.key === hovSlice; }) : null;
   var hovData = hovSeg ? hovSeg.slice : null;
-
-  // Discretionary total
-  var discretionary = computed.slices.filter(function (s) { return s.type === "discretionary"; })
-    .reduce(function (a, s) { return a + s.amount; }, 0);
 
   return (
     <div>
@@ -3423,12 +3176,6 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
     "$200K to $1M": "#dc2626",
     "Over $1M":     "#991b1b",
   };
-
-  function setIncrease(bucket, val) {
-    setIncreases(function (prev) {
-      return Object.assign({}, prev, { [bucket]: val });
-    });
-  }
 
   var ORDER = ["Under $25K", "$25K to $75K", "$75K to $200K", "$200K to $1M", "Over $1M"];
 
@@ -4783,7 +4530,8 @@ function varfComputeIndex(rep, keyVotesData, rollCalls) {
   return { actual: actual, min: -absSum, max: absSum, absSum: absSum, indexPct: indexPct, voted: voted, notVoted: notVoted };
 }
 
-function ParticipationFilteredPage({ computeFn, methodologyNote, legislators, keyVotesData, rollCalls, zipDistricts }) {
+function RepresentativesPage({ legislators, keyVotesData, rollCalls, zipDistricts }) {
+  var note = "Includes federal bills since 2015 with a 10-year CBO net deficit score of $25 billion or more, where both chambers acted on the bill (recorded vote or voice vote). Members with fewer than 5 recorded Yea or Nay votes in this set do not appear in the chart but remain searchable.";
   var _zip       = useState("");   var zipInput = _zip[0]; var setZipInput = _zip[1];
   var _reps      = useState(null); var foundReps = _reps[0]; var setFoundReps = _reps[1];
   var _err       = useState(null); var error = _err[0]; var setError = _err[1];
@@ -4799,7 +4547,7 @@ function ParticipationFilteredPage({ computeFn, methodologyNote, legislators, ke
     var house = [];
     var byBg = {};
     legislators.forEach(function (r) {
-      var s = computeFn(r, keyVotesData, rollCalls);
+      var s = varfComputeIndex(r, keyVotesData, rollCalls);
       // Participation floor: below-threshold reps keep their scoreObj (so the modal
       // can still show what they voted for + the dollar contributions) but their
       // indexPct is nulled so they don't appear in the chamber dot plot or get a
@@ -4813,7 +4561,7 @@ function ParticipationFilteredPage({ computeFn, methodologyNote, legislators, ke
       else if (r.chamber === "house") house.push(entry);
     });
     return { senate: senate, house: house, byBg: byBg };
-  }, [legislators, keyVotesData, rollCalls, computeFn]);
+  }, [legislators, keyVotesData, rollCalls]);
 
   var districtsByState = useMemo(function () {
     if (!legislators) return {};
@@ -4970,9 +4718,9 @@ function ParticipationFilteredPage({ computeFn, methodologyNote, legislators, ke
             <IndexDotPlotD chamberLabel="House" data={allScored.house} userReps={userHouseMems} />
           )}
 
-          {methodologyNote && (
+          {note && (
             <div style={{ marginTop: 18, padding: "14px 16px", background: "#f8fafc", borderRadius: 10, border: "1px solid " + BORDER, fontSize: 11, color: MUTED, lineHeight: 1.65 }}>
-              {methodologyNote}
+              {note}
             </div>
           )}
         </div>
@@ -4989,10 +4737,6 @@ function ParticipationFilteredPage({ computeFn, methodologyNote, legislators, ke
   );
 }
 
-function RepresentativesPage(props) {
-  var note = "Includes federal bills since 2015 with a 10-year CBO net deficit score of $25 billion or more, where both chambers acted on the bill (recorded vote or voice vote). Members with fewer than 5 recorded Yea or Nay votes in this set do not appear in the chart but remain searchable.";
-  return <ParticipationFilteredPage computeFn={varfComputeIndex} methodologyNote={note} {...props} />;
-}
 
 // ─────────────────────────────────────────────
 // NAVIGATION SHELL
@@ -5118,7 +4862,7 @@ function PageShell({ page, setPage, children, prompt }) {
               </button>
 
               {/* Sections */}
-              {sectionGroups.map(function (sg, si) {
+              {sectionGroups.map(function (sg) {
                 var firstIdx = sg.items[0] ? sg.items[0].i : 0;
                 var lastIdx  = sg.items[sg.items.length - 1] ? sg.items[sg.items.length - 1].i : 0;
                 var inSection = page >= firstIdx && page <= lastIdx;
@@ -5246,7 +4990,6 @@ export default function App() {
   var stabilizersData = useCSV("automatic_stabilizers.csv");
   var stimulusData    = useCSV("stimulus_spending.csv");
   var crowdingData    = useCSV("crowding_out.csv");
-  var japanData       = useCSV("japan_case_study.csv");
   var taxData         = useCSV("tax_brackets.csv");
   var cboBaseline     = useCSV("cbo_baseline_2026.csv");
   var multipliersData = useJSON("fiscal_multipliers.json");
@@ -5279,7 +5022,7 @@ export default function App() {
     /* 4  */ <ObamaEraPage       stabilizersData={stabilizersData} stimulusData={stimulusData} />,
     /* 5  */ <DeficitPage        summaryData={summaryData} />,
     /* 6  */ <RevSpendPage       spendingData={spendingData} receiptsData={receiptsData} summaryData={summaryData} />,
-    /* 7  */ <OBBBAPage         deficitProj={deficitProj} niProj={niProj} projSummary={projSummary} />,
+    /* 7  */ <OBBBAPage         deficitProj={deficitProj} projSummary={projSummary} />,
     /* 8  */ <ConsolesPage />,
     /* 9  */ <CrowdingOutTextPage />,
     /* 10 */ <CrowdingOutPage   spendingData={spendingData} summaryData={summaryData} niProj={niProj} projSummary={projSummary} />,
