@@ -666,8 +666,25 @@ function TourBtn({ onOpen }) {
 }
 
 // Inline info icon with tooltip — click to toggle (works on touch devices)
-function InfoTip({ text }) {
+function InfoTip({ text, children, modal }) {
   var _open = useState(false); var open = _open[0]; var setOpen = _open[1];
+
+  useEffect(function () {
+    if (!modal || !open) return undefined;
+    function onKey(e) { if (e.key === "Escape") setOpen(false); }
+    window.addEventListener("keydown", onKey);
+    var prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return function () {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [modal, open]);
+
+  var body = children ? children : text.split("\n\n").map(function (para, i) {
+    return <p key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.55, margin: i === 0 ? 0 : "8px 0 0" }}>{para}</p>;
+  });
+
   return (
     <div style={{ position: "relative", display: "inline-flex", alignItems: "center", flexShrink: 0 }}>
       <button
@@ -675,7 +692,32 @@ function InfoTip({ text }) {
         aria-expanded={open}
         style={{ cursor: "pointer", fontSize: 14, color: BLUE, fontWeight: 400, lineHeight: 1, background: "none", border: "none", padding: 0 }}
       >ⓘ</button>
-      {open && (
+
+      {open && modal && createPortal(
+        <div onClick={function () { setOpen(false); }}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 9999, padding: 16,
+            fontFamily: "'Segoe UI', system-ui, sans-serif",
+          }}>
+          <div onClick={function (e) { e.stopPropagation(); }}
+            style={{
+              position: "relative",
+              background: "#fff", borderRadius: 12, maxWidth: 460, width: "100%",
+              maxHeight: "calc(100vh - 32px)", overflowY: "auto",
+              padding: "22px 24px",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.35)", border: "1px solid #e5e7eb",
+            }}>
+            <button onClick={function () { setOpen(false); }} aria-label="Close"
+              style={{ position: "absolute", top: 8, right: 14, background: "none", border: "none", fontSize: 22, lineHeight: 1, color: MUTED, cursor: "pointer" }}>×</button>
+            {body}
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {open && !modal && (
         <div style={{
           position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)",
           background: "#fff", border: "1px solid #e5e7eb",
@@ -684,9 +726,7 @@ function InfoTip({ text }) {
           width: 300, zIndex: 300,
           whiteSpace: "normal",
         }}>
-          {text.split("\n\n").map(function (para, i) {
-            return <p key={i} style={{ fontSize: 11, color: "#374151", lineHeight: 1.55, margin: i === 0 ? 0 : "8px 0 0" }}>{para}</p>;
-          })}
+          {body}
           <div style={{ position: "absolute", bottom: -5, left: "50%", transform: "translateX(-50%) rotate(45deg)", width: 10, height: 10, background: "#fff", border: "1px solid #e5e7eb", borderTop: "none", borderLeft: "none" }} />
         </div>
       )}
@@ -3472,8 +3512,18 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
       })()}
 
       {/* Section II — Tax Increases */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "0 0 12px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, margin: "0 0 12px" }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: RED, textTransform: "uppercase", letterSpacing: 1.5, whiteSpace: "nowrap" }}>Tax Increases</div>
+        <InfoTip modal>
+          <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, margin: "0 0 12px", paddingRight: 20 }}>How the tax sliders work</div>
+          <p style={{ fontSize: 13.5, color: "#374151", lineHeight: 1.6, margin: 0 }}>
+            The sliders allow you to change the average tax rate paid by each bracket; this was calculated by finding the total amount paid by members of each tax bracket, divided by their taxable income. In reality, the US has a progressive marginal tax system. This means that the first $25K of all earners is taxed at the lowest rate, the next $50K is taxed at a higher rate, and so on. Earners above a million average a 29.7% tax rate across all of their income at each bracket level. However, when they pay their taxes, this is filed as the sum of all of the taxes they pay at lower rates as well.
+          </p>
+          <p style={{ fontSize: 13.5, color: "#374151", lineHeight: 1.6, margin: "12px 0 0" }}>
+            This allows you to target your policy choices to the demographic you want to affect most directly. To learn more about how marginal tax rates work in reality, explore{" "}
+            <a href="https://www.irs.gov/filing/federal-income-tax-rates-and-brackets" target="_blank" rel="noopener noreferrer" style={{ color: BLUE, textDecoration: "underline" }}>here</a>.
+          </p>
+        </InfoTip>
         <div style={{ flex: 1, height: 1, background: RED, opacity: 0.25 }} />
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
@@ -3490,7 +3540,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
                 <div>
                   <div style={{ fontSize: 15, fontWeight: 700, color: color }}>{bucketName}</div>
                   <div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>
-                    {b.num_returns_millions.toFixed(1)}M returns · ${(b.taxable_income_b / 1000).toFixed(2)}T taxable income · current effective rate {b.effective_rate_pct}%
+                    {b.num_returns_millions.toFixed(1)}M returns · ${(b.taxable_income_b / 1000).toFixed(2)}T taxable income · average effective rate {b.effective_rate_pct}%
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
@@ -3513,7 +3563,7 @@ function TaxPage({ taxData, cboBaseline, cuts, setCuts, ratesRaw, setRatesRaw })
                       {b.effective_rate_pct}% → {currentRate.toFixed(1)}%
                     </span>
                   ) : (
-                    <span style={{ fontSize: 13, color: MUTED }}>{b.effective_rate_pct}% (current)</span>
+                    <span style={{ fontSize: 13, color: MUTED }}>{b.effective_rate_pct}% (average)</span>
                   )}
                 </div>
               </div>
